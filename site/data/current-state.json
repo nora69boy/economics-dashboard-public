@@ -1,0 +1,54 @@
+{
+  "updated_at": "2026-09-11",
+  "edition": "public-market-research",
+  "status": "framework-only",
+  "source_policy": {
+    "primary_sources_first": true,
+    "live_market_data": false
+  },
+  "focus": [
+    {
+      "id": "macro-event-driven",
+      "title": "マクロ・イベント駆動",
+      "watch": [
+        "FOMC",
+        "金利",
+        "為替",
+        "雇用",
+        "インフレ"
+      ]
+    },
+    {
+      "id": "ai-investment",
+      "title": "AI関連投資",
+      "watch": [
+        "AI半導体",
+        "AIクラウド",
+        "AIアプリ",
+        "データセンター設備"
+      ]
+    },
+    {
+      "id": "japan-regional",
+      "title": "日本の地域投資",
+      "watch": [
+        "北海道",
+        "東北",
+        "九州",
+        "電力",
+        "設備工事",
+        "光通信"
+      ]
+    },
+    {
+      "id": "index-flow",
+      "title": "日本株・指数需給",
+      "watch": [
+        "TOPIX採用候補",
+        "浮動株",
+        "信用需給",
+        "指数リバランス"
+      ]
+    }
+  ]
+}

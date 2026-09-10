@@ -3,52 +3,106 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; font-src 'self'; object-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'; upgrade-insecure-requests">
-<meta name="robots" content="index,follow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WO+OTQylyLm4RCSIBeCS5nUWJn0ZUHQ5XcjGHbq/fr4='; style-src 'unsafe-inline'; img-src 'none'; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="no-referrer">
 <title>Economics Research Dashboard</title>
-<style>
-:root{--bg:#07111f;--panel:#0d1b2a;--line:#24364c;--text:#eaf1f8;--muted:#95a7bb;--accent:#55a7ff;--good:#39d98a;--warn:#ffc857;--bad:#ff6677}
-*{box-sizing:border-box}body{margin:0;background:#07111f;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;line-height:1.55}.wrap{max-width:1120px;margin:auto;padding:20px}.top{padding:18px 0}.top h1{margin:0;font-size:clamp(26px,4vw,40px)}.top p{color:var(--muted);margin:6px 0}.nav{display:flex;gap:8px;overflow:auto;position:sticky;top:0;padding:10px 0 16px;background:rgba(7,17,31,.96);backdrop-filter:blur(8px)}button{border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:10px 14px;border-radius:10px;font-weight:700;white-space:nowrap}button.active{color:white;border-color:var(--accent)}.section{display:none}.section.active{display:block}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.card{grid-column:span 4;border:1px solid var(--line);background:var(--panel);padding:16px;border-radius:16px}.wide{grid-column:span 8}.full{grid-column:1/-1}.kicker{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.metric{font-size:26px;font-weight:800;margin-top:4px}.small{font-size:13px;color:var(--muted)}.note{border-left:3px solid var(--accent);padding:12px;background:rgba(85,167,255,.08);border-radius:8px}.pill{display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:700}.good{color:var(--good);background:rgba(57,217,138,.1)}.warn{color:var(--warn);background:rgba(255,200,87,.1)}.bad{color:var(--bad);background:rgba(255,102,119,.1)}.list{list-style:none;margin:4px 0 0;padding:0}.list li{padding:10px 0;border-top:1px solid rgba(149,167,187,.16)}.list li:first-child{border-top:0}.row{display:flex;justify-content:space-between;gap:12px}.scenario{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.scenario>div{border:1px solid var(--line);padding:13px;border-radius:12px}.footer{text-align:center;color:var(--muted);font-size:12px;padding:30px 0}a{color:#b9dcff}@media(max-width:760px){.card,.wide{grid-column:span 6}.scenario{grid-template-columns:1fr}}@media(max-width:520px){.card,.wide{grid-column:1/-1}.wrap{padding:14px}}
+<style>:root{--bg:#07111f;--panel:#0d1b2a;--line:#24364c;--text:#eaf1f8;--muted:#abbace;--accent:#55a7ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;line-height:1.7}
+.wrap{max-width:1120px;margin:auto;padding:24px}.top{padding:18px 0}.top h1{margin:0;font-size:clamp(25px,4vw,38px)}.top p{color:var(--muted);margin:6px 0}
+.nav{display:flex;gap:8px;overflow:auto;position:sticky;top:0;z-index:2;padding:12px 0;background:var(--bg)}
+button{font:inherit;border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:10px 14px;border-radius:10px;white-space:nowrap;cursor:pointer}
+button.active{color:var(--text);border-color:var(--accent)}button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.card{border:1px solid var(--line);background:var(--panel);padding:18px;border-radius:14px}
+.full{grid-column:1/-1}.kicker{font-size:12px;letter-spacing:.06em;color:var(--muted)}.metric{font-size:24px;font-weight:700;margin-top:4px}
+.small{font-size:14px;color:var(--muted)}.note{border-left:3px solid var(--accent);padding:12px;background:var(--panel)}
+.badge{display:inline-block;padding:4px 10px;border:1px solid var(--line);border-radius:20px;font-size:13px}
+h2{font-size:23px}h3{font-size:17px;margin:0 0 8px}p{margin:8px 0}.row{padding:12px 0;border-bottom:1px solid var(--line)}
+a{color:#b9dcff;overflow-wrap:anywhere}.footer{color:var(--muted);font-size:12px;padding:30px 0}[hidden]{display:none!important}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.wrap{padding:14px}}
+@media print{.nav{display:none}.section[hidden]{display:block!important}body{background:white;color:black}.card{break-inside:avoid}}
 </style>
 </head>
 <body>
 <div class="wrap">
-<header class="top"><h1>Economics Research Dashboard</h1><p>公開情報のみを使用するマクロ・テック・企業戦略リサーチ</p><span class="pill good">Public-safe edition</span></header>
-<nav class="nav"><button class="active" data-tab="overview">Overview</button><button data-tab="events">Events</button><button data-tab="themes">Themes</button><button data-tab="risk">Risk</button><button data-tab="method">Method</button></nav>
-<section id="overview" class="section active"><h2>Overview</h2><div class="grid">
-<div class="card"><div class="kicker">Market Regime</div><div class="metric">要監視</div><div class="small">最新データは一次情報確認後に反映</div></div>
-<div class="card"><div class="kicker">Core Theme</div><div class="metric">AI Infrastructure</div><div class="small">半導体・クラウド・DC・電力を分離して分析</div></div>
-<div class="card"><div class="kicker">Japan</div><div class="metric">地域投資</div><div class="small">北海道・東北・九州などの設備投資を追跡</div></div>
-<div class="card full"><div class="note">ニュースの列挙ではなく、イベント → 業績前提 → バリュエーション → 需給の順で整理する。公開版には個人別ポートフォリオ情報を含めない。</div></div>
-<div class="card full"><div class="kicker">Three scenarios</div><div class="scenario"><div><strong>楽観</strong><p class="small">AI投資継続と供給制約緩和で設備投資の収益化が前倒し。</p></div><div><strong>標準</strong><p class="small">投資継続だが企業間の収益化速度とバリュエーション差が拡大。</p></div><div><strong>悲観</strong><p class="small">需要鈍化・規制・電力制約・資金調達コスト上昇が重なる。</p></div></div></div>
+<header class="top"><h1>Economics Research Dashboard</h1>
+<p>マクロ・テック・企業戦略の公開情報リサーチ</p>
+<span class="badge">初期公開版 · 2026-09-11 · ライブ市場データ未投入</span>
+</header>
+<p class="note">現在は分析の枠組みを示す初期版です。以下のシナリオは仮説であり、現在の相場判断や売買推奨ではありません。</p>
+<nav class="nav" role="tablist" aria-label="分析ページ" hidden><button type="button" id="tab-overview" data-tab="overview" aria-controls="overview">概要</button><button type="button" id="tab-events" data-tab="events" aria-controls="events">イベント</button><button type="button" id="tab-themes" data-tab="themes" aria-controls="themes">テーマ</button><button type="button" id="tab-risk" data-tab="risk" aria-controls="risk">リスク</button><button type="button" id="tab-method" data-tab="method" aria-controls="method">出典・運用</button></nav>
+<noscript><p class="note">JavaScriptが無効のため、全項目を続けて表示しています。</p></noscript>
+<section id="overview" class="section" aria-labelledby="tab-overview">
+<h2>概要</h2><div class="grid">
+<div class="card"><div class="kicker">MARKET DATA</div><div class="metric">未投入</div><p class="small">株価・金利・為替・決算数値は、一次情報の検証後に追加します。</p></div>
+<div class="card"><div class="kicker">RESEARCH FOCUS</div><div class="metric">AI関連投資</div><p class="small">AI半導体、AIクラウド、AIアプリ、データセンター設備を分けて調べます。</p></div>
+<div class="card"><div class="kicker">JAPAN</div><div class="metric">地域設備投資</div><p class="small">地域の話題性ではなく、企業の受注・売上・利益への寄与を検証します。</p></div>
+<div class="card full"><h3>分析の順番</h3><p>イベント → 業績の前提 → 株価の割高・割安 → 市場の資金需給</p><p class="small">企業実績と仮説を混同せず、何が変われば判断を変えるかを明示します。</p></div>
+<div class="card"><h3>楽観シナリオ［仮説］</h3><p class="small">AI投資が継続し、供給制約の緩和と収益化が進む。</p></div>
+<div class="card"><h3>標準シナリオ［仮説］</h3><p class="small">投資は続くが、企業ごとの収益化速度と評価倍率の差が広がる。</p></div>
+<div class="card"><h3>悲観シナリオ［仮説］</h3><p class="small">需要鈍化、規制、電力制約、資金調達コスト上昇が重なる。</p></div>
 </div></section>
-<section id="events" class="section"><h2>Events</h2><div class="grid"><div class="card full"><ul class="list">
-<li><div class="row"><strong>FOMC / 金利</strong><span class="pill warn">Macro</span></div><div class="small">割引率、ドル、グロース株への波及を分解</div></li>
-<li><div class="row"><strong>Big Tech 決算</strong><span class="pill warn">Earnings</span></div><div class="small">AI Capex、クラウド需要、推論需要、FCFを確認</div></li>
-<li><div class="row"><strong>半導体需給</strong><span class="pill warn">Supply</span></div><div class="small">GPU/ASIC、HBM、DRAM、NAND、先端パッケージを別々に評価</div></li>
-<li><div class="row"><strong>大型IPO / 資金需給</strong><span class="pill warn">Liquidity</span></div><div class="small">市場からの資金吸収と既存大型株への影響を評価</div></li>
-</ul></div></div></section>
-<section id="themes" class="section"><h2>Themes</h2><div class="grid">
-<div class="card"><div class="kicker">AI Semiconductor</div><strong>演算・メモリ・先端実装</strong><p class="small">生成AI需要と半導体サイクルを混同しない。</p></div>
-<div class="card"><div class="kicker">AI Cloud</div><strong>クラウド・推論</strong><p class="small">Capexが売上とFCFに転換する速度を確認。</p></div>
-<div class="card"><div class="kicker">AI Data Center</div><strong>電力・冷却・通信</strong><p class="small">GPU以外のボトルネックと設備投資感応度を評価。</p></div>
-<div class="card"><div class="kicker">Japan Regional</div><strong>電力・工事・光通信</strong><p class="small">地域テーマではなく実際の受注・売上への寄与を確認。</p></div>
-<div class="card"><div class="kicker">Index Flow</div><strong>TOPIX・浮動株・需給</strong><p class="small">業績と指数需給を分離して追跡。</p></div>
-<div class="card"><div class="kicker">Capital Markets</div><strong>IPO・増資・ロックアップ</strong><p class="small">ファンダメンタルズとは別に需給ショックを管理。</p></div>
+<section id="events" class="section" aria-labelledby="tab-events">
+<h2>イベントの確認項目</h2><p class="small">具体的な開催日・予想値は未登録です。</p><div class="grid">
+<div class="card full">
+<div class="row"><h3>金融政策・経済統計</h3><p>FOMC、金利、為替、雇用、インフレ。企業利益と金利の影響を分離します。</p></div>
+<div class="row"><h3>大手テック企業の決算</h3><p>AI設備投資、クラウド需要、手元に残る現金の増減を確認します。</p></div>
+<div class="row"><h3>半導体の需給</h3><p>GPU・専用半導体、HBM、DRAM、NAND、先端実装を別々に調べます。</p></div>
+<div class="row"><h3>IPO・増資・指数の銘柄入れ替え</h3><p>業績の変化と、売買資金の移動による影響を分けて評価します。</p></div>
+</div></div></section>
+<section id="themes" class="section" aria-labelledby="tab-themes">
+<h2>テーマ別の調査方針</h2><div class="grid">
+<div class="card"><h3>AI半導体</h3><p class="small">演算、メモリ、先端実装の需要・価格・生産能力を確認します。</p></div>
+<div class="card"><h3>AIクラウド</h3><p class="small">設備投資が売上と現金収入に転換する速度を確認します。</p></div>
+<div class="card"><h3>AIアプリ</h3><p class="small">利用者数だけでなく、課金、利用継続、利益への寄与を確認します。</p></div>
+<div class="card"><h3>データセンター設備</h3><p class="small">電力、冷却、建設、光通信の制約と受注への影響を確認します。</p></div>
+<div class="card"><h3>日本の地域投資</h3><p class="small">北海道・東北・九州などの案件を、公式発表と業績への寄与で検証します。</p></div>
+<div class="card"><h3>日本株の指数需給</h3><p class="small">TOPIX採用候補、浮動株、信用需給を企業業績と別に評価します。</p></div>
 </div></section>
-<section id="risk" class="section"><h2>Risk Radar</h2><div class="grid">
-<div class="card"><div class="kicker">最大リスク</div><div class="metric">期待先行</div><p class="small">売上・FCFより先にテーマ性と評価倍率だけが上昇。</p></div>
-<div class="card"><div class="kicker">見落としやすいリスク</div><div class="metric">資金需給</div><p class="small">IPO・増資・信用需給・指数リバランス。</p></div>
-<div class="card"><div class="kicker">反証材料</div><div class="metric">Capex減速</div><p class="small">主要顧客の投資計画下方修正や建設延期が継続する場合。</p></div>
+<section id="risk" class="section" aria-labelledby="tab-risk">
+<h2>リスクの確認項目</h2><div class="grid">
+<div class="card"><h3>最大リスク［評価軸］</h3><p>期待が業績を先行すること。</p><p class="small">売上・現金収入より評価倍率だけが上がっていないかを調べます。</p></div>
+<div class="card"><h3>見落としやすいリスク［評価軸］</h3><p>資金需給と実行制約。</p><p class="small">増資、信用需給、系統接続、許認可、建設延期を確認します。</p></div>
+<div class="card"><h3>反証材料［仮説の見直し条件］</h3><p>顧客の設備投資計画の縮小。</p><p class="small">受注、投資計画、稼働率が継続的に悪化した場合は前提を見直します。</p></div>
 </div></section>
-<section id="method" class="section"><h2>Method</h2><div class="grid"><div class="card wide"><div class="kicker">Source policy</div><ul class="list"><li>企業実績・ガイダンスは公式IR・規制当局資料を優先</li><li>金利・為替・統計は中央銀行・公的統計を優先</li><li>未確認数値は事実として扱わない</li><li>事実・推測・意見を分離する</li></ul></div><div class="card"><div class="kicker">Privacy</div><p class="small">この公開版は公開市場リサーチ専用。個人を識別する情報、金融口座に紐づく情報、秘密情報は掲載対象外。</p></div><div class="card full"><div class="note">公開前に自動プライバシー検査を通過したファイルだけを公開対象にする。</div></div></div></section>
-<div class="footer">Public market research only. Verify material investment facts against primary sources.</div>
+<section id="method" class="section" aria-labelledby="tab-method">
+<h2>出典・運用</h2><div class="grid">
+<div class="card full"><h3>データとレポート</h3><p><a href="data/current-state.json">公開用テーマデータ（JSON）</a></p><p><a href="reports/2026-09-11-carry-forward.md">継続論点の整理（Markdown）</a></p><p class="small">外部サイトや非公開資料への自動接続はありません。</p></div>
+<div class="card full"><h3>数値を掲載する条件</h3><p>公式IR・決算資料・規制当局資料・公的統計を優先します。出典を確認できない数値は「要確認」とし、事実・推測・意見を分けます。</p></div>
+<div class="card full"><h3>公開範囲</h3><p>公開版は一般的な市場リサーチ専用です。個人に紐づく金融情報や秘密情報は入力・保存・掲載しません。</p><p class="small">公開前の内容確認と機械的な検査を併用します。自動検査だけで安全性を保証するものではありません。</p></div>
+</div></section>
+<footer class="footer">Public market research · No analytics · No external assets<br>市場データの自動収集・売買の自動実行は行いません。</footer>
 </div>
 <script>
-const buttons=[...document.querySelectorAll('button[data-tab]')];
-const sections=[...document.querySelectorAll('.section')];
-buttons.forEach(b=>b.addEventListener('click',()=>{buttons.forEach(x=>x.classList.remove('active'));sections.forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById(b.dataset.tab).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}));
+'use strict';
+const tabs = Array.from(document.querySelectorAll('button[data-tab]'));
+const panels = Array.from(document.querySelectorAll('.section'));
+function activate(tab) {
+  tabs.forEach(t => {
+    const on = t === tab;
+    t.classList.toggle('active', on);
+    t.setAttribute('aria-selected', String(on));
+    t.tabIndex = on ? 0 : -1;
+  });
+  panels.forEach(p => { p.hidden = p.id !== tab.dataset.tab; });
+}
+tabs.forEach((tab, i) => {
+  tab.addEventListener('click', () => activate(tab));
+  tab.addEventListener('keydown', e => {
+    let n = i;
+    if (e.key === 'ArrowRight') n = (i + 1) % tabs.length;
+    else if (e.key === 'ArrowLeft') n = (i - 1 + tabs.length) % tabs.length;
+    else if (e.key === 'Home') n = 0;
+    else if (e.key === 'End') n = tabs.length - 1;
+    else return;
+    e.preventDefault();
+    activate(tabs[n]);
+    tabs[n].focus();
+  });
+});
+document.querySelector('.nav').hidden = false;
+tabs.forEach(t => t.setAttribute('role', 'tab'));
+panels.forEach(p => p.setAttribute('role', 'tabpanel'));
+activate(tabs[0]);
 </script>
 </body>
 </html>

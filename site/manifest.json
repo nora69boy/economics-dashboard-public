@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "classification": "public-market-research",
+  "files": {
+    "data/current-state.json": "7e21a445857a56d60315d414d56ef42fd9536f090850779dedf4048c4ad7229a",
+    "index.html": "d574ea2af5bf058225371f31917fbc5b58f449d4e74fe6eb8648541e7611f5a0",
+    "reports/2026-09-11-carry-forward.md": "447fbc394f74834b25e571693815691842fa0e0783761bcb6fc40450c369d663"
+  }
+}
