@@ -33,6 +33,11 @@ def eastern_to_jst(day:str,clock:str)->str:
     dt=datetime.fromisoformat(day+'T'+clock).replace(tzinfo=ZoneInfo('America/New_York'))
     return dt.astimezone(ZoneInfo('Asia/Tokyo')).strftime('%Y-%m-%d %H:%M')
 
+def local_year(now:datetime|None=None)->int:
+    now=now or datetime.now(timezone.utc)
+    if now.tzinfo is None:now=now.replace(tzinfo=timezone.utc)
+    return now.astimezone(ZoneInfo('Asia/Tokyo')).year
+
 def unfold_ics(raw:bytes)->list[str]:
     text=raw.decode('utf-8-sig').replace('\r\n','\n').replace('\r','\n');lines=[]
     for line in text.split('\n'):
@@ -86,7 +91,7 @@ def parse_bea(raw:bytes,year:int=2026)->list[dict]:
     require(len(out)>=4,'BEA PCE schedule absent');return sorted({(e['date'],e['period']):e for e in out}.values(),key=lambda e:e['date'])
 
 def parse_fed(raw:bytes,year:int=2026)->list[dict]:
-    text=html_text(raw);marker=f'{year} FOMC Meetings';start=text.find(marker);require(start>=0,'FOMC year absent');tail=text[start+len(marker):];stops=[p for p in (tail.find(f'{year-1} FOMC Meetings'),tail.find(f'{year+1} FOMC Meetings')) if p>=0]
+    text=html_text(raw);marker=f'{year} FOMC Meetings';start=text.find(marker);require(start>=0,'FOMC year absent');tail=text[start+len(marker):];stops=[p for p in (tail.find(f'{year-1} FOMC Meetings'),tail.find(f'{year+1} FOMC Meetings'),tail.find('Note:')) if p>=0]
     if stops:tail=tail[:min(stops)]
     positions=[]
     for name in MONTHS:
@@ -110,7 +115,7 @@ def compare(candidate:list[dict])->list[dict]:
         elif (old[k].get('period'),old[k].get('time_local'))!=(new[k].get('period'),new[k].get('time_local')):changes.append({'kind':'changed','family':k[0],'date':k[1]})
     return changes
 
-def probe_bls(fetcher):
+def probe_bls(fetcher,year:int=2026):
     advisories=[];errors=[]
     try:return parse_bls_ics(fetcher(BLS_ICS)),errors,advisories,'ics'
     except urllib.error.HTTPError as exc:
@@ -119,21 +124,28 @@ def probe_bls(fetcher):
     except (OSError,UnicodeError,ValueError,TypeError) as exc:return [],[{'source':'bls-ics','error':type(exc).__name__,'code':None}],advisories,'failed'
     events=[]
     for family,url in BLS_HTML.items():
-        try:events.extend(parse_bls_release_html(fetcher(url),family,url))
+        try:events.extend(parse_bls_release_html(fetcher(url),family,url,year))
         except urllib.error.HTTPError as exc:errors.append({'source':'bls-'+family+'-html','error':'HTTPError','code':exc.code})
         except (OSError,UnicodeError,ValueError,TypeError) as exc:errors.append({'source':'bls-'+family+'-html','error':type(exc).__name__,'code':None})
     return sorted(events,key=lambda e:(e['date'],e['family'])),errors,advisories,('html_fallback' if not errors else 'partial_html_fallback')
 
-def probe(fetcher=fetch)->dict:
-    candidate=[];errors=[];advisories=[];source_modes={};bls_events,bls_errors,bls_advisories,bls_mode=probe_bls(fetcher);candidate.extend(bls_events);errors.extend(bls_errors);advisories.extend(bls_advisories);source_modes['bls']=bls_mode
-    for name,url in SOURCES.items():
-        try:candidate.extend({'bea':parse_bea,'fed':parse_fed}[name](fetcher(url)));source_modes[name]='primary'
-        except urllib.error.HTTPError as exc:errors.append({'source':name,'error':'HTTPError','code':exc.code});source_modes[name]='failed'
-        except (OSError,UnicodeError,ValueError,TypeError) as exc:errors.append({'source':name,'error':type(exc).__name__,'code':None});source_modes[name]='failed'
-    candidate=sorted(candidate,key=lambda e:(e['date'],e['family']));access_errors=[e for e in errors if e['code'] in {403,429}]
+def probe(fetcher=fetch,now:datetime|None=None)->dict:
+    now=now or datetime.now(timezone.utc)
+    if now.tzinfo is None:now=now.replace(tzinfo=timezone.utc)
+    year=local_year(now);candidate=[];errors=[];advisories=[];source_modes={};bls_events,bls_errors,bls_advisories,bls_mode=probe_bls(fetcher,year);candidate.extend(bls_events);errors.extend(bls_errors);advisories.extend(bls_advisories);source_modes['bls']=bls_mode
+    try:candidate.extend(parse_bea(fetcher(BEA_SCHEDULE),year));source_modes['bea']='primary'
+    except urllib.error.HTTPError as exc:errors.append({'source':'bea','error':'HTTPError','code':exc.code});source_modes['bea']='failed'
+    except (OSError,UnicodeError,ValueError,TypeError) as exc:errors.append({'source':'bea','error':type(exc).__name__,'code':None});source_modes['bea']='failed'
+    try:
+        fed_raw=fetcher(FED_FOMC);candidate.extend(parse_fed(fed_raw,year));fed_text=html_text(fed_raw);source_modes['fed']='primary'
+        if f'{year+1} FOMC Meetings' in fed_text:
+            candidate.extend(parse_fed(fed_raw,year+1));source_modes['fed']='primary_current_plus_next_year'
+    except urllib.error.HTTPError as exc:errors.append({'source':'fed','error':'HTTPError','code':exc.code});source_modes['fed']='failed'
+    except (OSError,UnicodeError,ValueError,TypeError) as exc:errors.append({'source':'fed','error':type(exc).__name__,'code':None});source_modes['fed']='failed'
+    candidate=sorted({(e['family'],e['date']):e for e in candidate}.values(),key=lambda e:(e['date'],e['family']));access_errors=[e for e in errors if e['code'] in {403,429}]
     health='fresh' if not errors else ('source_access_blocked' if len(access_errors)==len(errors) and not candidate else ('partial_access_blocked' if len(access_errors)==len(errors) and candidate else 'degraded'))
     changes=compare(candidate) if candidate else []
-    return {'calendar_probe_health':health,'checked_at':datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),'publication':'staged_for_completeness_gate','candidate_events':candidate,'changes':changes,'errors':errors,'advisories':advisories,'source_modes':source_modes}
+    return {'calendar_probe_health':health,'checked_at':now.astimezone(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),'publication':'staged_for_completeness_gate','candidate_events':candidate,'changes':changes,'errors':errors,'advisories':advisories,'source_modes':source_modes}
 
 def save_state(result:dict,path:Path=STATE_PATH)->None:
     tmp=path.with_suffix(path.suffix+'.tmp');tmp.write_text(json.dumps(result,sort_keys=True,separators=(',',':'))+'\n',encoding='utf-8');tmp.replace(path)
@@ -144,7 +156,7 @@ def emit(result:dict)->None:
         with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:f.write('calendar_probe_health='+result['calendar_probe_health']+'\n')
     if os.environ.get('GITHUB_STEP_SUMMARY'):
         with open(os.environ['GITHUB_STEP_SUMMARY'],'a',encoding='utf-8') as f:
-            f.write('## Official economic calendar probe\n\n- Status: '+result['calendar_probe_health']+'\n- Candidate events: '+str(len(result['candidate_events']))+'\n- Differences vs reviewed snapshot: '+str(len(result['changes']))+'\n- BLS mode: '+result['source_modes'].get('bls','unknown')+'\n- Publication: staged for family completeness gate\n')
+            f.write('## Official economic calendar probe\n\n- Status: '+result['calendar_probe_health']+'\n- Candidate events: '+str(len(result['candidate_events']))+'\n- Differences vs reviewed snapshot: '+str(len(result['changes']))+'\n- BLS mode: '+result['source_modes'].get('bls','unknown')+'\n- Federal Reserve mode: '+result['source_modes'].get('fed','unknown')+'\n- Publication: staged for family completeness gate\n')
             for e in result['advisories']:f.write('- Advisory '+e['source']+': '+e['error']+((' '+str(e['code'])) if e['code'] else '')+'\n')
             for e in result['errors']:f.write('- Error '+e['source']+': '+e['error']+((' '+str(e['code'])) if e['code'] else '')+'\n')
 
