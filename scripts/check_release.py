@@ -5,7 +5,7 @@ import check_site as gate
 import macro_core as macro
 import publication_rights as rights
 ROOT=Path(__file__).resolve().parents[1]
-EXTRA_FILES={'scripts/calendar_snapshot.py','scripts/run_legacy_tests.py','scripts/macro_core.py','scripts/macro_fetch.py','scripts/build_release.py','scripts/check_release.py','scripts/browser_release.mjs','scripts/release_assertions.js','templates/macro.js','templates/macro.css','tests/test_release.py','docs/data-rights.md','docs/release-v060.md','scripts/publication_rights.py','tests/test_rights.py','data-rights/registry.json','data-rights/migration-baseline.json','data-rights/README.md','scripts/market_refresh_guard.py','tests/test_market_refresh_guard.py','docs/market-data-automation.md'}
+EXTRA_FILES={'scripts/calendar_snapshot.py','scripts/run_legacy_tests.py','scripts/macro_core.py','scripts/macro_fetch.py','scripts/build_release.py','scripts/check_release.py','scripts/browser_release.mjs','scripts/release_assertions.js','templates/macro.js','templates/macro.css','tests/test_release.py','docs/data-rights.md','docs/release-v060.md','scripts/publication_rights.py','tests/test_rights.py','data-rights/registry.json','data-rights/migration-baseline.json','data-rights/README.md','scripts/market_refresh_guard.py','tests/test_market_refresh_guard.py','docs/market-data-automation.md','scripts/sec_filings.py','tests/test_sec_filings.py'}
 def validate(site:Path, rights_reports=None):
  gate.PAYLOAD |= {'data/macro.json','data/macro-calendar.json'};gate.URLS |= macro.URLS;gate.REPO |= EXTRA_FILES
  payload=gate.validate(site);m=gate.loads(payload['data/macro.json']);c=gate.loads(payload['data/macro-calendar.json']);macro.validate(m);macro.validate_calendar(c);s=payload['index.html'].decode()
