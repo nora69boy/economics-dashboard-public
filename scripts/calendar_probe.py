@@ -125,13 +125,17 @@ def probe(fetcher=fetch)->dict:
         except urllib.error.HTTPError as exc:errors.append({'source':name,'error':'HTTPError','code':exc.code})
         except (OSError,UnicodeError,ValueError,TypeError) as exc:errors.append({'source':name,'error':type(exc).__name__,'code':None})
     candidate=sorted(candidate,key=lambda e:(e['date'],e['family']))
-    blocked=bool(errors) and len(errors)==len(SOURCES) and all(e['code'] in {403,429} for e in errors)
-    health='source_access_blocked' if blocked else ('fresh' if not errors else 'degraded')
+    access_errors=[e for e in errors if e['code'] in {403,429}]
+    if not errors:health='fresh'
+    elif len(access_errors)==len(SOURCES):health='source_access_blocked'
+    elif len(access_errors)==len(errors) and candidate:health='partial_access_blocked'
+    else:health='degraded'
     changes=compare(candidate) if candidate else []
     return {'calendar_probe_health':health,'checked_at':datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),'publication':'disabled_pending_rights_approval','candidate_events':candidate,'changes':changes,'errors':errors}
 
 def emit(result:dict)->None:
-    print(json.dumps({'calendar_probe_health':result['calendar_probe_health'],'candidate_count':len(result['candidate_events']),'change_count':len(result['changes']),'error_count':len(result['errors']),'publication':result['publication']},sort_keys=True,separators=(',',':')))
+    compact={'calendar_probe_health':result['calendar_probe_health'],'candidate_count':len(result['candidate_events']),'change_count':len(result['changes']),'error_count':len(result['errors']),'errors':result['errors'],'publication':result['publication']}
+    print(json.dumps(compact,sort_keys=True,separators=(',',':')))
     if os.environ.get('GITHUB_OUTPUT'):
         with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:f.write('calendar_probe_health='+result['calendar_probe_health']+'\n')
     if os.environ.get('GITHUB_STEP_SUMMARY'):
