@@ -37,6 +37,13 @@ class PrivacyTests(unittest.TestCase):
   p=self.site/'data/market.json';d=json.loads(p.read_text());d['assets'][0]['observations'][0]['close']+=.01;p.write_text(json.dumps(d));self.hash('data/market.json');self.blocked()
  def test_deterministic(self):
   b=(ROOT/'site/index.html').read_bytes();builder.build();self.assertEqual(b,(ROOT/'site/index.html').read_bytes())
+ def test_macro_source_hash_phone_false_positive_is_masked_only_at_schema_path(self):
+  h='a'*20+'0'+'123456789'+'b'*34
+  macro={'series':[{'source_sha256':h}]}
+  g.scan(json.dumps(macro),public_document='data/macro.json')
+  g.scan('<pre id="macro-data" hidden>'+json.dumps(macro)+'</pre>',public_document='index.html')
+  with self.assertRaisesRegex(ValueError,'sensitive phone'):
+   g.scan(json.dumps({'series':[{'other':h}]}),public_document='data/macro.json')
 for name,x in {'email':'<p>unit@example.invalid</p>','encoded_email':'<p>unit&#64;example.invalid</p>','phone':'<p>000-0000-0000</p>','iframe':'<iframe></iframe>','form':'<form></form>','image':'<img src="//example.invalid/x">','event':'<button onclick="void 0">x</button>','duplicate_attr':'<p id="a" id="b">x</p>','duplicate_id':'<p id="age">x</p>','unapproved_link':'<a href="https://example.invalid">x</a>','link_policy':'<a href="https://www.bls.gov/schedule/2026/home.htm">x</a>','secret':'<p>password = example_invalid_only</p>','local_address':'<p>192.168.20.1</p>'}.items():
  def f(self,x=x):self.inject(x);self.blocked()
  setattr(PrivacyTests,'test_'+name,f)
