@@ -7,11 +7,15 @@ from zoneinfo import ZoneInfo
 import calendar_snapshot
 
 BLS_ICS='https://www.bls.gov/schedule/news_release/bls.ics'
+BLS_CPI='https://www.bls.gov/schedule/news_release/cpi.htm'
+BLS_JOBS='https://www.bls.gov/schedule/news_release/empsit.htm'
 BEA_SCHEDULE='https://www.bea.gov/news/schedule'
 FED_FOMC='https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm'
 USER_AGENT=os.environ.get('CALENDAR_USER_AGENT','EconomicsResearchDashboard/1.0 (+https://github.com/nora69boy/economics-dashboard-public)')
-SOURCES={'bls':BLS_ICS,'bea':BEA_SCHEDULE,'fed':FED_FOMC}
+SOURCES={'bea':BEA_SCHEDULE,'fed':FED_FOMC}
+BLS_HTML={'cpi':BLS_CPI,'jobs':BLS_JOBS}
 MONTHS={name:i for i,name in enumerate('January February March April May June July August September October November December'.split(),1)}
+ABBR={'Jan.':1,'Feb.':2,'Mar.':3,'Apr.':4,'May':5,'Jun.':6,'Jul.':7,'Aug.':8,'Sep.':9,'Oct.':10,'Nov.':11,'Dec.':12}
 
 class Text(HTMLParser):
     def __init__(self):super().__init__(convert_charrefs=True);self.parts=[]
@@ -70,6 +74,26 @@ def parse_bls_ics(raw:bytes)->list[dict]:
 def html_text(raw:bytes)->str:
     p=Text();p.feed(raw.decode('utf-8',errors='strict'));return ' '.join(p.parts)
 
+def parse_bls_release_html(raw:bytes,family:str,source:str,year:int=2026)->list[dict]:
+    require(family in BLS_HTML,'BLS family')
+    text=html_text(raw)
+    title='Consumer Price Index' if family=='cpi' else 'Employment Situation'
+    require('Schedule of Releases for the '+title in text,'BLS schedule title')
+    full='|'.join(MONTHS);abbr='|'.join(re.escape(k) for k in ABBR)
+    pattern=re.compile(r'\b('+full+r')\s+(20\d{2})\s+('+abbr+r')\s+(\d{1,2}),\s+(20\d{2})\s+(\d{1,2}:\d{2})\s*(AM|PM)\b',re.I)
+    out=[]
+    for m in pattern.finditer(text):
+        release_year=int(m[5])
+        if release_year!=year:continue
+        ref_name=m[1].title();ref_year=int(m[2]);release_token=m[3].title()
+        token=next((k for k in ABBR if k.lower()==release_token.lower()),None);require(token is not None,'BLS release month')
+        day=f'{release_year}-{ABBR[token]:02d}-{int(m[4]):02d}'
+        clock=datetime.strptime(m[6]+' '+m[7].upper(),'%I:%M %p').strftime('%H:%M')
+        out.append({'family':family,'date':day,'period':f'{ref_year}-{MONTHS[ref_name]:02d}','time_local':clock,'time_jst':eastern_to_jst(day,clock),'source':source})
+    out=sorted({(e['date'],e['period']):e for e in out}.values(),key=lambda e:e['date'])
+    require(len(out)==12,'BLS '+family+' annual schedule incomplete')
+    return out
+
 def parse_bea(raw:bytes,year:int=2026)->list[dict]:
     text=html_text(raw)
     pattern=re.compile(r'('+ '|'.join(MONTHS) +r')\s+(\d{1,2})\s+(\d{1,2}:\d{2})\s*(AM|PM).*?Personal Income and Outlays,\s*('+ '|'.join(MONTHS) +r')\s+(20\d{2})',re.I)
@@ -118,23 +142,41 @@ def compare(candidate:list[dict])->list[dict]:
             if (a.get('period'),a.get('time_local'))!=(b.get('period'),b.get('time_local')):changes.append({'kind':'changed','family':k[0],'date':k[1]})
     return changes
 
+def probe_bls(fetcher):
+    advisories=[];errors=[]
+    try:
+        return parse_bls_ics(fetcher(BLS_ICS)),errors,advisories,'ics'
+    except urllib.error.HTTPError as exc:
+        if exc.code not in {403,429}:return [],[{'source':'bls-ics','error':'HTTPError','code':exc.code}],advisories,'failed'
+        advisories.append({'source':'bls-ics','error':'HTTPError','code':exc.code})
+    except (OSError,UnicodeError,ValueError,TypeError) as exc:
+        return [],[{'source':'bls-ics','error':type(exc).__name__,'code':None}],advisories,'failed'
+    events=[]
+    for family,url in BLS_HTML.items():
+        try:events.extend(parse_bls_release_html(fetcher(url),family,url))
+        except urllib.error.HTTPError as exc:errors.append({'source':'bls-'+family+'-html','error':'HTTPError','code':exc.code})
+        except (OSError,UnicodeError,ValueError,TypeError) as exc:errors.append({'source':'bls-'+family+'-html','error':type(exc).__name__,'code':None})
+    return sorted(events,key=lambda e:(e['date'],e['family'])),errors,advisories,('html_fallback' if not errors else 'partial_html_fallback')
+
 def probe(fetcher=fetch)->dict:
-    parsers={'bls':parse_bls_ics,'bea':parse_bea,'fed':parse_fed};candidate=[];errors=[]
+    candidate=[];errors=[];advisories=[];source_modes={}
+    bls_events,bls_errors,bls_advisories,bls_mode=probe_bls(fetcher);candidate.extend(bls_events);errors.extend(bls_errors);advisories.extend(bls_advisories);source_modes['bls']=bls_mode
+    parsers={'bea':parse_bea,'fed':parse_fed}
     for name,url in SOURCES.items():
-        try:candidate.extend(parsers[name](fetcher(url)))
-        except urllib.error.HTTPError as exc:errors.append({'source':name,'error':'HTTPError','code':exc.code})
-        except (OSError,UnicodeError,ValueError,TypeError) as exc:errors.append({'source':name,'error':type(exc).__name__,'code':None})
+        try:candidate.extend(parsers[name](fetcher(url)));source_modes[name]='primary'
+        except urllib.error.HTTPError as exc:errors.append({'source':name,'error':'HTTPError','code':exc.code});source_modes[name]='failed'
+        except (OSError,UnicodeError,ValueError,TypeError) as exc:errors.append({'source':name,'error':type(exc).__name__,'code':None});source_modes[name]='failed'
     candidate=sorted(candidate,key=lambda e:(e['date'],e['family']))
     access_errors=[e for e in errors if e['code'] in {403,429}]
     if not errors:health='fresh'
-    elif len(access_errors)==len(SOURCES):health='source_access_blocked'
+    elif len(access_errors)==len(errors) and not candidate:health='source_access_blocked'
     elif len(access_errors)==len(errors) and candidate:health='partial_access_blocked'
     else:health='degraded'
     changes=compare(candidate) if candidate else []
-    return {'calendar_probe_health':health,'checked_at':datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),'publication':'disabled_pending_rights_approval','candidate_events':candidate,'changes':changes,'errors':errors}
+    return {'calendar_probe_health':health,'checked_at':datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),'publication':'disabled_pending_rights_approval','candidate_events':candidate,'changes':changes,'errors':errors,'advisories':advisories,'source_modes':source_modes}
 
 def emit(result:dict)->None:
-    compact={'calendar_probe_health':result['calendar_probe_health'],'candidate_count':len(result['candidate_events']),'change_count':len(result['changes']),'error_count':len(result['errors']),'errors':result['errors'],'publication':result['publication']}
+    compact={'calendar_probe_health':result['calendar_probe_health'],'candidate_count':len(result['candidate_events']),'change_count':len(result['changes']),'error_count':len(result['errors']),'errors':result['errors'],'advisories':result['advisories'],'source_modes':result['source_modes'],'publication':result['publication']}
     print(json.dumps(compact,sort_keys=True,separators=(',',':')))
     if os.environ.get('GITHUB_OUTPUT'):
         with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:f.write('calendar_probe_health='+result['calendar_probe_health']+'\n')
@@ -144,8 +186,10 @@ def emit(result:dict)->None:
             f.write('- Status: '+result['calendar_probe_health']+'\n')
             f.write('- Candidate events: '+str(len(result['candidate_events']))+'\n')
             f.write('- Differences vs reviewed snapshot: '+str(len(result['changes']))+'\n')
+            f.write('- BLS mode: '+result['source_modes'].get('bls','unknown')+'\n')
             f.write('- Publication: disabled pending explicit rights approval\n')
-            for e in result['errors']:f.write('- '+e['source']+': '+e['error']+((' '+str(e['code'])) if e['code'] else '')+'\n')
+            for e in result['advisories']:f.write('- Advisory '+e['source']+': '+e['error']+((' '+str(e['code'])) if e['code'] else '')+'\n')
+            for e in result['errors']:f.write('- Error '+e['source']+': '+e['error']+((' '+str(e['code'])) if e['code'] else '')+'\n')
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--probe',action='store_true');p.add_argument('--strict',action='store_true');args=p.parse_args()
