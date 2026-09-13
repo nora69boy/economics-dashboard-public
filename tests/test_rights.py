@@ -24,6 +24,62 @@ def payload():
     return {name: (ROOT / 'site' / name).read_bytes() for name in r.TARGETS}
 
 
+class HashPhoneScannerTests(unittest.TestCase):
+    def setUp(self):
+        self.hash = 'a' * 20 + '0' + '123456789' + 'b' * 34
+
+    def scan(self, data, document='migration-baseline.json'):
+        r.check_site.scan(json.dumps(data), rights_document=document)
+
+    def test_only_allowed_hash_paths_are_exempt(self):
+        self.scan({'html_shell_sha256': self.hash, 'datasets': {'market-spx': {
+            'scope_sha256': self.hash, 'content_sha256': self.hash}}})
+        self.scan({'datasets': [{'evidence': [{'terms_sha256': self.hash}]}]}, 'registry.json')
+        for data in [{'other': self.hash}, {'content_sha256': self.hash},
+                     {'nested': {'html_shell_sha256': self.hash}},
+                     {'datasets': {'market-spx': {'terms_sha256': self.hash}}},
+                     {'html_shell_sha256': self.hash, 'note': self.hash}]:
+            with self.subTest(data=data), self.assertRaisesRegex(ValueError, 'sensitive phone'):
+                self.scan(data)
+        with self.assertRaisesRegex(ValueError, 'sensitive phone'):
+            r.check_site.scan(json.dumps({'html_shell_sha256': self.hash}))
+        with self.assertRaisesRegex(ValueError, 'sensitive phone'):
+            self.scan({'html_shell_sha256': self.hash}, 'registry.json')
+
+    def test_hash_format_requires_exact_lowercase_hex(self):
+        for value in [self.hash[:-1], self.hash + 'a', self.hash.upper(),
+                      self.hash + '\n', ' ' + self.hash, self.hash + ' ',
+                      self.hash[:-1] + 'g', self.hash.replace('a', '\uff41')]:
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'sensitive phone'):
+                self.scan({'html_shell_sha256': value})
+
+    def test_other_secret_checks_still_scan_original_hash_values(self):
+        for label in ['credential', 'token', 'key']:
+            with self.subTest(label=label), patch.dict(r.check_site.PATTERNS, {label: self.hash}):
+                with self.assertRaisesRegex(ValueError, 'sensitive ' + label):
+                    self.scan({'html_shell_sha256': self.hash})
+        for value, label in [('api' + '_key=' + 'a' * 32, 'credential'),
+                             ('gh' + 'p_' + 'a' * 30, 'token'),
+                             ('-----BEGIN ' + 'PRIVATE KEY-----', 'key')]:
+            with self.subTest(label=label), self.assertRaisesRegex(ValueError, 'sensitive ' + label):
+                self.scan({'html_shell_sha256': self.hash, 'note': value})
+
+    def test_actual_baseline_false_positive_and_integrity(self):
+        content = (ROOT / 'data-rights/migration-baseline.json').read_text()
+        with self.assertRaisesRegex(ValueError, 'sensitive phone'):
+            r.check_site.scan(content)
+        r.check_site.scan(content, rights_document='migration-baseline.json')
+        self.assertEqual(r.load_baseline(), BASELINE)
+        changed = copy.deepcopy(BASELINE)
+        changed['datasets']['market-n225']['content_sha256'] = self.hash
+        self.scan(changed)
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'migration-baseline.json'
+            path.write_text(json.dumps(changed))
+            with self.assertRaisesRegex(r.RightsError, 'MIGRATION_BASELINE_CHANGED'):
+                r.load_baseline(path)
+
+
 class RightsTests(unittest.TestCase):
     def setUp(self):
         self.registry = copy.deepcopy(REGISTRY)

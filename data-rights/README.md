@@ -106,3 +106,12 @@ artifact, or replace review of public commits. GitHub permissions, human release
 approval, source review and an approved withdrawal process remain necessary.
 No change to production, the update schedule, privacy/CSP checks, browser tests,
 data retrieval, analytics, or UI is part of this implementation.
+
+For private pre-push JSON scanning, use `check_site.scan(text,
+rights_document='migration-baseline.json')` (or `'registry.json'`). Rights-file
+loading also runs this scan. Only the phone detector masks exact lowercase
+64-hex strings at baseline `html_shell_sha256`,
+`datasets.<id>.scope_sha256` / `content_sha256`, and registry
+`datasets[].evidence[].terms_sha256`. Other paths and ordinary text scans have
+no exemption. All other sensitive-data detectors inspect the original text;
+the pinned baseline digest and existing payload hash validation remain required.

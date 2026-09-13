@@ -21,9 +21,32 @@ def pairs(items):
  return out
 def loads(s):return json.loads(s,object_pairs_hook=pairs,parse_constant=lambda _:(_ for _ in ()).throw(ValueError('non-finite')))
 def normal(s):return unicodedata.normalize('NFKC',html.unescape(re.sub(r'\\u([a-fA-F0-9]{4})',lambda m:chr(int(m[1],16)),s)))
-def scan(s):
+def phone_scan_text(s, rights_document):
+ """Mask only SHA-256 scalars at known rights-document schema paths."""
+ require(rights_document in {'registry.json','migration-baseline.json'},'hash scan context')
+ data=loads(s)
+ def mask(obj,key):
+  if isinstance(obj,dict) and isinstance(obj.get(key),str) and re.fullmatch(r'[0-9a-f]{64}',obj[key]):
+   obj[key]='SHA256'
+ if isinstance(data,dict):
+  datasets=data.get('datasets')
+  if rights_document=='migration-baseline.json':
+   mask(data,'html_shell_sha256')
+   if isinstance(datasets,dict):
+    for ident,entry in datasets.items():
+     if re.fullmatch(r'[a-z][a-z0-9-]{0,79}',ident):
+      mask(entry,'scope_sha256');mask(entry,'content_sha256')
+  elif isinstance(datasets,list):
+   for entry in datasets:
+    evidence=entry.get('evidence') if isinstance(entry,dict) else None
+    if isinstance(evidence,list):
+     for item in evidence:mask(item,'terms_sha256')
+ return normal(json.dumps(data,ensure_ascii=True))
+
+def scan(s, *, rights_document=None):
+ phone_text=phone_scan_text(s,rights_document) if rights_document is not None else normal(s)
  s=normal(s)
- for label,p in PATTERNS.items():require(not re.search(p,s),'sensitive '+label)
+ for label,p in PATTERNS.items():require(not re.search(p,phone_text if label=='phone' else s),'sensitive '+label)
  require(not any(t.lower() in s.lower() for t in TERMS),'sensitive term')
 def number(v):require(type(v) in (int,float) and math.isfinite(v) and v>0,'number')
 def research(d):

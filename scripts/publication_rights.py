@@ -97,7 +97,10 @@ def read_json(path):
     try:
         require(path.is_file() and not path.is_symlink() and path.stat().st_size <= 500000,
                 'REGISTRY_OR_BASELINE_MISSING')
-        return check_site.loads(path.read_text(encoding='utf-8'))
+        content = path.read_text(encoding='utf-8')
+        context = path.name if path.name in {'registry.json', 'migration-baseline.json'} else None
+        check_site.scan(content, rights_document=context)
+        return check_site.loads(content)
     except RightsError:
         raise
     except (OSError, ValueError, TypeError, UnicodeError):
