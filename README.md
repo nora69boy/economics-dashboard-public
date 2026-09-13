@@ -1,65 +1,32 @@
-# Economics Research Dashboard v0.5.0
+# Economics Research Dashboard v0.6.0
 
-An independent, public-market research portal. This release adds a market overview,
-a regional reference heatmap, local instrument search, same-date screening,
-comparison of up to four compatible series, and a macro/data coverage catalogue.
-It is not affiliated with a reference site, and is not a pixel-perfect reproduction.
-The completed research document and reference website were unavailable for exact
-comparison during this release. No original-site text, images or source were copied.
+Independent public-market research. No affiliation with the reference website; its complete research report has not been reconciled, and exact reproduction is not claimed.
 
-## Scope and data honesty
+## What is available
 
-There are 11 panels with JavaScript enabled. Without JavaScript the nine previous
-static panels and their source tables remain available; the new interactive
-portal controls require JavaScript. No real-time data or new price observations
-were added. The existing secondary snapshot still ends on September 10, 2026:
-14 indices with three observations, five stocks and SPY with six observations.
-The old research JSON version describes its data schema, not the new UI version.
+Eleven panels, same-date stock/index screening, up-to-four compatible series comparison, six government macro histories from 2015, 1/5/10-year and full-range charts, and 37 reviewed economic release dates linked to macro charts. A seventh VIX slot is explicitly withheld pending republication permission. CPI/PCE year-on-year rates use matching calendar months, not an array offset. Government missing values are not zero-filled. Monthly observation months and economic announcement dates are distinct. Current revised values must not be treated as point-in-time backtest inputs.
 
-All screening calculations use the common September 8-10 window. DAX total-return
-and provider-derived reference series are excluded from comparable rankings and
-multi-series selection. They remain accessible in the existing index explorer.
-Different local closing times and currencies are explicitly not reconciled.
-Historical data, financial results and their dates are inherited, not newly verified.
+Stock and world-index data remain the prior September 10, 2026 secondary snapshot: 14 indices with three observations and five stocks plus SPY with six observations. No new stock quotes, real-time stock feed, consensus dataset or news ingestion was added. DAX total-return and provider-derived series remain excluded from compatible screening.
 
-The macro catalogue has no numeric observations: unavailable values are shown as
-unconnected, not zero, and official navigation links do not imply an active feed.
-Long histories, quote updates, news ingestion and consensus data are not implemented.
-No stopped schedule was restarted. Market-data publication rights for ongoing use
-remain a separate decision before any continuous or bulk distribution is enabled.
+## Updates and calendar
+
+The public workflow fetches only the six fixed government histories at 22:17 UTC Monday-Friday (07:17 JST Tuesday-Saturday), and also on approved releases. Source failure retains the previous validated public observations and their original retrieval timestamp with a retained/error label. Initial publication fails if six valid histories are unavailable. Calendar dates are manually reviewed as of September 13, 2026, not automatically refreshed. The calendar includes 12 CPI dates, 12 employment dates, 8 FOMC final days and 5 PCE dates (August-December). Unknown meeting announcement times are left unknown. API/data delays and scheduler delays remain possible.
 
 ## Privacy and publication
 
-There is one bounded search box for instrument names and symbols. Filtering happens
-only in page memory, with no form submission, persistence, network request, analytics
-or account connection. Never enter individual financial or identifying records.
-Search text is never interpolated as HTML. All render operations use text nodes.
-All source links are explicit HTTPS URLs with no-referrer and noreferrer/noopener.
-Source navigation is user initiated; it leaves the application when clicked.
+No personal holdings, account connection, browser persistence, form submission, analytics, advertising, external frontend scripts or background frontend requests. The sole instrument search is bounded to 40 characters and stays in page memory. Data-provider requests run on GitHub-hosted infrastructure without private repository credentials or API keys. Hosting providers still process ordinary access metadata; no anonymity or zero-leakage guarantee is made. A shorter hostname does not erase public GitHub ownership history.
 
-A public commit is public BEFORE CI. Review and scan privately before writing.
-The content gate, SHA-256 manifest, restricted CSP, no-referrer, fixed file allowlist,
-and official pinned deployment workflow remain in place. No deployment permission
-or paid service was added. A separate private monthly audit must approve this
-release and validate all eleven runtime panels and the new controls.
+The existing CSP, no-referrer links, strict field/path/URL allowlists, finite-number checks, source fingerprints and SHA-256 artifact checks remain. Only six validated payloads plus an empty .nojekyll marker are deployed; templates, tests and private records are not. Public commits are public before CI: review all contents before writing.
 
-## Build and verification
+## Build and test
 
-The existing deterministic builder combines reviewed base HTML, local market data,
-and the chart/portal program and stylesheet. It recalculates the program CSP hash
-but never changes the approval manifest. index.html is generated, not tracked.
-Only four reviewed payload files are deployed; templates and test code are not.
+1. python3 scripts/run_legacy_tests.py
+2. python3 scripts/macro_fetch.py
+3. python3 scripts/build_release.py
+4. python3 -m unittest discover -s tests -p test_release.py -v
+5. node scripts/browser_release.mjs site/index.html
+6. python3 scripts/check_release.py --check-history --build
 
-Run python3 scripts/build_dashboard.py, then python3 -m unittest discover -s tests -v,
-and python3 scripts/check_site.py --check-history --build. Search, comparison,
-keyboard, no-JavaScript fallback and zero-background-request checks also run in the
-private browser audit. PASS is scoped verification, not proof of zero vulnerabilities.
+No post-test data patch is applied. Builds from the same validated snapshots are deterministic. The production HTTPS file must equal the generated SHA-256. Browser tests cover 390/768/1440 pixel widths, not physical iPhone/Safari certification. PASS is scoped verification, not proof of zero vulnerabilities or economic-data correctness. The separate private monthly audit must approve each source-code release; daily data refreshes do not mutate source commits.
 
-## Next dependencies
-
-1. Review the completed research report and the reference site's available pages.
-2. Approve a lawful data source and update policy before adding automatic history.
-3. Add tested ingestion with observation timestamps, revisions and corporate actions.
-4. Verify physical Safari, account protections and device notification delivery.
-
-These are dependencies, not scheduled background implementation promises.
+See docs/data-rights.md and docs/release-v060.md for boundaries and remaining work. No paid service, domain purchase, stopped market-watch task restart or live trading has been added.
