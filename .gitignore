@@ -1,9 +1,8 @@
-.pages-build/
 __pycache__/
 *.pyc
+.pages-build/
+node_modules/
 .env
 .env.*
-*.pem
-*.key
-private/
-personal/
+.DS_Store
+site/index.html

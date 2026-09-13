@@ -2,8 +2,9 @@
   "version": 2,
   "classification": "public-market-research",
   "files": {
+    "index.html": "43387795cd8b4090fd8039e0e6c1cfce5306d9bda2080d95aaa82fdfe36fd903",
     "data/current-state.json": "021e7501e7ad7a6dacb9e2bc7bb8457170b1d39b84d75c9416e3f73104b38173",
-    "index.html": "54b62ed0f605628e214601b5809345616046f1128805ca58b1a02ca64ed26a1c",
+    "data/market.json": "f5bc015909985d436a3debc7248a2f8203eca0f4fa3c50483e004eb71c955260",
     "reports/2026-09-11-carry-forward.md": "447fbc394f74834b25e571693815691842fa0e0783761bcb6fc40450c369d663"
   }
 }
