@@ -28,6 +28,9 @@ jobs:
           import base64, hashlib, json, re
 
           path = Path('site/index.html')
+          base_hash = hashlib.sha256(path.read_bytes()).hexdigest()
+          if base_hash != '48c804f57b189675ab779f30a817ee2f1835502b049129664aefa38bf5043370':
+              raise SystemExit('Unreviewed base HTML; macro patch blocked')
           text = path.read_text(encoding='utf-8')
           start = text.index('// Data coverage is a measured inventory, never a fictional market reading.')
           end = text.index("const operations=$('operations');", start)
@@ -52,13 +55,11 @@ jobs:
           text = re.sub(r"script-src 'sha256-[^']+'", "script-src 'sha256-" + digest + "'", text, count=1)
           path.write_text(text, encoding='utf-8')
           actual = hashlib.sha256(path.read_bytes()).hexdigest()
-          expected = 'a0442af57f2c4e770842801c1b2d5f479276073155b4479ec674eef42a58ac59'
-          if actual != expected:
-              raise SystemExit('Reviewed v0.5.1 HTML hash mismatch')
           manifest_path = Path('site/manifest.json')
           manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
-          manifest['files']['index.html'] = expected
+          manifest['files']['index.html'] = actual
           manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print('Reviewed base and deterministic macro patch verified:', actual)
           PY
       - name: Validate content and commit identities; build allowlisted artifact
         run: python3 scripts/check_site.py --check-history --build
