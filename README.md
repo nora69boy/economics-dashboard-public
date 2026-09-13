@@ -8,6 +8,8 @@ Eleven panels, same-date stock/index screening, up-to-four compatible series com
 
 Stock and world-index data remain the prior September 10, 2026 secondary snapshot: 14 indices with three observations and five stocks plus SPY with six observations. No new stock quotes, real-time stock feed, consensus dataset or news ingestion was added. DAX total-return and provider-derived series remain excluded from compatible screening.
 
+Market-data automation is explicitly fail-closed. `scripts/market_refresh_guard.py` performs no quote-provider network access and cannot mutate `site/data/market.json`; it reports whether every published stock/index series has explicit rights for automated retrieval, storage, transformation, display, redistribution and caching. The current 20 published market series remain blocked from automated refresh until their rights records are approved. See `docs/market-data-automation.md`.
+
 ## Updates and calendar
 
 The public workflow fetches only the six fixed government histories every six hours, at 04:17/10:17/16:17/22:17 UTC every day (01:17/07:17/13:17/19:17 JST), and also on approved releases and manual workflow dispatch. Pull requests reuse the previously published validated macro snapshot without polling upstream providers. Source failure retains the previous validated public observations and their original retrieval timestamp with a retained/error label. Initial publication fails if six valid histories are unavailable. Calendar dates are manually reviewed as of September 13, 2026, not automatically refreshed. The calendar includes 12 CPI dates, 12 employment dates, 8 FOMC final days and 5 PCE dates (August-December). Unknown meeting announcement times are left unknown. API/data delays and scheduler delays remain possible.
@@ -21,11 +23,14 @@ The existing CSP, no-referrer links, strict field/path/URL allowlists, finite-nu
 ## Build and test
 
 1. python3 scripts/run_legacy_tests.py
-2. python3 scripts/macro_fetch.py
-3. python3 scripts/build_release.py
-4. python3 -m unittest discover -s tests -p test_release.py -v
-5. node scripts/browser_release.mjs site/index.html
-6. python3 scripts/check_release.py --check-history --build
+2. python3 scripts/market_refresh_guard.py
+3. python3 scripts/macro_fetch.py
+4. python3 scripts/build_release.py
+5. python3 -m unittest discover -s tests -p test_release.py -v
+6. python3 -m unittest discover -s tests -p test_rights.py -v
+7. python3 -m unittest discover -s tests -p test_market_refresh_guard.py -v
+8. node scripts/browser_release.mjs site/index.html
+9. python3 scripts/check_release.py --check-history --build
 
 No post-test data patch is applied. Builds from the same validated snapshots are deterministic. The production HTTPS file must equal the generated SHA-256. Browser tests cover 390/768/1440 pixel widths, not physical iPhone/Safari certification. PASS is scoped verification, not proof of zero vulnerabilities or economic-data correctness. The separate private monthly audit must approve each source-code release; daily data refreshes do not mutate source commits.
 
