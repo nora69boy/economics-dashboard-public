@@ -45,16 +45,21 @@ def assess(payload, today=None):
 
 
 def enforce(payload):
-    # Preserve the original UNKNOWN migration gate for every non-calendar dataset.
-    # The four approved calendar IDs are removed from that legacy assessment only;
-    # they are then assessed under the explicit CONDITIONAL effective registry.
-    base = rights.read_json(ROOT / 'data-rights/registry.json')
-    items = rights.inventory(payload)
-    non_calendar = [item for item in items if item['id'] not in EXPECTED_IDS]
-    base_report = rights.assess(base, non_calendar, rights.load_baseline(), payload)
-    if base_report['blocked']:
-        raise rights.PublicationBlocked(base_report)
-    report = rights.assess(effective_registry(base), items, rights.load_baseline(), payload)
+    # Run the original fail-closed gate first. Once the four calendar datasets are
+    # explicitly approved, the only legacy block we may supersede is the frozen
+    # UNKNOWN snapshot-change block for those exact IDs. Every other base block
+    # still aborts publication before the effective registry is considered.
+    try:
+        rights.enforce(payload)
+    except rights.PublicationBlocked as exc:
+        blocks = exc.report.get('blocked', [])
+        allowed_legacy = blocks and all(
+            block.get('id') in EXPECTED_IDS and block.get('code') == 'CHANGED_UNKNOWN_SNAPSHOT'
+            for block in blocks
+        )
+        if not allowed_legacy:
+            raise
+    report = assess(payload)
     if report['blocked']:
         raise rights.PublicationBlocked(report)
     return report
