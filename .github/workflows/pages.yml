@@ -36,6 +36,8 @@ jobs:
         run: python3 -m unittest discover -s tests -p test_sec_filings.py -v
       - name: Test official calendar probe
         run: python3 -m unittest discover -s tests -p test_calendar_probe.py -v
+      - name: Test calendar completeness publication
+        run: python3 -m unittest discover -s tests -p test_calendar_publish.py -v
       - name: Probe official SEC filings for tracked US companies
         id: sec
         if: github.event_name != 'pull_request'
@@ -58,6 +60,7 @@ jobs:
           python3 -m unittest discover -s tests -p test_release.py -v
           python3 -m unittest discover -s tests -p test_rights.py -v
           python3 -m unittest discover -s tests -p test_calendar_rights.py -v
+          python3 -m unittest discover -s tests -p test_calendar_publish.py -v
           python3 -m unittest discover -s tests -p test_market_refresh_guard.py -v
           python3 -m unittest discover -s tests -p test_sec_filings.py -v
           python3 -m unittest discover -s tests -p test_calendar_probe.py -v
@@ -142,14 +145,14 @@ jobs:
             echo 'SEC filing probe retrieved all five tracked companies.'
           fi
           if [ "$CALENDAR_PROBE_HEALTH" = "degraded" ]; then
-            echo '::error::Official calendar probe had a parser/data/network failure. Reviewed calendar snapshot remains published; inspect the probe summary.'
+            echo '::error::Official calendar probe had a parser/data/network failure. Completeness gate retained reviewed families where needed; inspect the probe summary.'
             exit 1
           fi
           if [ "$CALENDAR_PROBE_HEALTH" = "source_access_blocked" ]; then
-            echo '::warning::All official calendar sources blocked/rate-limited the GitHub-hosted runner. Reviewed calendar snapshot remains published.'
+            echo '::warning::All official calendar sources blocked/rate-limited the GitHub-hosted runner. Reviewed calendar families were retained.'
           elif [ "$CALENDAR_PROBE_HEALTH" = "partial_access_blocked" ]; then
-            echo '::warning::One or more official calendar sources blocked/rate-limited the GitHub-hosted runner while other official sources succeeded. Reviewed calendar snapshot remains published.'
+            echo '::warning::Some official calendar sources were blocked while others succeeded. Complete families may publish; incomplete families remain reviewed/static.'
           else
             echo 'Official BLS, BEA and Federal Reserve calendar probe completed.'
           fi
-          echo 'Six government histories retrieved successfully. SEC candidates remain rights-pending; calendar candidates remain unpublished pending separate completeness-protected publication integration.'
+          echo 'Six government histories retrieved successfully. SEC candidates remain rights-pending; economic-calendar publication is protected by family completeness checks.'
