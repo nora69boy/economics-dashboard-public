@@ -1,0 +1,1640 @@
+{
+  "schema_version": 1,
+  "datasets": [
+    {
+      "id": "calendar-cpi",
+      "provider": "www.bls.gov",
+      "dataset": "calendar-cpi",
+      "source_url": [
+        "https://www.bls.gov/schedule/news_release/cpi.htm"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "date",
+        "family",
+        "id",
+        "period",
+        "source",
+        "status",
+        "time-jst",
+        "time-local"
+      ],
+      "public_targets": [
+        "data/macro-calendar.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "calendar-fomc",
+      "provider": "www.federalreserve.gov",
+      "dataset": "calendar-fomc",
+      "source_url": [
+        "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "date",
+        "family",
+        "id",
+        "period",
+        "source",
+        "status",
+        "time-jst",
+        "time-local"
+      ],
+      "public_targets": [
+        "data/macro-calendar.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "calendar-jobs",
+      "provider": "www.bls.gov",
+      "dataset": "calendar-jobs",
+      "source_url": [
+        "https://www.bls.gov/schedule/news_release/empsit.htm"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "date",
+        "family",
+        "id",
+        "period",
+        "source",
+        "status",
+        "time-jst",
+        "time-local"
+      ],
+      "public_targets": [
+        "data/macro-calendar.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "calendar-pce",
+      "provider": "www.bea.gov",
+      "dataset": "calendar-pce",
+      "source_url": [
+        "https://www.bea.gov/news/schedule"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "date",
+        "family",
+        "id",
+        "period",
+        "source",
+        "status",
+        "time-jst",
+        "time-local"
+      ],
+      "public_targets": [
+        "data/macro-calendar.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "financial-nvda",
+      "provider": "nvidianews.nvidia.com",
+      "dataset": "financial-nvda",
+      "source_url": [
+        "https://nvidianews.nvidia.com/news/nvidia-announces-financial-results-for-second-quarter-fiscal-2027"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "end",
+        "gross-margin",
+        "operating-income",
+        "period",
+        "revenue"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "macro-cpi",
+      "provider": "data.bls.gov",
+      "dataset": "macro-cpi",
+      "source_url": [
+        "https://data.bls.gov/timeseries/CUUR0000SA0"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "date",
+        "revisions",
+        "value"
+      ],
+      "public_targets": [
+        "data/macro.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "macro-cpi-core",
+      "provider": "data.bls.gov",
+      "dataset": "macro-cpi-core",
+      "source_url": [
+        "https://data.bls.gov/timeseries/CUUR0000SA0"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "date",
+        "value"
+      ],
+      "public_targets": [
+        "data/macro.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "macro-cpi-core-sa",
+      "provider": "data.bls.gov",
+      "dataset": "macro-cpi-core-sa",
+      "source_url": [
+        "https://data.bls.gov/timeseries/CUUR0000SA0"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "date",
+        "value"
+      ],
+      "public_targets": [
+        "data/macro.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "macro-cpi-headline-sa",
+      "provider": "data.bls.gov",
+      "dataset": "macro-cpi-headline-sa",
+      "source_url": [
+        "https://data.bls.gov/timeseries/CUUR0000SA0"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "date",
+        "value"
+      ],
+      "public_targets": [
+        "data/macro.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "macro-pce",
+      "provider": "www.bea.gov",
+      "dataset": "macro-pce",
+      "source_url": [
+        "https://www.bea.gov/data/personal-consumption-expenditures-price-index"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "date",
+        "revisions",
+        "value"
+      ],
+      "public_targets": [
+        "data/macro.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "macro-pce-core",
+      "provider": "www.bea.gov",
+      "dataset": "macro-pce-core",
+      "source_url": [
+        "https://www.bea.gov/data/personal-consumption-expenditures-price-index"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "date",
+        "value"
+      ],
+      "public_targets": [
+        "data/macro.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "macro-unemployment",
+      "provider": "data.bls.gov",
+      "dataset": "macro-unemployment",
+      "source_url": [
+        "https://data.bls.gov/timeseries/LNS14000000"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "date",
+        "revisions",
+        "value"
+      ],
+      "public_targets": [
+        "data/macro.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "macro-unemployment-payrolls-thousands",
+      "provider": "data.bls.gov",
+      "dataset": "macro-unemployment-payrolls-thousands",
+      "source_url": [
+        "https://data.bls.gov/timeseries/LNS14000000"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "date",
+        "value"
+      ],
+      "public_targets": [
+        "data/macro.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "macro-usdjpy",
+      "provider": "www.federalreserve.gov",
+      "dataset": "macro-usdjpy",
+      "source_url": [
+        "https://www.federalreserve.gov/releases/h10/hist/dat00_ja.htm"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "date",
+        "revisions",
+        "value"
+      ],
+      "public_targets": [
+        "data/macro.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "macro-ust10",
+      "provider": "home.treasury.gov",
+      "dataset": "macro-ust10",
+      "source_url": [
+        "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "date",
+        "revisions",
+        "value"
+      ],
+      "public_targets": [
+        "data/macro.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "macro-ust10-ust2",
+      "provider": "home.treasury.gov",
+      "dataset": "macro-ust10-ust2",
+      "source_url": [
+        "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "date",
+        "value"
+      ],
+      "public_targets": [
+        "data/macro.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "macro-vix",
+      "provider": "Cboe",
+      "dataset": "macro-vix",
+      "source_url": [
+        "https://www.cboe.com/tradable-products/vix/vix-historical-data/"
+      ],
+      "terms_url": [
+        "https://www.cboe.com/terms"
+      ],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "date",
+        "revisions",
+        "value"
+      ],
+      "public_targets": [
+        "data/macro.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "macro-wti",
+      "provider": "EIA / Refinitiv (LSEG) - series-specific reuse unverified",
+      "dataset": "macro-wti",
+      "source_url": [
+        "https://www.eia.gov/dnav/pet/hist/RWTCD.htm"
+      ],
+      "terms_url": [
+        "https://www.eia.gov/about/copyrights_reuse.php"
+      ],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "date",
+        "revisions",
+        "value"
+      ],
+      "public_targets": [
+        "data/macro.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "market-aapl",
+      "provider": "stockanalysis.com",
+      "dataset": "market-aapl",
+      "source_url": [
+        "https://stockanalysis.com/stocks/aapl/history/"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "close",
+        "date",
+        "high",
+        "low",
+        "open",
+        "volume"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "market-amzn",
+      "provider": "stockanalysis.com",
+      "dataset": "market-amzn",
+      "source_url": [
+        "https://stockanalysis.com/stocks/amzn/history/"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "close",
+        "date",
+        "high",
+        "low",
+        "open",
+        "volume"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "market-asx200",
+      "provider": "www.investing.com",
+      "dataset": "market-asx200",
+      "source_url": [
+        "https://www.investing.com/indices/aus-200-historical-data"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "close",
+        "date"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "market-cac",
+      "provider": "www.investing.com",
+      "dataset": "market-cac",
+      "source_url": [
+        "https://www.investing.com/indices/france-40-historical-data"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "close",
+        "date"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "market-dax",
+      "provider": "www.investing.com",
+      "dataset": "market-dax",
+      "source_url": [
+        "https://www.investing.com/indices/germany-30-historical-data"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "close",
+        "date"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "market-dji",
+      "provider": "apnews.com",
+      "dataset": "market-dji",
+      "source_url": [
+        "https://apnews.com/article/0c547c6cc3e374a2c04f78a90e35e113",
+        "https://apnews.com/article/cadd309d4fd4933397cd38fe436edb71",
+        "https://www.financialexpress.com/market/sensex-nifty-50-stock-market-today-live-updates-india-us-iran-isreal-war-asia-nikkei-gold-silver-rate-crude-oil-10september2026-4335863/"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "close",
+        "date"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "market-ftse",
+      "provider": "www.advfn.com",
+      "dataset": "market-ftse",
+      "source_url": [
+        "https://www.advfn.com/stock-market/FTSE/UKX/historical/more-historical-data"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "close",
+        "date"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "market-googl",
+      "provider": "stockanalysis.com",
+      "dataset": "market-googl",
+      "source_url": [
+        "https://stockanalysis.com/stocks/googl/history/"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "close",
+        "date",
+        "high",
+        "low",
+        "open",
+        "volume"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "market-hsi",
+      "provider": "www.investing.com",
+      "dataset": "market-hsi",
+      "source_url": [
+        "https://www.investing.com/indices/hang-sen-40-historical-data"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "close",
+        "date"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "market-ixic",
+      "provider": "www.investing.com",
+      "dataset": "market-ixic",
+      "source_url": [
+        "https://www.investing.com/indices/nasdaq-composite-historical-data"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "close",
+        "date"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "market-kospi",
+      "provider": "www.investing.com",
+      "dataset": "market-kospi",
+      "source_url": [
+        "https://www.investing.com/indices/kospi-historical-data"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "close",
+        "date"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "market-msft",
+      "provider": "stockanalysis.com",
+      "dataset": "market-msft",
+      "source_url": [
+        "https://stockanalysis.com/stocks/msft/history/"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "close",
+        "date",
+        "high",
+        "low",
+        "open",
+        "volume"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "market-n225",
+      "provider": "www.investing.com",
+      "dataset": "market-n225",
+      "source_url": [
+        "https://www.investing.com/indices/japan-ni225-historical-data"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "close",
+        "date"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "market-nifty",
+      "provider": "www.investing.com",
+      "dataset": "market-nifty",
+      "source_url": [
+        "https://www.investing.com/indices/s-p-cnx-nifty-historical-data"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "close",
+        "date"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "market-nvda",
+      "provider": "stockanalysis.com",
+      "dataset": "market-nvda",
+      "source_url": [
+        "https://stockanalysis.com/stocks/nvda/history/"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "close",
+        "date",
+        "high",
+        "low",
+        "open",
+        "volume"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "market-spx",
+      "provider": "ycharts.com",
+      "dataset": "market-spx",
+      "source_url": [
+        "https://ycharts.com/indices/%5ESPX/level"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "close",
+        "date"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "market-spy",
+      "provider": "stockanalysis.com",
+      "dataset": "market-spy",
+      "source_url": [
+        "https://stockanalysis.com/etf/spy/history/"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "close",
+        "date",
+        "high",
+        "low",
+        "open",
+        "volume"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "market-ssec",
+      "provider": "www.investing.com",
+      "dataset": "market-ssec",
+      "source_url": [
+        "https://www.investing.com/indices/shanghai-composite-historical-data"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "close",
+        "date"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "market-stoxx50e",
+      "provider": "www.investing.com",
+      "dataset": "market-stoxx50e",
+      "source_url": [
+        "https://www.investing.com/indices/eu-stoxx50-historical-data"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "close",
+        "date"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "market-topix",
+      "provider": "www.investing.com",
+      "dataset": "market-topix",
+      "source_url": [
+        "https://www.investing.com/indices/topix-historical-data"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "close",
+        "date"
+      ],
+      "public_targets": [
+        "data/market.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "research-report",
+      "provider": "www.bls.gov",
+      "dataset": "research-report",
+      "source_url": [
+        "https://www.bls.gov/schedule/2026/home.htm",
+        "https://www.boj.or.jp/en/mopo/mpmsche_minu/index.htm",
+        "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "text"
+      ],
+      "public_targets": [
+        "index.html",
+        "reports/2026-09-11-carry-forward.md"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    },
+    {
+      "id": "research-state",
+      "provider": "www.bls.gov",
+      "dataset": "research-state",
+      "source_url": [
+        "https://www.bls.gov/schedule/2026/home.htm",
+        "https://www.boj.or.jp/en/mopo/mpmsche_minu/index.htm",
+        "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
+      ],
+      "terms_url": [],
+      "access": "UNKNOWN",
+      "automated_retrieval": "UNKNOWN",
+      "storage": "UNKNOWN",
+      "transformation": "UNKNOWN",
+      "display": "UNKNOWN",
+      "redistribution": "UNKNOWN",
+      "commercial_use": "UNKNOWN",
+      "caching": "UNKNOWN",
+      "ai_processing": "UNKNOWN",
+      "attribution": null,
+      "retention": {
+        "mode": "UNKNOWN",
+        "max_age_days": null
+      },
+      "reviewed_at": null,
+      "evidence": [],
+      "status": "UNKNOWN",
+      "fields": [
+        "as-of",
+        "automated-report-ingestion",
+        "company-checks",
+        "events",
+        "live-market-data",
+        "publication",
+        "sources",
+        "streams",
+        "topics",
+        "version"
+      ],
+      "public_targets": [
+        "data/current-state.json",
+        "index.html"
+      ],
+      "valid_from": null,
+      "valid_until": null,
+      "review_due_at": null,
+      "conditions": [],
+      "monthly_cost_ceiling_jpy": 0
+    }
+  ]
+}
