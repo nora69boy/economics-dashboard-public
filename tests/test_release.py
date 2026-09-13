@@ -146,7 +146,10 @@ class RefreshHardeningTests(unittest.TestCase):
    with patch.object(fetch,'ROOT',root),self.assertRaises(ValueError):fetch.write_snapshot({})
    self.assertEqual(dest.read_text(),'old')
  def test_healthy_report_does_not_treat_vix_as_failure(self):
-  with patch('sys.stdout',new=io.StringIO()) as output:fetch.emit_status(DATA)
+  data=copy.deepcopy(DATA)
+  for series in data['series']:
+   if series['id']!='vix':series['status']='available'
+  with patch('sys.stdout',new=io.StringIO()) as output:fetch.emit_status(data)
   self.assertEqual(json.loads(output.getvalue())['refresh_health'],'fresh')
  def test_degraded_report_and_ci_summary(self):
   data=copy.deepcopy(DATA);data['series'][0]['status']='retained'
