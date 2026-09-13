@@ -5,6 +5,8 @@ from datetime import date, datetime, timedelta, timezone
 from html.parser import HTMLParser
 from zoneinfo import ZoneInfo
 START = '2015-01-01'
+CALENDAR_HISTORY_START_YEAR = 2026
+CALENDAR_MAX_EVENTS = 140
 TREASURY = 'https://home.treasury.gov/resource-center/data-chart-center/interest-rates/'
 BLS = 'https://api.bls.gov/publicAPI/v1/timeseries/data/'
 BEA = 'https://apps.bea.gov/national/Release/TXT/NipaDataM.txt'
@@ -47,10 +49,10 @@ def validate(data: dict, today: date|None=None) -> None:
  for r in data['revisions']:
   keys(r,'series date old new detected_at');require(r['series'] in META and r['series']!='vix','Revision identity');iso(r['date']);timestamp(r['detected_at']);require(all(type(r[k]) in (int,float) and math.isfinite(r[k]) and META[r['series']][3]<=r[k]<=META[r['series']][4] for k in ['old','new']),'Revision values')
 def validate_calendar(data: dict, today: date|None=None) -> None:
- today=today or date.today();keys(data,'schema checked_at events');require(data['schema']==1 and iso(data['checked_at'])<=today,'Calendar version/date');require(isinstance(data['events'],list) and 1<=len(data['events'])<=120,'Calendar size');ids=set()
+ today=today or datetime.now(ZoneInfo('Asia/Tokyo')).date();keys(data,'schema checked_at events');require(data['schema']==1 and iso(data['checked_at'])<=today,'Calendar version/date');require(isinstance(data['events'],list) and 1<=len(data['events'])<=CALENDAR_MAX_EVENTS,'Calendar size');ids=set()
  for e in data['events']:
   keys(e,'id family date period time_local time_jst source status');require(e['family'] in CAL_SOURCES and e['source']==CAL_SOURCES[e['family']],'Event source');require(re.fullmatch(r'[a-z]+-\d{4}-\d{2}-\d{2}',e['id']) is not None and e['id'] not in ids,'Event ID');ids.add(e['id'])
-  day=iso(e['date']);require(today.year-1<=day.year<=today.year+1,'Event range');require(e['status']=='verified_schedule','Schedule is not an actual result');require(e['period'] is None or re.fullmatch(r'\d{4}-\d{2}',e['period']) is not None,'Reference period')
+  day=iso(e['date']);require(CALENDAR_HISTORY_START_YEAR<=day.year<=today.year+1,'Event range');require(e['status']=='verified_schedule','Schedule is not an actual result');require(e['period'] is None or re.fullmatch(r'\d{4}-\d{2}',e['period']) is not None,'Reference period')
   if e['time_local'] is None:require(e['time_jst'] is None,'Unknown time')
   else:
    require(re.fullmatch(r'\d{2}:\d{2}',e['time_local']) is not None,'Event time');dt=datetime.fromisoformat(e['date']+'T'+e['time_local']).replace(tzinfo=ZoneInfo('America/New_York'));require(e['time_jst']==dt.astimezone(ZoneInfo('Asia/Tokyo')).strftime('%Y-%m-%d %H:%M'),'DST conversion')
