@@ -1,4 +1,4 @@
-import copy,sys,unittest
+import sys,unittest,urllib.error
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'scripts'))
 import sec_filings as s
@@ -27,6 +27,9 @@ class SecFilingsTests(unittest.TestCase):
    if calls['n']==1:raise OSError('synthetic')
    ticker=next(t for t,(cik,_) in s.COMPANIES.items() if cik in url);return payload(ticker)
   r=s.probe(f,lambda _:None);self.assertEqual(r['sec_probe_health'],'degraded');self.assertEqual(len(r['errors']),1);self.assertEqual(len(r['companies']),4)
+ def test_all_403_is_source_access_blocked(self):
+  def f(url):raise urllib.error.HTTPError(url,403,'Forbidden',None,None)
+  r=s.probe(f,lambda _:None);self.assertEqual(r['sec_probe_health'],'source_access_blocked');self.assertEqual({e['error'] for e in r['errors']},{'HTTP_403'})
  def test_no_publication_side_effect(self):
   before=(ROOT/'site/data/market.json').read_bytes();s.probe(lambda url:payload(next(t for t,(cik,_) in s.COMPANIES.items() if cik in url)),lambda _:None);self.assertEqual((ROOT/'site/data/market.json').read_bytes(),before)
 if __name__=='__main__':unittest.main()
