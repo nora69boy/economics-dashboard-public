@@ -43,8 +43,32 @@ def phone_scan_text(s, rights_document):
      for item in evidence:mask(item,'terms_sha256')
  return normal(json.dumps(data,ensure_ascii=True))
 
-def scan(s, *, rights_document=None):
- phone_text=phone_scan_text(s,rights_document) if rights_document is not None else normal(s)
+def public_phone_scan_text(s, public_document):
+ """Mask only validated macro provenance SHA-256 scalars for phone scanning."""
+ require(public_document in {'data/macro.json','index.html'},'hash scan context')
+ def mask_macro(raw):
+  data=loads(raw)
+  require(isinstance(data,dict) and isinstance(data.get('series'),list),'macro hash context')
+  for series in data['series']:
+   require(isinstance(series,dict),'macro hash context')
+   value=series.get('source_sha256')
+   if value is not None:
+    require(isinstance(value,str) and re.fullmatch(r'[0-9a-f]{64}',value),'macro hash context')
+    series['source_sha256']='SHA256'
+  return json.dumps(data,ensure_ascii=True,separators=(',',':'))
+ if public_document=='data/macro.json':
+  return normal(mask_macro(s))
+ pattern=r'(<pre id="macro-data" hidden>)(.*?)(</pre>)'
+ matches=list(re.finditer(pattern,s,re.S));require(len(matches)<=1,'macro hash context')
+ if not matches:return normal(s)
+ m=matches[0];masked=mask_macro(html.unescape(m.group(2)))
+ return normal(s[:m.start(2)]+html.escape(masked)+s[m.end(2):])
+
+def scan(s, *, rights_document=None, public_document=None):
+ require(not (rights_document is not None and public_document is not None),'hash scan context')
+ if rights_document is not None:phone_text=phone_scan_text(s,rights_document)
+ elif public_document is not None:phone_text=public_phone_scan_text(s,public_document)
+ else:phone_text=normal(s)
  s=normal(s)
  for label,p in PATTERNS.items():require(not re.search(p,phone_text if label=='phone' else s),'sensitive '+label)
  require(not any(t.lower() in s.lower() for t in TERMS),'sensitive term')
@@ -110,7 +134,7 @@ def validate(site):
   if p.is_file():require(p.stat().st_nlink==1,'hardlink');actual.add(p.relative_to(site).as_posix())
  require(actual==PAYLOAD|{'manifest.json'},'unexpected file');out={}
  for n,h in m['files'].items():
-  p=site/n;require(p.stat().st_size<1000000 and re.fullmatch(r'[0-9a-f]{64}',h),'size/digest');b=p.read_bytes();require(hashlib.sha256(b).hexdigest()==h,'hash');s=b.decode();scan(s);out[n]=b
+  p=site/n;require(p.stat().st_size<1000000 and re.fullmatch(r'[0-9a-f]{64}',h),'size/digest');b=p.read_bytes();require(hashlib.sha256(b).hexdigest()==h,'hash');s=b.decode();scan(s,public_document=n if n in {'index.html','data/macro.json'} else None);out[n]=b
   if n=='index.html':html_check(s)
   elif n=='data/market.json':market(loads(s))
   elif n=='data/current-state.json':research(loads(s))
