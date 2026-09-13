@@ -21,6 +21,45 @@ jobs:
           persist-credentials: false
       - name: Regression tests
         run: python3 -m unittest discover -s tests -v
+      - name: Apply reviewed v0.5.1 macro snapshot patch
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, hashlib, json, re
+
+          path = Path('site/index.html')
+          text = path.read_text(encoding='utf-8')
+          start = text.index('// Data coverage is a measured inventory, never a fictional market reading.')
+          end = text.index("const operations=$('operations');", start)
+          new = """// Macro snapshots use public primary sources. They are observations, not a live feed.
+          add(macro,el('div','p-eyebrow','PRIMARY DATA / MACRO'),el('h2','',J.macro),el('p','p-lead','「未接続」を分解し、確認できた一次情報のスナップショットを表示します。自動更新はまだ未接続です。'));
+          const catalogue=[
+           {title:'米国金利・政策',status:'接続済み',value:'FF 3.50–3.75%',detail:'米国債 2年 4.63% / 10年 4.96% / 10年−2年 +0.33pt',date:'政策 2026-07-29 / 国債 2026-09-11',note:'FOMCの政策金利とTreasuryのパー・イールドを別データとして表示。',links:[['https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a.htm','Federal Reserve'],['https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView','U.S. Treasury']]},
+           {title:'CPI / 消費者物価',status:'部分接続',value:'総合 +0.1% MoM / +3.4% YoY',detail:'コア +0.2% MoM / +2.5% YoY',date:'2026-07 / 公表 2026-08-12',note:'今回取得できたBLS一次ページは7月版。8月値は9月11日公表予定だったため、最新値の一次再確認が必要。',links:[['https://www.bls.gov/cpi/','BLS CPI']]},
+           {title:'PCE / 個人消費物価',status:'接続済み',value:'総合 +0.2% MoM / +3.7% YoY',detail:'コア +0.2% MoM / +3.3% YoY',date:'2026-07 / 公表 2026-08-26',note:'総合とコア、前月比と前年比を分離。',links:[['https://www.bea.gov/news/2026/personal-income-and-outlays-july-2026','BEA']]},
+           {title:'雇用・失業率',status:'接続済み',value:'+162,000 payrolls',detail:'失業率 4.1%',date:'2026-08 / 公表 2026-09-04',note:'雇用者数と失業率は別調査に基づくため、同一指標として混同しません。',links:[['https://www.bls.gov/news.release/empsit.htm','BLS Employment Situation']]},
+           {title:'VIX / 変動性',status:'接続済み・遅延',value:'15.84',detail:'前日比 -11.21% / -2.00',date:'Cboe表示 2026-09-11 20:15 ET',note:'Cboeページの遅延スナップショット。終値・時刻の扱いは投資判断前に再確認。',links:[['https://www.cboe.com/tradable-products/vix','Cboe VIX']]},
+           {title:'為替・資源価格',status:'接続済み・発表遅延',value:'USD/JPY 156.11',detail:'WTI $97.26 / bbl',date:'FX 2026-09-04 / WTI 2026-09-09',note:'USD/JPYはFed H.10、WTIはEIAスポット。更新タイミングが異なるため同時点比較ではありません。',links:[['https://www.federalreserve.gov/RELEASES/H10/hist/dat00_ja.htm','Fed H.10 / JPY'],['https://www.eia.gov/dnav/pet/PET_PRI_SPT_S1_D.htm','EIA / WTI']]}
+          ];
+          const macroGrid=el('div','p-three');catalogue.forEach(x=>{const cls=x.status.startsWith('接続済み')?'':'p-warn';const c=card(x.title,badge(x.status,cls),el('div','p-macro-value',x.value),el('p','p-macro-detail',x.detail),el('p','small',x.date),el('p','small',x.note));const links=el('div','source-links');x.links.forEach(([u,l])=>links.append(source(u,l)));c.append(links);macroGrid.append(c);});macro.append(macroGrid);
+          const coverage=card('現在のデータカバレッジ');[['世界指数','14系列 / 3点','二次情報・一次照合待ち'],['株価・ETF','6系列 / 6日','限定スナップショット'],['決算','1社 / 比較3期間','前版からの収録値'],['マクロ','6カテゴリ / 一次情報スナップショット','自動更新は未接続'],['コンセンサス予想','未収録','利用条件・提供元の確認が必要']].forEach(a=>coverage.append(add(el('div','p-coverage-row'),el('strong','',a[0]),el('span','',a[1]),el('small','',a[2]))));macro.append(coverage);
+          const macroBoundary=card('接続状態の意味',el('p','','接続済み = この公開版に一次情報の確認済みスナップショットを収録。リアルタイム/API自動更新を意味しません。'),el('p','small','CPIは最新一次値の再確認が残るため「部分接続」。為替・資源は公表時刻が異なるため同時点比較に使いません。'));macro.append(macroBoundary);
+          """
+          text = text[:start] + new + text[end:]
+          text = text.replace('v0.5.0', 'v0.5.1')
+          script = re.findall(r'<script[^>]*>(.*?)</script>', text, re.S)[0]
+          digest = base64.b64encode(hashlib.sha256(script.encode()).digest()).decode()
+          text = re.sub(r"script-src 'sha256-[^']+'", "script-src 'sha256-" + digest + "'", text, count=1)
+          path.write_text(text, encoding='utf-8')
+          actual = hashlib.sha256(path.read_bytes()).hexdigest()
+          expected = 'a0442af57f2c4e770842801c1b2d5f479276073155b4479ec674eef42a58ac59'
+          if actual != expected:
+              raise SystemExit('Reviewed v0.5.1 HTML hash mismatch')
+          manifest_path = Path('site/manifest.json')
+          manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+          manifest['files']['index.html'] = expected
+          manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          PY
       - name: Validate content and commit identities; build allowlisted artifact
         run: python3 scripts/check_site.py --check-history --build
       - name: Upload reviewed artifact only
@@ -52,7 +91,7 @@ jobs:
         run: |
           case "$SITE_URL" in https://*) ;; *) exit 1 ;; esac
           for attempt in 1 2 3 4 5 6; do
-            if curl --proto '=https' --proto-redir '=https' --fail --silent --show-error --location --max-time 20 "$SITE_URL" -o /tmp/site.html && grep -q 'Economics Research Dashboard' /tmp/site.html; then
+            if curl --proto '=https' --proto-redir '=https' --fail --silent --show-error --location --max-time 20 "$SITE_URL" -o /tmp/site.html && grep -q 'Economics Research Dashboard' /tmp/site.html && grep -q 'v0.5.1' /tmp/site.html; then
               echo "HTTPS site content verified"
               exit 0
             fi
