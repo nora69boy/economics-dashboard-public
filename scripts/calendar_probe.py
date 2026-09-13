@@ -13,9 +13,10 @@ BLS_ICS='https://www.bls.gov/schedule/news_release/bls.ics'
 BLS_CPI='https://www.bls.gov/schedule/news_release/cpi.htm'
 BLS_JOBS='https://www.bls.gov/schedule/news_release/empsit.htm'
 BEA_SCHEDULE='https://www.bea.gov/news/schedule'
+BEA_NEXT_YEAR='https://www.bea.gov/news/schedule/next-year/next-year'
 FED_FOMC='https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm'
 USER_AGENT=os.environ.get('CALENDAR_USER_AGENT','EconomicsResearchDashboard/1.0 (+https://github.com/nora69boy/economics-dashboard-public)')
-SOURCES={'bea':BEA_SCHEDULE,'fed':FED_FOMC}
+SOURCES={'bea':BEA_SCHEDULE,'bea-next-year':BEA_NEXT_YEAR,'fed':FED_FOMC}
 BLS_HTML={'cpi':BLS_CPI,'jobs':BLS_JOBS}
 MONTHS={name:i for i,name in enumerate('January February March April May June July August September October November December'.split(),1)}
 ABBR={'Jan.':1,'Feb.':2,'Mar.':3,'Apr.':4,'May':5,'Jun.':6,'Jul.':7,'Aug.':8,'Sep.':9,'Oct.':10,'Nov.':11,'Dec.':12}
@@ -74,21 +75,27 @@ def parse_bls_ics(raw:bytes)->list[dict]:
 def html_text(raw:bytes)->str:
     p=Text();p.feed(raw.decode('utf-8',errors='strict'));return ' '.join(p.parts)
 
-def parse_bls_release_html(raw:bytes,family:str,source:str,year:int=2026)->list[dict]:
+def parse_bls_release_html(raw:bytes,family:str,source:str,year:int|None=2026)->list[dict]:
     require(family in BLS_HTML,'BLS family');text=html_text(raw);title='Consumer Price Index' if family=='cpi' else 'Employment Situation';require('Schedule of Releases for the '+title in text,'BLS schedule title')
     full='|'.join(MONTHS);abbr='|'.join(re.escape(k) for k in ABBR);pattern=re.compile(r'\b('+full+r')\s+(20\d{2})\s+('+abbr+r')\s+(\d{1,2}),\s+(20\d{2})\s+(\d{1,2}:\d{2})\s*(AM|PM)\b',re.I);out=[]
     for m in pattern.finditer(text):
         release_year=int(m[5])
-        if release_year!=year:continue
+        if year is not None and release_year!=year:continue
         ref_name=m[1].title();ref_year=int(m[2]);release_token=m[3].title();token=next((k for k in ABBR if k.lower()==release_token.lower()),None);require(token is not None,'BLS release month')
         day=f'{release_year}-{ABBR[token]:02d}-{int(m[4]):02d}';clock=datetime.strptime(m[6]+' '+m[7].upper(),'%I:%M %p').strftime('%H:%M');out.append({'family':family,'date':day,'period':f'{ref_year}-{MONTHS[ref_name]:02d}','time_local':clock,'time_jst':eastern_to_jst(day,clock),'source':source})
-    out=sorted({(e['date'],e['period']):e for e in out}.values(),key=lambda e:e['date']);require(len(out)==12,'BLS '+family+' annual schedule incomplete');return out
+    out=sorted({(e['date'],e['period']):e for e in out}.values(),key=lambda e:e['date']);require(bool(out),'BLS '+family+' schedule absent')
+    if year is not None:require(len(out)==12,'BLS '+family+' annual schedule incomplete')
+    return out
 
-def parse_bea(raw:bytes,year:int=2026)->list[dict]:
+def parse_bea(raw:bytes,year:int=2026,source:str=BEA_SCHEDULE,minimum:int=1)->list[dict]:
     text=html_text(raw);pattern=re.compile(r'('+ '|'.join(MONTHS) +r')\s+(\d{1,2})\s+(\d{1,2}:\d{2})\s*(AM|PM).*?Personal Income and Outlays,\s*('+ '|'.join(MONTHS) +r')\s+(20\d{2})',re.I);out=[]
     for m in pattern.finditer(text):
-        release_month=MONTHS[m[1].title()];day=f'{year}-{release_month:02d}-{int(m[2]):02d}';clock=datetime.strptime(m[3]+' '+m[4].upper(),'%I:%M %p').strftime('%H:%M');period=f'{m[6]}-{MONTHS[m[5].title()]:02d}';out.append({'family':'pce','date':day,'period':period,'time_local':clock,'time_jst':eastern_to_jst(day,clock),'source':BEA_SCHEDULE})
-    require(len(out)>=4,'BEA PCE schedule absent');return sorted({(e['date'],e['period']):e for e in out}.values(),key=lambda e:e['date'])
+        release_month=MONTHS[m[1].title()];day=f'{year}-{release_month:02d}-{int(m[2]):02d}';clock=datetime.strptime(m[3]+' '+m[4].upper(),'%I:%M %p').strftime('%H:%M');period=f'{m[6]}-{MONTHS[m[5].title()]:02d}';out.append({'family':'pce','date':day,'period':period,'time_local':clock,'time_jst':eastern_to_jst(day,clock),'source':source})
+    out=sorted({(e['date'],e['period']):e for e in out}.values(),key=lambda e:e['date']);require(len(out)>=minimum,'BEA PCE schedule absent');return out
+
+def complete_monthly_year(events:list[dict],release_year:int)->bool:
+    rows=[e for e in events if e['date'].startswith(str(release_year)+'-')]
+    return len(rows)==12 and len({e['date'] for e in rows})==12 and len({e['period'] for e in rows})==12
 
 def parse_fed(raw:bytes,year:int=2026)->list[dict]:
     text=html_text(raw);marker=f'{year} FOMC Meetings';start=text.find(marker);require(start>=0,'FOMC year absent');tail=text[start+len(marker):];stops=[p for p in (tail.find(f'{year-1} FOMC Meetings'),tail.find(f'{year+1} FOMC Meetings'),tail.find('Note:')) if p>=0]
@@ -117,25 +124,50 @@ def compare(candidate:list[dict])->list[dict]:
 
 def probe_bls(fetcher,year:int=2026):
     advisories=[];errors=[]
-    try:return parse_bls_ics(fetcher(BLS_ICS)),errors,advisories,'ics'
+    try:
+        events=parse_bls_ics(fetcher(BLS_ICS));events=[e for e in events if int(e['date'][:4]) in {year,year+1}]
+        mode='ics_current_plus_next_year' if any(e['date'].startswith(str(year+1)+'-') for e in events) else 'ics'
+        return events,errors,advisories,mode
     except urllib.error.HTTPError as exc:
         if exc.code not in {403,429}:return [],[{'source':'bls-ics','error':'HTTPError','code':exc.code}],advisories,'failed'
         advisories.append({'source':'bls-ics','error':'HTTPError','code':exc.code})
     except (OSError,UnicodeError,ValueError,TypeError) as exc:return [],[{'source':'bls-ics','error':type(exc).__name__,'code':None}],advisories,'failed'
     events=[]
     for family,url in BLS_HTML.items():
-        try:events.extend(parse_bls_release_html(fetcher(url),family,url,year))
+        try:
+            parsed=parse_bls_release_html(fetcher(url),family,url,None)
+            events.extend(e for e in parsed if int(e['date'][:4]) in {year,year+1})
         except urllib.error.HTTPError as exc:errors.append({'source':'bls-'+family+'-html','error':'HTTPError','code':exc.code})
         except (OSError,UnicodeError,ValueError,TypeError) as exc:errors.append({'source':'bls-'+family+'-html','error':type(exc).__name__,'code':None})
-    return sorted(events,key=lambda e:(e['date'],e['family'])),errors,advisories,('html_fallback' if not errors else 'partial_html_fallback')
+    next_year=any(e['date'].startswith(str(year+1)+'-') for e in events)
+    mode=('html_fallback_current_plus_next_year' if next_year and not errors else ('html_fallback' if not errors else 'partial_html_fallback'))
+    return sorted(events,key=lambda e:(e['date'],e['family'])),errors,advisories,mode
+
+def probe_bea(fetcher,year:int=2026):
+    errors=[];advisories=[];events=[];mode='primary'
+    try:events.extend(parse_bea(fetcher(BEA_SCHEDULE),year,BEA_SCHEDULE,1))
+    except urllib.error.HTTPError as exc:return [],[{'source':'bea','error':'HTTPError','code':exc.code}],advisories,'failed'
+    except (OSError,UnicodeError,ValueError,TypeError) as exc:return [],[{'source':'bea','error':type(exc).__name__,'code':None}],advisories,'failed'
+    try:
+        raw=fetcher(BEA_NEXT_YEAR);text=html_text(raw)
+        if f'Year {year+1}' in text:
+            try:future=parse_bea(raw,year+1,BEA_NEXT_YEAR,1)
+            except ValueError:future=[]
+            if complete_monthly_year(future,year+1):
+                events.extend(future);mode='primary_current_plus_next_year'
+            else:
+                advisories.append({'source':'bea-next-year','error':'ScheduleIncomplete','code':None});mode='primary_next_year_incomplete'
+    except urllib.error.HTTPError as exc:
+        if exc.code not in {404}:advisories.append({'source':'bea-next-year','error':'HTTPError','code':exc.code})
+    except (OSError,UnicodeError,ValueError,TypeError) as exc:advisories.append({'source':'bea-next-year','error':type(exc).__name__,'code':None})
+    return sorted(events,key=lambda e:e['date']),errors,advisories,mode
 
 def probe(fetcher=fetch,now:datetime|None=None)->dict:
     now=now or datetime.now(timezone.utc)
     if now.tzinfo is None:now=now.replace(tzinfo=timezone.utc)
-    year=local_year(now);candidate=[];errors=[];advisories=[];source_modes={};bls_events,bls_errors,bls_advisories,bls_mode=probe_bls(fetcher,year);candidate.extend(bls_events);errors.extend(bls_errors);advisories.extend(bls_advisories);source_modes['bls']=bls_mode
-    try:candidate.extend(parse_bea(fetcher(BEA_SCHEDULE),year));source_modes['bea']='primary'
-    except urllib.error.HTTPError as exc:errors.append({'source':'bea','error':'HTTPError','code':exc.code});source_modes['bea']='failed'
-    except (OSError,UnicodeError,ValueError,TypeError) as exc:errors.append({'source':'bea','error':type(exc).__name__,'code':None});source_modes['bea']='failed'
+    year=local_year(now);candidate=[];errors=[];advisories=[];source_modes={}
+    bls_events,bls_errors,bls_advisories,bls_mode=probe_bls(fetcher,year);candidate.extend(bls_events);errors.extend(bls_errors);advisories.extend(bls_advisories);source_modes['bls']=bls_mode
+    bea_events,bea_errors,bea_advisories,bea_mode=probe_bea(fetcher,year);candidate.extend(bea_events);errors.extend(bea_errors);advisories.extend(bea_advisories);source_modes['bea']=bea_mode
     try:
         fed_raw=fetcher(FED_FOMC);candidate.extend(parse_fed(fed_raw,year));fed_text=html_text(fed_raw);source_modes['fed']='primary'
         if f'{year+1} FOMC Meetings' in fed_text:
@@ -156,7 +188,7 @@ def emit(result:dict)->None:
         with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f:f.write('calendar_probe_health='+result['calendar_probe_health']+'\n')
     if os.environ.get('GITHUB_STEP_SUMMARY'):
         with open(os.environ['GITHUB_STEP_SUMMARY'],'a',encoding='utf-8') as f:
-            f.write('## Official economic calendar probe\n\n- Status: '+result['calendar_probe_health']+'\n- Candidate events: '+str(len(result['candidate_events']))+'\n- Differences vs reviewed snapshot: '+str(len(result['changes']))+'\n- BLS mode: '+result['source_modes'].get('bls','unknown')+'\n- Federal Reserve mode: '+result['source_modes'].get('fed','unknown')+'\n- Publication: staged for family completeness gate\n')
+            f.write('## Official economic calendar probe\n\n- Status: '+result['calendar_probe_health']+'\n- Candidate events: '+str(len(result['candidate_events']))+'\n- Differences vs reviewed snapshot: '+str(len(result['changes']))+'\n- BLS mode: '+result['source_modes'].get('bls','unknown')+'\n- BEA mode: '+result['source_modes'].get('bea','unknown')+'\n- Federal Reserve mode: '+result['source_modes'].get('fed','unknown')+'\n- Publication: staged for family completeness gate\n')
             for e in result['advisories']:f.write('- Advisory '+e['source']+': '+e['error']+((' '+str(e['code'])) if e['code'] else '')+'\n')
             for e in result['errors']:f.write('- Error '+e['source']+': '+e['error']+((' '+str(e['code'])) if e['code'] else '')+'\n')
 
