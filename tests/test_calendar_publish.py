@@ -78,6 +78,15 @@ class CalendarPublishTests(unittest.TestCase):
         self.assertEqual(len(future),8)
         self.assertEqual(future[0]['date'],'2027-01-27')
 
+    def test_complete_next_year_pce_from_bea_next_year_source_is_extended(self):
+        candidates=self.current_live_candidates()+monthly_family('pce',2027,probe.BEA_NEXT_YEAR)
+        with tempfile.TemporaryDirectory() as tmp:
+            data,report=publish.build(self.write_state(state(candidates),tmp),NOW)
+        self.assertEqual(report['extended_years'],{'pce':[2027]})
+        future=[e for e in data['events'] if e['family']=='pce' and e['date'].startswith('2027-')]
+        self.assertEqual(len(future),12)
+        self.assertTrue(all(e['source']==publish.CAL_SOURCES['pce'] for e in future))
+
     def test_partial_next_year_fomc_is_not_published(self):
         candidates=self.current_live_candidates()+fomc(2027,['01-27','03-17','04-28','06-09','07-28','09-15','10-27'])
         with tempfile.TemporaryDirectory() as tmp:
