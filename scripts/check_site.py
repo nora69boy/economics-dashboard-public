@@ -11,7 +11,7 @@ PATTERNS={'email':r'(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b','phone':r'(?<
 TERMS=['\u6c0f\u540d','\u4f4f\u6240','\u96fb\u8a71\u756a\u53f7','\u751f\u5e74\u6708\u65e5','\u30de\u30a4\u30ca\u30f3\u30d0\u30fc','\u53e3\u5ea7\u756a\u53f7','\u8a3c\u5238\u53e3\u5ea7','\u4fdd\u6709\u682a\u6570','\u53d6\u5f97\u5358\u4fa1','\u8cb7\u4ed8\u4f59\u529b','\u53e3\u5ea7\u6b8b\u9ad8','\u8cc7\u7523\u7dcf\u984d','\u542b\u307f\u76ca','\u542b\u307f\u640d','\u58f2\u8cb7\u5c65\u6b74','home address','date of birth','account number','cost basis','account balance','trading history']
 NETWORK=re.compile(r'(?i)\b(?:fetch\s*\(|XMLHttpRequest\b|WebSocket\b|sendBeacon\b|EventSource\b|Worker\b|import\s*\(|eval\s*\(|Function\s*\(|location\b|localStorage\b|sessionStorage\b|indexedDB\b|cookie\b|FileReader\b|RTCPeerConnection\b)|window\s*\.\s*open')
 PAYLOAD={'index.html','data/current-state.json','data/market.json','reports/2026-09-11-carry-forward.md'}
-REPO={'README.md','.gitignore','.github/workflows/pages.yml','scripts/check_site.py','scripts/source_policy.json','scripts/build_dashboard.py','scripts/market_refresh_guard.py','templates/base.html','templates/charts.js','templates/charts.css','tests/test_site.py','tests/test_market_refresh_guard.py','docs/market-data-auto-refresh.md'}
+REPO={'README.md','.gitignore','.github/workflows/pages.yml','scripts/check_site.py','scripts/source_policy.json','scripts/build_dashboard.py','templates/base.html','templates/charts.js','templates/charts.css','tests/test_site.py'}
 def require(ok,label):
  if not ok:raise ValueError(label)
 def fields(d,names):require(isinstance(d,dict) and set(d)==set(names.split()),'fields')
