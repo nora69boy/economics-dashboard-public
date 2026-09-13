@@ -74,19 +74,51 @@ def normalize_candidate(event: dict) -> dict:
     }
 
 
-def complete_family(reviewed: list[dict], candidates: list[dict], family: str, cutoff: str) -> tuple[bool, list[dict]]:
-    old_future = [e for e in reviewed if e['family'] == family and e['date'] >= cutoff]
-    if not old_future:
-        return False, []
+def annual_complete(events: list[dict], family: str, release_year: int) -> bool:
+    year_events = [e for e in events if e['date'].startswith(str(release_year) + '-')]
+    if family == 'fomc':
+        return len(year_events) == 8 and len({e['date'] for e in year_events}) == 8
+    if family in {'cpi', 'jobs'}:
+        expected = {f'{release_year - 1}-12'} | {f'{release_year}-{month:02d}' for month in range(1, 12)}
+        observed = [e['period'] for e in year_events]
+        return len(observed) == 12 and len(set(observed)) == 12 and set(observed) == expected
+    if family == 'pce':
+        observed = [e['period'] for e in year_events]
+        return len(observed) == 12 and len(set(observed)) == 12
+    return False
+
+
+def complete_family(reviewed: list[dict], candidates: list[dict], family: str, cutoff: str) -> tuple[bool, list[dict], list[int]]:
     raw = [normalize_candidate(e) for e in candidates if e.get('family') == family]
-    new_future = [e for e in raw if e['date'] >= cutoff]
-    if family in PERIOD_FAMILIES:
-        expected = [e['period'] for e in old_future]
-        observed = [e['period'] for e in new_future]
-        complete = len(observed) == len(set(observed)) and set(observed) == set(expected)
+    future = sorted([e for e in raw if e['date'] >= cutoff], key=lambda e: (e['date'], e['id']))
+    old_future = [e for e in reviewed if e['family'] == family and e['date'] >= cutoff]
+    cutoff_year = int(cutoff[:4])
+
+    if old_future:
+        if family in PERIOD_FAMILIES:
+            expected = [e['period'] for e in old_future]
+            observed = [e['period'] for e in future if e['period'] in set(expected)]
+            base_complete = len(observed) == len(set(observed)) and set(observed) == set(expected)
+        else:
+            old_year = {e['date'][:4] for e in old_future}
+            base = [e for e in future if e['date'][:4] in old_year]
+            base_complete = len(base) == len(old_future) and len({e['date'] for e in base}) == len(base)
     else:
-        complete = len(new_future) == len(old_future) and len({e['date'] for e in new_future}) == len(new_future)
-    return complete, sorted(new_future, key=lambda e: (e['date'], e['id']))
+        base_complete = annual_complete(future, family, cutoff_year)
+
+    if not base_complete:
+        return False, [], []
+
+    reviewed_max_year = max((int(e['date'][:4]) for e in reviewed if e['family'] == family), default=cutoff_year - 1)
+    extension_years = []
+    for year in sorted({int(e['date'][:4]) for e in future if int(e['date'][:4]) > reviewed_max_year}):
+        if annual_complete(future, family, year):
+            extension_years.append(year)
+
+    allowed_years = {int(e['date'][:4]) for e in old_future} if old_future else {cutoff_year}
+    allowed_years.update(extension_years)
+    accepted = [e for e in future if int(e['date'][:4]) in allowed_years]
+    return True, accepted, extension_years
 
 
 def build(state_path: Path = DEFAULT_STATE, now: datetime | None = None) -> tuple[dict, dict]:
@@ -97,6 +129,7 @@ def build(state_path: Path = DEFAULT_STATE, now: datetime | None = None) -> tupl
         'live_families': [],
         'retained_families': list(FAMILIES),
         'cutoff_jst': None,
+        'extended_years': {},
     }
     if state is None:
         return reviewed, report
@@ -106,12 +139,15 @@ def build(state_path: Path = DEFAULT_STATE, now: datetime | None = None) -> tupl
     final_events = []
     live = []
     retained = []
+    extended = {}
     for family in FAMILIES:
-        complete, future = complete_family(reviewed['events'], state['candidate_events'], family, cutoff)
+        complete, future, extension_years = complete_family(reviewed['events'], state['candidate_events'], family, cutoff)
         if complete:
             final_events.extend(e for e in reviewed['events'] if e['family'] == family and e['date'] < cutoff)
             final_events.extend(future)
             live.append(family)
+            if extension_years:
+                extended[family] = extension_years
         else:
             final_events.extend(e for e in reviewed['events'] if e['family'] == family)
             retained.append(family)
@@ -127,5 +163,6 @@ def build(state_path: Path = DEFAULT_STATE, now: datetime | None = None) -> tupl
         'live_families': live,
         'retained_families': retained,
         'cutoff_jst': cutoff,
+        'extended_years': extended,
     }
     return data, report
