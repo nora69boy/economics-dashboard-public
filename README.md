@@ -1,27 +1,23 @@
-# Economics Research Dashboard v0.3.0
+# Economics Research Dashboard v0.4.0
 
-Public-market research only: seven tabs, five research classifications, thirteen topics and eight official calendar events. This release does not resume scheduled tasks or ingest full scheduled reports. No live market data or individual records are included.
+Nine tabs: world equity indices, individual stocks/ETF and financial charts, plus the existing seven research views. Fourteen world indices are classified by region. Five large technology stocks and SPY are separate from the indices. DAX performance is excluded from price-only relative rankings.
 
-## Publication boundary
+## Data scope
 
-Public commits are visible BEFORE CI runs. Review and scan in private staging before pushing. Never import private history, individual financial information or credentials.
+World indices contain only September 8-10, 2026 (three observations). Stocks and SPY contain six trading dates from September 2-10. All prices are secondary reference snapshots, NOT current quotes or independently confirmed official index closes. Provider-derived series may differ from the administrator's final closes. Sources, dates, currencies and time zones are explicit. NVIDIA financials are three selected GAAP comparison periods from its official Q2 FY27 announcement, not a consecutive quarterly time series. No missing dates are fabricated, and RSI14, long-term averages, annualized forecasts and live updates are not supplied.
 
-- The existing deployment workflow and its permissions are unchanged.
-- Only the three hash-allowlisted site files and a generated .nojekyll are deployed.
-- The inline tab and filter program is CSP hash-approved; background connections and form submission remain disabled.
-- Source navigation permits only three exact official calendar URLs with no-referrer and noreferrer attributes. No external assets, analytics, input forms or storage are used.
-- The gate preserves file, history, credential and active-content checks. It adds duplicate-attribute and duplicate-ID rejection, strict JSON fields and named-time-zone checks.
-- All public commit identities must use GitHub noreply addresses.
+## Features
 
-## Verification
+Region and index selection, points or base-100 charts, relative comparison, performance cards, candlesticks, closing-price lines, volume, five-observation averages, in-window closing-price drawdown, and financial comparisons. Static source tables are available when JavaScript is disabled. These calculations are not trading recommendations.
 
-Run `python3 -m unittest discover -s tests -v` and `python3 scripts/check_site.py --check-history --build`.
-Content-only validation in private staging omits --check-history. Browser verification and the separately maintained private monthly audit must use seven panels and the event-card/topic-card selectors for this release.
+## Build and privacy
 
-The gate is a secondary check, not proof of anonymity or absence of vulnerabilities. Review freely written text before publication. Hosting connection metadata and public account identifiers remain visible to the hosting provider.
+Public commits are visible before CI. Review all code and data privately BEFORE pushing. Never import personal data, private histories, credentials or account-linked records. The browser makes no background network requests, uses no storage, forms, analytics or external assets. Only explicitly reviewed source links can be followed by the user, with no-referrer.
 
-## Data status
+`templates/base.html` preserves the reviewed research shell. `scripts/build_dashboard.py` combines it with `templates/charts.js`, `templates/charts.css` and local market JSON. It generates `site/index.html` and never updates approval hashes or accesses the network. The generated HTML is not tracked. Tests build it on a fresh checkout, then verify the expected manifest, data schema, security rules and calculations. The scanner also checks embedded data consistency, exact file sets and public noreply commit identities.
 
-Calendar dates were checked against FRB, Bank of Japan and BLS official pages on 2026-09-13. Publication times not verified remain null. Forecasts and results are not invented. The old 2026-09-11 report is retained as a dated archive, not relabeled as a fresh report.
+Run `python3 scripts/build_dashboard.py`, `python3 -m unittest discover -s tests -v`, and `python3 scripts/check_site.py --check-history --build`. The existing Pages workflow and permissions are unchanged. Only the four reviewed payload files are deployed, never the source repository root. A separate private monthly audit must approve each release hash and run compatible browser tests; detailed results remain private.
 
-No paid service, subscription upgrade, private-to-public sync or new schedule is introduced by this release.
+## Limits
+
+No market schedule is resumed. No automatic report ingestion, account connection, paid plan, custom domain or ongoing licensed data feed is introduced. Data are limited attributed excerpts for research commentary; this is not a grant of bulk redistribution rights. Primary data reconciliation, long histories, ongoing data rights, actual iPhone/Safari testing and account security remain separate requirements. Hosting still processes connection metadata. Passing automated checks does not prove zero vulnerabilities.
