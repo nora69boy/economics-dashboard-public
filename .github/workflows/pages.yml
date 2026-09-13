@@ -57,6 +57,7 @@ jobs:
         run: |
           python3 -m unittest discover -s tests -p test_release.py -v
           python3 -m unittest discover -s tests -p test_rights.py -v
+          python3 -m unittest discover -s tests -p test_calendar_rights.py -v
           python3 -m unittest discover -s tests -p test_market_refresh_guard.py -v
           python3 -m unittest discover -s tests -p test_sec_filings.py -v
           python3 -m unittest discover -s tests -p test_calendar_probe.py -v
@@ -151,4 +152,4 @@ jobs:
           else
             echo 'Official BLS, BEA and Federal Reserve calendar probe completed.'
           fi
-          echo 'Six government histories retrieved successfully. Probe-only SEC and calendar candidates remain unpublished pending explicit rights approval.'
+          echo 'Six government histories retrieved successfully. SEC candidates remain rights-pending; calendar candidates remain unpublished pending separate completeness-protected publication integration.'
