@@ -20,6 +20,7 @@ jobs:
       index_sha: ${{ steps.release.outputs.index_sha }}
       refresh_health: ${{ steps.macro.outputs.refresh_health }}
       sec_probe_health: ${{ steps.sec.outputs.sec_probe_health }}
+      calendar_probe_health: ${{ steps.calendar.outputs.calendar_probe_health }}
     steps:
       - name: Checkout public sources only
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
@@ -33,10 +34,16 @@ jobs:
         run: python3 scripts/market_refresh_guard.py
       - name: Test SEC filings probe
         run: python3 -m unittest discover -s tests -p test_sec_filings.py -v
+      - name: Test official calendar probe
+        run: python3 -m unittest discover -s tests -p test_calendar_probe.py -v
       - name: Probe official SEC filings for tracked US companies
         id: sec
         if: github.event_name != 'pull_request'
         run: python3 scripts/sec_filings.py --probe
+      - name: Probe BLS BEA and FOMC official calendars
+        id: calendar
+        if: github.event_name != 'pull_request'
+        run: python3 scripts/calendar_probe.py --probe
       - name: Read published public fixture for pull requests
         if: github.event_name == 'pull_request'
         run: python3 scripts/macro_fetch.py --snapshot-only
@@ -52,6 +59,7 @@ jobs:
           python3 -m unittest discover -s tests -p test_rights.py -v
           python3 -m unittest discover -s tests -p test_market_refresh_guard.py -v
           python3 -m unittest discover -s tests -p test_sec_filings.py -v
+          python3 -m unittest discover -s tests -p test_calendar_probe.py -v
           node --check templates/macro.js
           node scripts/browser_release.mjs site/index.html
       - name: Validate allowlisted publication
@@ -117,6 +125,7 @@ jobs:
         env:
           REFRESH_HEALTH: ${{ needs.validate.outputs.refresh_health }}
           SEC_PROBE_HEALTH: ${{ needs.validate.outputs.sec_probe_health }}
+          CALENDAR_PROBE_HEALTH: ${{ needs.validate.outputs.calendar_probe_health }}
         run: |
           if [ "$REFRESH_HEALTH" != "fresh" ]; then
             echo '::error::One or more macro sources failed. Validated retained data was published; inspect the refresh summary.'
@@ -131,4 +140,13 @@ jobs:
           else
             echo 'SEC filing probe retrieved all five tracked companies.'
           fi
-          echo 'Six government histories retrieved successfully. SEC filing data remains unpublished pending explicit rights approval.'
+          if [ "$CALENDAR_PROBE_HEALTH" = "degraded" ]; then
+            echo '::error::Official calendar probe partially failed. Reviewed calendar snapshot remains published; inspect the probe summary.'
+            exit 1
+          fi
+          if [ "$CALENDAR_PROBE_HEALTH" = "source_access_blocked" ]; then
+            echo '::warning::Official calendar sources blocked/rate-limited the GitHub-hosted runner. Reviewed calendar snapshot remains published.'
+          else
+            echo 'Official BLS, BEA and Federal Reserve calendar probe completed.'
+          fi
+          echo 'Six government histories retrieved successfully. Probe-only SEC and calendar candidates remain unpublished pending explicit rights approval.'
