@@ -5,18 +5,20 @@ on:
   pull_request:
   workflow_dispatch:
   schedule:
-    - cron: '17 22 * * 1-5'
+    # UTC 04/10/16/22 = JST 13/19/01/07, every day.
+    - cron: '17 4,10,16,22 * * *'
 permissions:
   contents: read
 concurrency:
   group: pages-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   validate:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     outputs:
       index_sha: ${{ steps.release.outputs.index_sha }}
+      refresh_health: ${{ steps.macro.outputs.refresh_health }}
     steps:
       - name: Checkout public sources only
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
@@ -25,7 +27,12 @@ jobs:
           persist-credentials: false
       - name: Isolated legacy regression tests
         run: python3 scripts/run_legacy_tests.py
+      - name: Read published public fixture for pull requests
+        if: github.event_name == 'pull_request'
+        run: python3 scripts/macro_fetch.py --snapshot-only
       - name: Retrieve six public government histories
+        id: macro
+        if: github.event_name != 'pull_request'
         run: python3 scripts/macro_fetch.py
       - name: Build actual v0.6 release
         run: python3 scripts/build_release.py
@@ -88,3 +95,18 @@ jobs:
             sleep 10
           done
           exit 1
+  refresh-health:
+    if: always() && github.event_name != 'pull_request' && needs.validate.result == 'success' && needs.deploy.result == 'success'
+    needs: [validate, deploy]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Fail visibly after safe retained data has been published
+        env:
+          REFRESH_HEALTH: ${{ needs.validate.outputs.refresh_health }}
+        run: |
+          if [ "$REFRESH_HEALTH" != "fresh" ]; then
+            echo '::error::One or more macro sources failed. Validated retained data was published; inspect the refresh summary.'
+            exit 1
+          fi
+          echo 'Six government histories retrieved successfully. This is not a real-time market feed.'

@@ -1,6 +1,6 @@
 """Fetch only allowlisted government series; failed sources retain validated public data."""
 from __future__ import annotations
-import argparse,copy,hashlib,io,json,sys,urllib.request,urllib.parse
+import argparse,copy,hashlib,io,json,os,sys,time,urllib.request,urllib.parse,urllib.error
 from datetime import datetime,timezone,date
 from pathlib import Path
 from macro_core import *
@@ -11,22 +11,103 @@ HOSTS={'home.treasury.gov','api.bls.gov','apps.bea.gov','www.federalreserve.gov'
 class Redirect(urllib.request.HTTPRedirectHandler):
  def redirect_request(self,req,fp,code,msg,headers,newurl):
   p=urllib.parse.urlsplit(newurl);require(p.scheme=='https' and p.hostname==urllib.parse.urlsplit(req.full_url).hostname,'Unexpected redirect');return super().redirect_request(req,fp,code,msg,headers,newurl)
-def download(url:str,body:dict|None=None)->bytes:
- p=urllib.parse.urlsplit(url);require(url in ENDPOINTS and p.scheme=='https' and p.hostname in HOSTS and not p.username and not p.password,'Endpoint')
- headers={'User-Agent':'EconomicsResearchDashboard/0.6 (public statistical research)'}
- if body is not None:headers['Content-Type']='application/json'
- req=urllib.request.Request(url,data=json.dumps(body).encode() if body else None,headers=headers);cap=120000000 if url==BEA else 4000000
- with urllib.request.build_opener(Redirect()).open(req,timeout=45) as r:
-  value=r.read(cap+1);require(len(value)<=cap,'Size limit');return value
+def download(url: str, body: dict | None = None) -> bytes:
+    """Retry one transient GET failure; never retry quota-limited BLS POSTs."""
+    p = urllib.parse.urlsplit(url)
+    require(url in ENDPOINTS and p.scheme == 'https' and p.hostname in HOSTS
+            and not p.username and not p.password, 'Endpoint')
+    headers = {'User-Agent': 'EconomicsResearchDashboard/0.6 (public statistical research)'}
+    if body is not None:
+        headers['Content-Type'] = 'application/json'
+    req = urllib.request.Request(url, data=json.dumps(body).encode() if body is not None else None,
+                                 headers=headers)
+    cap = 120000000 if url == BEA else 4000000
+    attempts = 1 if body is not None else 2
+    opener = urllib.request.build_opener(Redirect())
+    for attempt in range(attempts):
+        try:
+            with opener.open(req, timeout=30) as response:
+                value = response.read(cap + 1)
+                require(len(value) <= cap, 'Size limit')
+                return value
+        except urllib.error.HTTPError as exc:
+            # A rate limit or denial must not be amplified by automatic retries.
+            if exc.code not in {500, 502, 503, 504} or attempt + 1 == attempts:
+                raise
+        except (urllib.error.URLError, TimeoutError):
+            if attempt + 1 == attempts:
+                raise
+        time.sleep(1)
+    raise ValueError('Download failed')
+
+
+def ensure_continuity(candidate: dict, previous: dict | None) -> None:
+    """Do not promote a truncated response to a newly fetched valid history."""
+    if not previous or not previous['observations']:
+        return
+    def preserved(before, after):
+        require({row[0] for row in before} <= {row[0] for row in after},
+                'History coverage regression')
+    preserved(previous['observations'], candidate['observations'])
+    for ident, rows in previous['auxiliary'].items():
+        require(ident in candidate['auxiliary'], 'Auxiliary coverage regression')
+        preserved(rows, candidate['auxiliary'][ident])
+
+
+def write_snapshot(data: dict) -> None:
+    """Replace the local output atomically, only after full validation."""
+    validate(data)
+    require(all(s['observations'] for s in data['series'] if s['id'] != 'vix'),
+            'Initial complete government history required')
+    dest = ROOT / 'site/data/macro.json'
+    temporary = dest.with_suffix('.json.tmp')
+    try:
+        temporary.write_text(json.dumps(data, separators=(',', ':'), allow_nan=False) + '\n', encoding='utf-8')
+        temporary.replace(dest)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def emit_status(data: dict, mode: str = 'refresh') -> None:
+    """CI diagnostics contain fixed identities and dates, never provider error bodies."""
+    validate(data)
+    rows = [{k: s[k] for k in ['id', 'status', 'fetched_at']} |
+            {'points': len(s['observations']),
+             'latest_observation': s['observations'][-1][0] if s['observations'] else None}
+            for s in data['series']]
+    affected = [s for s in rows if s['id'] != 'vix' and s['status'] != 'available']
+    health = 'fixture' if mode == 'fixture' else ('degraded' if affected else 'fresh')
+    print(json.dumps({'mode': mode, 'refresh_health': health, 'series': rows}))
+    if mode != 'fixture':
+        for row in affected:
+            print('::warning::Macro source ' + row['id'] + ': previous validated data retained; retrieval did not succeed.')
+    if os.environ.get('GITHUB_OUTPUT'):
+        with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as handle:
+            handle.write('refresh_health=' + health + '\n')
+    if os.environ.get('GITHUB_STEP_SUMMARY'):
+        lines = ['## Macro refresh: ' + health, '',
+                 'Mode: ' + mode + '. Source retrieval success is not proof of a new observation.',
+                 'Attempt timestamp (UTC): ' + data['attempted_at'], '',
+                 '| Series | Retrieval status | Last successful retrieval (UTC) | Last observation | Points |',
+                 '|---|---|---|---|---|']
+        for row in rows:
+            lines.append('| ' + ' | '.join(str(row[key] if row[key] is not None else '--')
+                         for key in ['id', 'status', 'fetched_at', 'latest_observation', 'points']) + ' |')
+        lines += ['', 'Stocks, indices, news, calendar review and VIX are not refreshed by this job.', '']
+        with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as handle:
+            handle.write('\n'.join(lines))
 
 def main():
- ap=argparse.ArgumentParser();ap.add_argument('--raw-dir',type=Path);ap.add_argument('--previous',type=Path);a=ap.parse_args()
+ ap=argparse.ArgumentParser();ap.add_argument('--raw-dir',type=Path);ap.add_argument('--previous',type=Path);ap.add_argument('--snapshot-only',action='store_true');a=ap.parse_args()
+ require(not (a.snapshot_only and a.raw_dir),'Fixture mode cannot read provider captures')
  now=datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ');previous=None
  try:
   if a.previous:previous=json.loads(a.previous.read_text())
   elif not a.raw_dir:previous=json.loads(download(PUBLIC))
   if previous is not None:validate(previous)
  except Exception:previous=None
+ if a.snapshot_only:
+  require(previous is not None,'Validated published fixture required');write_snapshot(previous);emit_status(previous,'fixture');return
  old={s['id']:s for s in previous['series']} if previous else {}
  result={'schema':1,'classification':'public-official-macro','attempted_at':now,'series':[],'revisions':previous['revisions'][:] if previous else []}
  def get(name,url,body=None):return (a.raw_dir/(name+'.raw')).read_bytes() if a.raw_dir else download(url,body)
@@ -64,6 +145,7 @@ def main():
   s=collected[ident]
   try:
    trial={'schema':1,'classification':result['classification'],'attempted_at':now,'series':[s if i==ident else {'id':i,'status':'rights_pending' if i=='vix' else 'unavailable','fetched_at':None,'source_sha256':None,'observations':[],'auxiliary':{}} for i in META],'revisions':[]};validate(trial)
+   if s['status']=='available':ensure_continuity(s,old.get(ident))
   except Exception:
    if ident!='vix':s=failed(ident);collected[ident]=s
   if s['status']=='available' and ident in old:
@@ -72,5 +154,5 @@ def main():
     if d in before and before[d]!=v:result['revisions'].append({'series':ident,'date':d,'old':before[d],'new':v,'detected_at':now})
   result['series'].append(s)
  result['revisions']=result['revisions'][-50:];validate(result);require(all(s['observations'] for s in result['series'] if s['id']!='vix'),'Initial complete government history required')
- dest=ROOT/'site/data/macro.json';dest.write_text(json.dumps(result,separators=(',',':'),allow_nan=False)+'\n',encoding='utf-8');print(json.dumps({'series':[{k:s[k] for k in ['id','status','fetched_at']}|{'points':len(s['observations'])} for s in result['series']]}))
+ write_snapshot(result);emit_status(result)
 if __name__=='__main__':main()
