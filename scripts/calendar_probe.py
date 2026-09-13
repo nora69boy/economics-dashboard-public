@@ -108,13 +108,9 @@ def complete_monthly_year(events:list[dict],release_year:int)->bool:
 def parse_fed(raw:bytes,year:int=2026)->list[dict]:
     text=html_text(raw);marker=f'{year} FOMC Meetings';start=text.find(marker);require(start>=0,'FOMC year absent');tail=text[start+len(marker):];stops=[p for p in (tail.find(f'{year-1} FOMC Meetings'),tail.find(f'{year+1} FOMC Meetings'),tail.find('Note:')) if p>=0]
     if stops:tail=tail[:min(stops)]
-    positions=[]
-    for name in MONTHS:
-        for m in re.finditer(r'\b'+name+r'\b',tail):positions.append((m.start(),name))
-    positions.sort();out=[]
-    for i,(pos,name) in enumerate(positions):
-        end=positions[i+1][0] if i+1<len(positions) else len(tail);chunk=tail[pos+len(name):end];m=re.search(r'\b(\d{1,2})\s*[-–]\s*(\d{1,2})\b',chunk)
-        if m:out.append({'family':'fomc','date':f'{year}-{MONTHS[name]:02d}-{int(m[2]):02d}','period':None,'time_local':None,'time_jst':None,'source':FED_FOMC})
+    months='|'.join(MONTHS);pattern=re.compile(r'\b('+months+r')\s+(\d{1,2})\s*[-–]\s*(?:('+months+r')\s+)?(\d{1,2})\b',re.I);out=[]
+    for m in pattern.finditer(tail):
+        end_month=(m[3] or m[1]).title();out.append({'family':'fomc','date':f'{year}-{MONTHS[end_month]:02d}-{int(m[4]):02d}','period':None,'time_local':None,'time_jst':None,'source':FED_FOMC})
     require(len(out)>=8,'FOMC schedule incomplete');return sorted({e['date']:e for e in out}.values(),key=lambda e:e['date'])
 
 def fetch(url:str,timeout:float=25.0)->bytes:
