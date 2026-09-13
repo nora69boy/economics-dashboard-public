@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "approved_at": "2026-09-14",
-  "valid_until": "2027-09-14",
-  "review_due_at": "2027-08-14",
+  "approved_at": "2026-09-13",
+  "valid_until": "2027-09-13",
+  "review_due_at": "2027-08-13",
   "datasets": [
     {
       "id": "calendar-cpi",
