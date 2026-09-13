@@ -42,10 +42,6 @@ jobs:
         id: sec
         if: github.event_name != 'pull_request'
         run: python3 scripts/sec_filings.py --probe
-      - name: Probe BLS BEA and FOMC official calendars
-        id: calendar
-        if: github.event_name != 'pull_request'
-        run: python3 scripts/calendar_probe.py --probe
       - name: Read published public fixture for pull requests
         if: github.event_name == 'pull_request'
         run: python3 scripts/macro_fetch.py --snapshot-only
@@ -53,12 +49,19 @@ jobs:
         id: macro
         if: github.event_name != 'pull_request'
         run: python3 scripts/macro_fetch.py
+      - name: Build reviewed calendar rights fixture
+        run: python3 scripts/build_release.py
+      - name: Test base publication rights migration
+        run: python3 -m unittest discover -s tests -p test_rights.py -v
+      - name: Probe BLS BEA and FOMC official calendars
+        id: calendar
+        if: github.event_name != 'pull_request'
+        run: python3 scripts/calendar_probe.py --probe
       - name: Build actual v0.6 release
         run: python3 scripts/build_release.py
       - name: Test actual release and data boundaries
         run: |
           python3 -m unittest discover -s tests -p test_release.py -v
-          python3 -m unittest discover -s tests -p test_rights.py -v
           python3 -m unittest discover -s tests -p test_calendar_rights.py -v
           python3 -m unittest discover -s tests -p test_calendar_publish.py -v
           python3 -m unittest discover -s tests -p test_market_refresh_guard.py -v
