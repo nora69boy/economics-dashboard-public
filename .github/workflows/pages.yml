@@ -19,6 +19,7 @@ jobs:
     outputs:
       index_sha: ${{ steps.release.outputs.index_sha }}
       refresh_health: ${{ steps.macro.outputs.refresh_health }}
+      sec_probe_health: ${{ steps.sec.outputs.sec_probe_health }}
     steps:
       - name: Checkout public sources only
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
@@ -30,6 +31,12 @@ jobs:
       - name: Check market-data automation rights
         id: market
         run: python3 scripts/market_refresh_guard.py
+      - name: Test SEC filings probe
+        run: python3 -m unittest discover -s tests -p test_sec_filings.py -v
+      - name: Probe official SEC filings for tracked US companies
+        id: sec
+        if: github.event_name != 'pull_request'
+        run: python3 scripts/sec_filings.py --probe
       - name: Read published public fixture for pull requests
         if: github.event_name == 'pull_request'
         run: python3 scripts/macro_fetch.py --snapshot-only
@@ -44,6 +51,7 @@ jobs:
           python3 -m unittest discover -s tests -p test_release.py -v
           python3 -m unittest discover -s tests -p test_rights.py -v
           python3 -m unittest discover -s tests -p test_market_refresh_guard.py -v
+          python3 -m unittest discover -s tests -p test_sec_filings.py -v
           node --check templates/macro.js
           node scripts/browser_release.mjs site/index.html
       - name: Validate allowlisted publication
@@ -108,9 +116,14 @@ jobs:
       - name: Fail visibly after safe retained data has been published
         env:
           REFRESH_HEALTH: ${{ needs.validate.outputs.refresh_health }}
+          SEC_PROBE_HEALTH: ${{ needs.validate.outputs.sec_probe_health }}
         run: |
           if [ "$REFRESH_HEALTH" != "fresh" ]; then
             echo '::error::One or more macro sources failed. Validated retained data was published; inspect the refresh summary.'
             exit 1
           fi
-          echo 'Six government histories retrieved successfully. This is not a real-time market feed.'
+          if [ "$SEC_PROBE_HEALTH" != "fresh" ]; then
+            echo '::error::SEC filings probe was degraded. No SEC filing data was published; inspect the probe summary.'
+            exit 1
+          fi
+          echo 'Six government histories and five SEC company filing feeds retrieved successfully. SEC filing data remains unpublished pending explicit rights approval.'
