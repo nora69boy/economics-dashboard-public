@@ -1,19 +1,19 @@
 # Official economic-calendar rights review
 
-Status: **prepared for product-owner review; no approval has been granted by this document.**
+Status: **product-owner approved on 2026-09-14 for the four calendar datasets in this document.** The approval is implemented as a narrow fail-closed overlay in `data-rights/calendar-approvals.json`; it does not approve any market, index, VIX, research, or financial dataset.
 
-Reviewed sources: Bureau of Labor Statistics (BLS), Bureau of Economic Analysis (BEA), and Board of Governors of the Federal Reserve System (Federal Reserve Board). The proposed scope is limited to the four existing calendar datasets already present in the publication-rights registry: `calendar-cpi`, `calendar-jobs`, `calendar-pce`, and `calendar-fomc`.
+Reviewed sources: Bureau of Labor Statistics (BLS), Bureau of Economic Analysis (BEA), and Board of Governors of the Federal Reserve System (Federal Reserve Board). The approved scope is limited to `calendar-cpi`, `calendar-jobs`, `calendar-pce`, and `calendar-fomc`.
 
-## Proposed publication scope
+## Approved publication scope
 
-| Dataset | Official schedule source | Published fields | Proposed public targets |
+| Dataset | Official schedule source | Published fields | Public targets |
 | --- | --- | --- | --- |
 | `calendar-cpi` | BLS CPI release schedule | date, family, id, reference period, source, status, local time, JST time | `data/macro-calendar.json`, `index.html` |
 | `calendar-jobs` | BLS Employment Situation release schedule | date, family, id, reference period, source, status, local time, JST time | `data/macro-calendar.json`, `index.html` |
 | `calendar-pce` | BEA news-release schedule | date, family, id, reference period, source, status, local time, JST time | `data/macro-calendar.json`, `index.html` |
 | `calendar-fomc` | Federal Reserve FOMC calendar | date, family, id, source, status; meeting time remains null unless officially published and reviewed | `data/macro-calendar.json`, `index.html` |
 
-No consensus estimates, copyrighted market prices, third-party calendar text, logos, seals, photographs, graphics, or third-party material are included in this proposed scope.
+No consensus estimates, copyrighted market prices, third-party calendar text, logos, seals, photographs, graphics, or third-party material are included.
 
 ## Primary rights evidence
 
@@ -26,7 +26,7 @@ No consensus estimates, copyrighted market prices, third-party calendar text, lo
 - CPI schedule source: <https://www.bls.gov/schedule/news_release/cpi.htm>
 - Employment Situation schedule source: <https://www.bls.gov/schedule/news_release/empsit.htm>
 
-Candidate decision for owner review: publication rights appear compatible with storage, transformation, display, redistribution, and caching of the schedule facts, with BLS source attribution. Automated retrieval is technically attempted but is currently blocked with HTTP 403 from GitHub-hosted runners; this transport limitation is not a publication-rights limitation.
+Rights decision: storage, transformation, display, redistribution, caching and automated retrieval of the schedule facts are approved. The current HTTP 403 from GitHub-hosted runners is a transport limitation, not a rights denial.
 
 ### Bureau of Economic Analysis
 
@@ -35,7 +35,7 @@ Candidate decision for owner review: publication rights appear compatible with s
 - BEA says a citation such as `Source: U.S. Bureau of Economic Analysis` is appreciated.
 - PCE schedule source: <https://www.bea.gov/news/schedule>
 
-Candidate decision for owner review: publication rights appear compatible with storage, transformation, display, redistribution, caching, and automated retrieval of the schedule facts, with BEA source attribution.
+Rights decision: storage, transformation, display, redistribution, caching and automated retrieval of the schedule facts are approved.
 
 ### Federal Reserve Board
 
@@ -45,52 +45,54 @@ Candidate decision for owner review: publication rights appear compatible with s
 - Board seals, logos, and official insignia are protected and are outside this scope.
 - FOMC schedule source: <https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm>
 
-Candidate decision for owner review: publication rights appear compatible with storage, transformation, display, redistribution, caching, and automated retrieval of the FOMC meeting-date facts, with Federal Reserve Board source attribution.
+Rights decision: storage, transformation, display, redistribution, caching and automated retrieval of the FOMC meeting-date facts are approved.
 
-## Proposed registry decision
+## Approved rights decision
 
-The conservative candidate is **CONDITIONAL**, not APPROVED, for all four calendar datasets so that source attribution is enforced by the existing publication-rights gate even where the government source describes attribution as requested/appreciated rather than a condition of reuse.
+The four datasets use **CONDITIONAL** status in the effective publication registry. This intentionally keeps an executable source-attribution condition even where citation is requested or appreciated rather than a legal precondition.
 
-Proposed purpose values after explicit owner approval:
+Approved purpose values:
 
 - `access`: ALLOWED
-- `automated_retrieval`: ALLOWED for BEA/Federal Reserve; BLS legal permission appears compatible, but current GitHub-runner transport is blocked. Record ALLOWED only if the owner treats technical reachability separately from rights.
+- `automated_retrieval`: ALLOWED as a rights decision; BLS transport remains blocked from GitHub-hosted runners
 - `storage`: ALLOWED
 - `transformation`: ALLOWED
 - `display`: ALLOWED
 - `redistribution`: ALLOWED
-- `commercial_use`: confirm separately before setting ALLOWED; leave UNKNOWN if not needed for this public research site.
+- `commercial_use`: UNKNOWN
 - `caching`: ALLOWED
-- `ai_processing`: leave UNKNOWN unless separately needed and reviewed.
+- `ai_processing`: UNKNOWN
 - `retention.mode`: WHILE_VALID
+- `retention.max_age_days`: null
 
-Proposed literal attribution conditions:
+Administrative dates:
 
-- BLS datasets: `Source: U.S. Bureau of Labor Statistics`
-- BEA dataset: `Source: U.S. Bureau of Economic Analysis`
-- FOMC dataset: `Source: Board of Governors of the Federal Reserve System`
+- `reviewed_at`: 2026-09-14
+- `valid_from`: 2026-09-14
+- `review_due_at`: 2027-08-14
+- `valid_until`: 2027-09-14
 
-The registry requires an explicit `valid_until` and `review_due_at` even for public-domain sources. A candidate administrative review cycle is one year, but dates must be selected by the product owner at approval time rather than inferred by engineering.
+The machine-enforced attribution token is the exact official schedule URL already carried by every reviewed event and rendered as the `公式日程` source link. The condition is checked in both `data/macro-calendar.json` and `index.html`. This avoids modifying the reviewed calendar schema solely to duplicate a source-name string while retaining explicit source attribution in the user interface.
+
+Each approved entry receives a reproducible SHA-256 of the canonical reviewed public-domain evidence excerpt stored in `data-rights/calendar-approvals.json`, with `approved_by_role: product_owner` in the effective registry.
 
 ## Technical state
 
-- The reviewed static calendar remains the only published calendar snapshot under the migration exception.
-- Official BEA and Federal Reserve schedule probes run on `main` and currently retrieve successfully.
-- BLS ICS, CPI schedule HTML, and Employment Situation schedule HTML all return HTTP 403 from GitHub-hosted runners. The code retains the reviewed BLS snapshot and does not treat the 403 as permission to use a mirror or proxy.
-- Probe candidates do not mutate `site/data/macro-calendar.json`.
-- The publication-rights gate continues to report the four calendar datasets as UNKNOWN / PENDING_RIGHTS_REVIEW until an explicit owner-approved registry change is merged.
+- The reviewed static calendar remains the published calendar snapshot.
+- Official BEA and Federal Reserve schedule probes run on `main` and retrieve successfully.
+- BLS ICS, CPI schedule HTML, and Employment Situation schedule HTML return HTTP 403 from GitHub-hosted runners. The code retains the reviewed BLS snapshot and does not use mirrors, proxies, or aggressive retrying.
+- Probe candidates still do not mutate `site/data/macro-calendar.json`.
+- Rights approval and live-publication wiring remain separate controls. Approval of the four datasets does not permit a partial BEA/Fed candidate to overwrite the complete reviewed calendar.
+- The migration baseline is unchanged; approval is not manufactured by modifying the baseline.
 
-## Approval checklist
+## Verification requirements
 
-Before changing any registry status from UNKNOWN:
+1. Exactly the four approved calendar datasets become CONDITIONAL in the effective registry; the other 36 registry entries remain unchanged.
+2. Required public uses are ALLOWED; commercial use and AI processing remain UNKNOWN.
+3. Evidence hashes are reproducible from the canonical reviewed excerpts.
+4. Official source URLs exist in both required public targets.
+5. Removing an attribution condition blocks publication.
+6. Rights tests, release tests, browser tests, publication gate, Pages deployment, exact HTTPS verification, and post-deploy health must pass before merge.
+7. Live calendar publication is a separate follow-on change with completeness protection.
 
-1. Product owner confirms the four dataset scopes above.
-2. Product owner confirms whether attribution should be enforced as a CONDITIONAL requirement.
-3. Product owner selects `valid_from`, `valid_until`, and `review_due_at`.
-4. Capture a reproducible public-safe evidence record for each terms page, including the terms URL and SHA-256 required by the registry schema.
-5. Add the selected literal attribution to every required final target and verify it is visible and accurate.
-6. Update the four registry entries in one reviewed PR; do not modify the migration baseline to manufacture approval.
-7. Run rights tests, release tests, browser tests, publication gate, Pages deployment, exact HTTPS verification, and post-deploy health.
-8. Only after the rights PR passes may live official calendar candidates be wired to replace the reviewed static calendar.
-
-This document is an engineering review aid. It is not legal advice and does not itself grant or record publication approval.
+This document records the engineering rights decision and implementation boundary. It is not legal advice.
