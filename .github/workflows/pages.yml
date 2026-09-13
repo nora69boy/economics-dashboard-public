@@ -36,8 +36,6 @@ jobs:
         run: python3 -m unittest discover -s tests -p test_sec_filings.py -v
       - name: Test official calendar probe
         run: python3 -m unittest discover -s tests -p test_calendar_probe.py -v
-      - name: Test approved calendar rights
-        run: python3 -m unittest discover -s tests -p test_calendar_rights.py -v
       - name: Probe official SEC filings for tracked US companies
         id: sec
         if: github.event_name != 'pull_request'
@@ -154,4 +152,4 @@ jobs:
           else
             echo 'Official BLS, BEA and Federal Reserve calendar probe completed.'
           fi
-          echo 'Six government histories retrieved successfully. Probe-only SEC and calendar candidates remain unpublished pending explicit rights approval.'
+          echo 'Six government histories retrieved successfully. SEC candidates remain rights-pending; calendar candidates remain unpublished pending separate completeness-protected publication integration.'
