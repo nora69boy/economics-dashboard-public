@@ -141,11 +141,13 @@ jobs:
             echo 'SEC filing probe retrieved all five tracked companies.'
           fi
           if [ "$CALENDAR_PROBE_HEALTH" = "degraded" ]; then
-            echo '::error::Official calendar probe partially failed. Reviewed calendar snapshot remains published; inspect the probe summary.'
+            echo '::error::Official calendar probe had a parser/data/network failure. Reviewed calendar snapshot remains published; inspect the probe summary.'
             exit 1
           fi
           if [ "$CALENDAR_PROBE_HEALTH" = "source_access_blocked" ]; then
-            echo '::warning::Official calendar sources blocked/rate-limited the GitHub-hosted runner. Reviewed calendar snapshot remains published.'
+            echo '::warning::All official calendar sources blocked/rate-limited the GitHub-hosted runner. Reviewed calendar snapshot remains published.'
+          elif [ "$CALENDAR_PROBE_HEALTH" = "partial_access_blocked" ]; then
+            echo '::warning::One or more official calendar sources blocked/rate-limited the GitHub-hosted runner while other official sources succeeded. Reviewed calendar snapshot remains published.'
           else
             echo 'Official BLS, BEA and Federal Reserve calendar probe completed.'
           fi
