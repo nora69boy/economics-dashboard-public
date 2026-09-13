@@ -15,6 +15,7 @@ BLS_JOBS='https://www.bls.gov/schedule/news_release/empsit.htm'
 BEA_SCHEDULE='https://www.bea.gov/news/schedule'
 BEA_NEXT_YEAR='https://www.bea.gov/news/schedule/next-year/next-year'
 FED_FOMC='https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm'
+HORIZON_YEARS_AHEAD=1
 USER_AGENT=os.environ.get('CALENDAR_USER_AGENT','EconomicsResearchDashboard/1.0 (+https://github.com/nora69boy/economics-dashboard-public)')
 SOURCES={'bea':BEA_SCHEDULE,'bea-next-year':BEA_NEXT_YEAR,'fed':FED_FOMC}
 BLS_HTML={'cpi':BLS_CPI,'jobs':BLS_JOBS}
@@ -38,6 +39,12 @@ def local_year(now:datetime|None=None)->int:
     now=now or datetime.now(timezone.utc)
     if now.tzinfo is None:now=now.replace(tzinfo=timezone.utc)
     return now.astimezone(ZoneInfo('Asia/Tokyo')).year
+
+def horizon_years(year:int)->set[int]:
+    return set(range(year,year+HORIZON_YEARS_AHEAD+1))
+
+def expected_monthly_periods(release_year:int)->set[str]:
+    return {f'{release_year-1}-12'}|{f'{release_year}-{month:02d}' for month in range(1,12)}
 
 def unfold_ics(raw:bytes)->list[str]:
     text=raw.decode('utf-8-sig').replace('\r\n','\n').replace('\r','\n');lines=[]
@@ -95,7 +102,8 @@ def parse_bea(raw:bytes,year:int=2026,source:str=BEA_SCHEDULE,minimum:int=1)->li
 
 def complete_monthly_year(events:list[dict],release_year:int)->bool:
     rows=[e for e in events if e['date'].startswith(str(release_year)+'-')]
-    return len(rows)==12 and len({e['date'] for e in rows})==12 and len({e['period'] for e in rows})==12
+    observed=[e['period'] for e in rows]
+    return len(rows)==12 and len({e['date'] for e in rows})==12 and len(set(observed))==12 and set(observed)==expected_monthly_periods(release_year)
 
 def parse_fed(raw:bytes,year:int=2026)->list[dict]:
     text=html_text(raw);marker=f'{year} FOMC Meetings';start=text.find(marker);require(start>=0,'FOMC year absent');tail=text[start+len(marker):];stops=[p for p in (tail.find(f'{year-1} FOMC Meetings'),tail.find(f'{year+1} FOMC Meetings'),tail.find('Note:')) if p>=0]
@@ -123,9 +131,9 @@ def compare(candidate:list[dict])->list[dict]:
     return changes
 
 def probe_bls(fetcher,year:int=2026):
-    advisories=[];errors=[]
+    advisories=[];errors=[];years=horizon_years(year)
     try:
-        events=parse_bls_ics(fetcher(BLS_ICS));events=[e for e in events if int(e['date'][:4]) in {year,year+1}]
+        events=parse_bls_ics(fetcher(BLS_ICS));events=[e for e in events if int(e['date'][:4]) in years]
         mode='ics_current_plus_next_year' if any(e['date'].startswith(str(year+1)+'-') for e in events) else 'ics'
         return events,errors,advisories,mode
     except urllib.error.HTTPError as exc:
@@ -136,7 +144,7 @@ def probe_bls(fetcher,year:int=2026):
     for family,url in BLS_HTML.items():
         try:
             parsed=parse_bls_release_html(fetcher(url),family,url,None)
-            events.extend(e for e in parsed if int(e['date'][:4]) in {year,year+1})
+            events.extend(e for e in parsed if int(e['date'][:4]) in years)
         except urllib.error.HTTPError as exc:errors.append({'source':'bls-'+family+'-html','error':'HTTPError','code':exc.code})
         except (OSError,UnicodeError,ValueError,TypeError) as exc:errors.append({'source':'bls-'+family+'-html','error':type(exc).__name__,'code':None})
     next_year=any(e['date'].startswith(str(year+1)+'-') for e in events)
