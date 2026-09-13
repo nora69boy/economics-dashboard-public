@@ -58,4 +58,37 @@ for kind,cases in [('research',research_cases),('market',market_cases)]:
    o[parts[-1]]=value
    with self.assertRaises((ValueError,KeyError,TypeError)):getattr(g,kind)(d)
   setattr(DataTests,'test_'+kind+'_'+str(i),f)
+
+class PortalTests(unittest.TestCase):
+ @classmethod
+ def setUpClass(cls):
+  cls.code=(ROOT/'templates/charts.js').read_text().split('/* Independent, read-only market portal.')[1]
+  cls.data=json.loads((ROOT/'site/data/market.json').read_text())
+ def test_no_transport(self):self.assertIsNone(g.NETWORK.search(self.code))
+ def test_no_html_injection(self):
+  for s in ['innerHTML','outerHTML','insertAdjacentHTML','document.write']:self.assertNotIn(s,self.code)
+ def test_search_only(self):
+  self.assertIn("search.type='search'",self.code);self.assertIn("search.id='instrument-search'",self.code);self.assertIn('search.maxLength=40',self.code)
+ def test_no_forms(self):
+  for tag in ["el('form'","el('textarea'","el('iframe'","el('img'"]:self.assertNotIn(tag,self.code)
+ def test_comparison_basis(self):self.assertIn("a.basis!=='total_return'",self.code);self.assertIn('/derived/i',self.code)
+ def test_exact_common_dates(self):
+  dates={r['date'] for r in self.data['indices'][0]['observations']}
+  for a in self.data['assets']+self.data['indices']:self.assertTrue(dates<={r['date'] for r in a['observations']})
+ def test_price_snapshot_unchanged(self):self.assertEqual(self.data['as_of'],'2026-09-10');self.assertFalse(self.data['automatic_updates'])
+ def test_bounded_selection(self):self.assertIn('selections.size<4',self.code);self.assertIn('selections.size>1',self.code)
+ def test_no_private_endpoints(self):
+  for s in ['api.github.com','docs.google.com','mail.google.com']:self.assertNotIn(s,self.code)
+ def test_source_urls_allowlisted(self):
+  urls=re.findall(r"https://[a-zA-Z0-9./_%?=+-]+",self.code)
+  self.assertTrue(set(urls)<=g.URLS)
+ def test_pii_search_not_logged(self):
+  for s in ['console.log','console.error','search.value+', 'JSON.stringify(F)']:self.assertNotIn(s,self.code)
+ def test_no_automatic_actions(self):
+  for s in ['setInterval','navigator.','Notification(','serviceWorker']:self.assertNotIn(s,self.code)
+ def test_version(self):self.assertIn("version:'0.5.0'",self.code)
+ def test_reference_series_not_ranked(self):self.assertIn('D.indices.filter(comparable)',self.code)
+ def test_bounded_dom_search(self):self.assertIn("search.value.slice(0,40)",self.code)
+ def test_legacy_css_no_external_import(self):
+  s=(ROOT/'templates/charts.css').read_text();self.assertNotRegex(s,r'@import|url\s*\(')
 if __name__=='__main__':unittest.main()
