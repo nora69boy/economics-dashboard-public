@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -74,17 +74,17 @@ def normalize_candidate(event: dict) -> dict:
     }
 
 
+def expected_periods(release_year: int) -> set[str]:
+    return {f'{release_year - 1}-12'} | {f'{release_year}-{month:02d}' for month in range(1, 12)}
+
+
 def annual_complete(events: list[dict], family: str, release_year: int) -> bool:
     year_events = [e for e in events if e['date'].startswith(str(release_year) + '-')]
     if family == 'fomc':
         return len(year_events) == 8 and len({e['date'] for e in year_events}) == 8
-    if family in {'cpi', 'jobs'}:
-        expected = {f'{release_year - 1}-12'} | {f'{release_year}-{month:02d}' for month in range(1, 12)}
+    if family in PERIOD_FAMILIES:
         observed = [e['period'] for e in year_events]
-        return len(observed) == 12 and len(set(observed)) == 12 and set(observed) == expected
-    if family == 'pce':
-        observed = [e['period'] for e in year_events]
-        return len(observed) == 12 and len(set(observed)) == 12
+        return len(observed) == 12 and len(set(observed)) == 12 and set(observed) == expected_periods(release_year)
     return False
 
 
@@ -111,7 +111,7 @@ def complete_family(reviewed: list[dict], candidates: list[dict], family: str, c
 
     reviewed_max_year = max((int(e['date'][:4]) for e in reviewed if e['family'] == family), default=cutoff_year - 1)
     extension_years = []
-    for year in sorted({int(e['date'][:4]) for e in future if int(e['date'][:4]) > reviewed_max_year}):
+    for year in sorted({int(e['date'][:4]) for e in future if reviewed_max_year < int(e['date'][:4]) <= cutoff_year + 1}):
         if annual_complete(future, family, year):
             extension_years.append(year)
 
@@ -119,6 +119,36 @@ def complete_family(reviewed: list[dict], candidates: list[dict], family: str, c
     allowed_years.update(extension_years)
     accepted = [e for e in future if int(e['date'][:4]) in allowed_years]
     return True, accepted, extension_years
+
+
+def family_source_blocked(state: dict, family: str) -> bool:
+    names = {
+        'cpi': {'bls-cpi-html'},
+        'jobs': {'bls-jobs-html'},
+        'pce': {'bea'},
+        'fomc': {'fed'},
+    }[family]
+    return any(e.get('source') in names and e.get('code') in {403, 429} for e in state.get('errors', []))
+
+
+def family_year_status(reviewed: list[dict], candidates: list[dict], final_events: list[dict], state: dict, family: str, year: int, cutoff_year: int, live: set[str]) -> str:
+    final_year = [e for e in final_events if e['family'] == family and e['date'].startswith(str(year) + '-')]
+    candidate_year = [normalize_candidate(e) for e in candidates if e.get('family') == family and e.get('date', '').startswith(str(year) + '-')]
+    reviewed_year = [e for e in reviewed if e['family'] == family and e['date'].startswith(str(year) + '-')]
+    if family in live and final_year:
+        if annual_complete(final_year, family, year):
+            return 'live_complete'
+        if year == cutoff_year:
+            return 'live_reviewed_coverage'
+    if candidate_year and not annual_complete(candidate_year, family, year):
+        return 'partial_rejected'
+    if family == 'pce' and year == cutoff_year + 1 and any(e.get('source') == 'bea-next-year' and e.get('error') == 'ScheduleIncomplete' for e in state.get('advisories', [])):
+        return 'partial_rejected'
+    if family_source_blocked(state, family):
+        return 'source_access_blocked'
+    if reviewed_year:
+        return 'retained_reviewed'
+    return 'awaiting_official_schedule'
 
 
 def build(state_path: Path = DEFAULT_STATE, now: datetime | None = None) -> tuple[dict, dict]:
@@ -130,12 +160,14 @@ def build(state_path: Path = DEFAULT_STATE, now: datetime | None = None) -> tupl
         'retained_families': list(FAMILIES),
         'cutoff_jst': None,
         'extended_years': {},
+        'family_year_status': {},
     }
     if state is None:
         return reviewed, report
 
     checked = parse_checked_at(state['checked_at'])
     cutoff = checked.astimezone(ZoneInfo('Asia/Tokyo')).date().isoformat()
+    cutoff_year = int(cutoff[:4])
     final_events = []
     live = []
     retained = []
@@ -152,17 +184,27 @@ def build(state_path: Path = DEFAULT_STATE, now: datetime | None = None) -> tupl
             final_events.extend(e for e in reviewed['events'] if e['family'] == family)
             retained.append(family)
 
+    final_events = sorted(final_events, key=lambda e: (e['date'], e['id']))
+    live_set = set(live)
+    family_status = {
+        family: {
+            str(year): family_year_status(reviewed['events'], state['candidate_events'], final_events, state, family, year, cutoff_year, live_set)
+            for year in (cutoff_year, cutoff_year + 1)
+        }
+        for family in FAMILIES
+    }
     data = {
         'schema': 1,
-        'checked_at': checked.date().isoformat() if live else reviewed['checked_at'],
-        'events': sorted(final_events, key=lambda e: (e['date'], e['id'])),
+        'checked_at': cutoff if live else reviewed['checked_at'],
+        'events': final_events,
     }
-    validate_calendar(data, today=max(checked.date(), datetime.now(timezone.utc).date()))
+    validate_calendar(data, today=date.fromisoformat(cutoff))
     report = {
         'mode': 'family_merge' if live else 'reviewed_static',
         'live_families': live,
         'retained_families': retained,
         'cutoff_jst': cutoff,
         'extended_years': extended,
+        'family_year_status': family_status,
     }
     return data, report
