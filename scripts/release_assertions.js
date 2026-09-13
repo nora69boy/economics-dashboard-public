@@ -1,0 +1,23 @@
+async()=>{
+ const $=id=>document.getElementById(id),wait=()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))),out={tabs:0,periods:0,series:0,events:0,checks:0};
+ const ok=(v,id)=>{out.checks++;if(!v)throw Error(id);};
+ ok(window.EconomicsPortal.version==='0.6.0'&&window.EconomicsMacro.version==='0.6.0','runtime versions');
+ const tabs=[...document.querySelectorAll('.nav [data-tab]')];ok(tabs.length===11,'11 tabs');
+ for(const b of tabs){b.click();await wait();ok([...document.querySelectorAll('.panel')].filter(x=>!x.hidden).length===1&&!$(b.dataset.tab).hidden,'one active panel');ok(document.documentElement.scrollWidth<=innerWidth+1,'horizontal overflow');out.tabs++;}
+ $('tab-screener').click();const search=$('instrument-search');search.value='MSFT';search.dispatchEvent(new Event('input'));ok(document.querySelectorAll('#screen-table tbody tr').length===1,'legacy search');search.value='<img src=x onerror=alert(1)>';search.dispatchEvent(new Event('input'));ok(document.querySelectorAll('img').length===0,'inert search');search.value='';search.dispatchEvent(new Event('input'));
+ $('tab-world').click();await wait();for(const b of document.querySelectorAll('[data-index]')){b.click();await wait();ok($('index-title').textContent.length>0,'legacy index');}
+ $('tab-market').click();await wait();for(const b of document.querySelectorAll('[data-asset]')){b.click();await wait();ok($('stock-title').textContent.includes(b.dataset.asset),'legacy asset');}
+ $('tab-macro').click();await wait();ok(window.EconomicsMacro.seriesCount===7&&window.EconomicsMacro.availableCount===6,'honest data coverage');ok(document.querySelectorAll('[data-macro-card]').length===7,'seven slots');ok($('macro-chart-vix').hidden,'VIX rights boundary');
+ const data=JSON.parse($('macro-data').textContent);ok(data.series.find(s=>s.id==='vix').observations.length===0,'no unlicensed VIX history');ok(data.series.filter(s=>s.observations.length).every(s=>s.observations[0][0]<='2016-01-01'),'ten-year coverage');
+ for(const b of document.querySelectorAll('[data-macro-years]')){b.click();await wait();ok(b.getAttribute('aria-pressed')==='true','period active');ok(!$('macro-chart-ust10').hidden&&$('macro-chart-ust10').width>0,'period renders');out.periods++;}
+ for(const b of document.querySelectorAll('[data-macro-series]')){b.click();await wait();ok(document.querySelectorAll('[data-macro-card]:not([hidden])').length===(b.dataset.macroSeries==='all'?7:1),'series filter');out.series++;}
+ document.querySelector('[data-macro-series="all"]').click();document.querySelector('[data-macro-mode="level"]').click();ok(document.querySelector('[data-macro-card="cpi"] .macro-value').textContent.includes('100'),'index level units');document.querySelector('[data-macro-mode="yoy"]').click();
+ const result=window.EconomicsMacro.yoy([['2024-01-01',100],['2025-01-01',110],['2025-03-01',120]]);ok(result.length===1&&Math.abs(result[0][1]-10)<1e-9,'calendar-month YoY not array offset');
+ document.querySelector('[data-macro-calendar="all"]').click();const events=[...document.querySelectorAll('[data-macro-event]')];ok(events.length===37,'calendar count');
+ for(const b of events){b.click();await wait();ok(window.EconomicsMacro.state().event===b.dataset.macroEvent,'calendar to chart');ok(!$('macro-event-detail').hidden,'event details');out.events++;}
+ document.querySelector('[data-macro-event="cpi-2026-09-11"]').click();await wait();ok($('macro-event-detail').textContent.includes('21:30 JST'),'summer time');document.querySelector('[data-macro-event="cpi-2026-11-10"]').click();await wait();ok($('macro-event-detail').textContent.includes('22:30 JST'),'winter time');
+ ok(document.querySelector('[data-macro-card="vix"] .macro-value').textContent==='\u2014','missing not zero');
+ document.querySelector('[data-macro-years="5"]').click();await wait();const cv=$('macro-chart-ust10');cv.dispatchEvent(new KeyboardEvent('keydown',{key:'Home',bubbles:true}));ok(document.querySelector('[data-macro-card="ust10"] p[aria-live]').textContent.length>5,'keyboard readout');
+ const links=[...document.querySelectorAll('a[href]')];ok(links.every(a=>a.getAttribute('referrerpolicy')==='no-referrer'&&a.rel.includes('noreferrer')),'link privacy');ok(document.querySelectorAll('input').length===1&&search.maxLength===40,'bounded search only');ok(document.querySelectorAll('form,iframe,object,embed').length===0,'no submission or frames');
+ const ids=[...document.querySelectorAll('[id]')].map(n=>n.id);ok(new Set(ids).size===ids.length,'unique IDs');ok(document.documentElement.scrollWidth<=innerWidth+1,'final overflow');return out;
+}

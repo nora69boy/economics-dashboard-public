@@ -6,3 +6,6 @@ node_modules/
 .env.*
 .DS_Store
 site/index.html
+site/data/macro.json
+site/data/macro-calendar.json
+release-review/
