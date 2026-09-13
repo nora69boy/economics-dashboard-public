@@ -4,15 +4,16 @@ from pathlib import Path
 import check_site as gate
 import macro_core as macro
 import publication_rights as rights
+import calendar_rights
 ROOT=Path(__file__).resolve().parents[1]
-EXTRA_FILES={'scripts/calendar_snapshot.py','scripts/run_legacy_tests.py','scripts/macro_core.py','scripts/macro_fetch.py','scripts/build_release.py','scripts/check_release.py','scripts/browser_release.mjs','scripts/release_assertions.js','templates/macro.js','templates/macro.css','tests/test_release.py','docs/data-rights.md','docs/release-v060.md','scripts/publication_rights.py','tests/test_rights.py','data-rights/registry.json','data-rights/migration-baseline.json','data-rights/README.md','scripts/market_refresh_guard.py','tests/test_market_refresh_guard.py','docs/market-data-automation.md','scripts/sec_filings.py','tests/test_sec_filings.py','scripts/calendar_probe.py','tests/test_calendar_probe.py','docs/calendar-data-rights-review.md'}
+EXTRA_FILES={'scripts/calendar_snapshot.py','scripts/run_legacy_tests.py','scripts/macro_core.py','scripts/macro_fetch.py','scripts/build_release.py','scripts/check_release.py','scripts/browser_release.mjs','scripts/release_assertions.js','templates/macro.js','templates/macro.css','tests/test_release.py','docs/data-rights.md','docs/release-v060.md','scripts/publication_rights.py','tests/test_rights.py','data-rights/registry.json','data-rights/migration-baseline.json','data-rights/README.md','scripts/market_refresh_guard.py','tests/test_market_refresh_guard.py','docs/market-data-automation.md','scripts/sec_filings.py','tests/test_sec_filings.py','scripts/calendar_probe.py','tests/test_calendar_probe.py','docs/calendar-data-rights-review.md','scripts/calendar_rights.py','data-rights/calendar-approvals.json','tests/test_calendar_rights.py'}
 def validate(site:Path, rights_reports=None):
  gate.PAYLOAD |= {'data/macro.json','data/macro-calendar.json'};gate.URLS |= macro.URLS;gate.REPO |= EXTRA_FILES
  payload=gate.validate(site);m=gate.loads(payload['data/macro.json']);c=gate.loads(payload['data/macro-calendar.json']);macro.validate(m);macro.validate_calendar(c);s=payload['index.html'].decode()
  for id,name in [('macro-data','data/macro.json'),('macro-calendar-data','data/macro-calendar.json')]:
   match=re.search('<pre id="'+id+'" hidden>(.*?)</pre>',s,re.S);gate.require(match and gate.loads(html.unescape(match[1]))==gate.loads(payload[name]),'Macro embedded mismatch')
  gate.require(s.count("version:'0.6.0'")==2 and 'macro-chart-' in s,'Actual release program');gate.require((ROOT/'templates/macro.js').read_text() in s,'Macro template mismatch')
- report=rights.enforce(payload)
+ report=calendar_rights.enforce(payload)
  if rights_reports is not None:rights_reports.append(report)
  return payload
 
