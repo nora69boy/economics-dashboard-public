@@ -88,6 +88,9 @@ def assess(payload, today=None):
 
 
 def enforce(payload):
+    # Preserve the original fail-closed registry gate first. The calendar overlay
+    # may only reduce four reviewed UNKNOWN warnings; it cannot bypass a base block.
+    rights.enforce(payload)
     report = assess(payload)
     if report['blocked']:
         raise rights.PublicationBlocked(report)
