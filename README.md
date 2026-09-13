@@ -1,23 +1,65 @@
-# Economics Research Dashboard v0.4.0
+# Economics Research Dashboard v0.5.0
 
-Nine tabs: world equity indices, individual stocks/ETF and financial charts, plus the existing seven research views. Fourteen world indices are classified by region. Five large technology stocks and SPY are separate from the indices. DAX performance is excluded from price-only relative rankings.
+An independent, public-market research portal. This release adds a market overview,
+a regional reference heatmap, local instrument search, same-date screening,
+comparison of up to four compatible series, and a macro/data coverage catalogue.
+It is not affiliated with a reference site, and is not a pixel-perfect reproduction.
+The completed research document and reference website were unavailable for exact
+comparison during this release. No original-site text, images or source were copied.
 
-## Data scope
+## Scope and data honesty
 
-World indices contain only September 8-10, 2026 (three observations). Stocks and SPY contain six trading dates from September 2-10. All prices are secondary reference snapshots, NOT current quotes or independently confirmed official index closes. Provider-derived series may differ from the administrator's final closes. Sources, dates, currencies and time zones are explicit. NVIDIA financials are three selected GAAP comparison periods from its official Q2 FY27 announcement, not a consecutive quarterly time series. No missing dates are fabricated, and RSI14, long-term averages, annualized forecasts and live updates are not supplied.
+There are 11 panels with JavaScript enabled. Without JavaScript the nine previous
+static panels and their source tables remain available; the new interactive
+portal controls require JavaScript. No real-time data or new price observations
+were added. The existing secondary snapshot still ends on September 10, 2026:
+14 indices with three observations, five stocks and SPY with six observations.
+The old research JSON version describes its data schema, not the new UI version.
 
-## Features
+All screening calculations use the common September 8-10 window. DAX total-return
+and provider-derived reference series are excluded from comparable rankings and
+multi-series selection. They remain accessible in the existing index explorer.
+Different local closing times and currencies are explicitly not reconciled.
+Historical data, financial results and their dates are inherited, not newly verified.
 
-Region and index selection, points or base-100 charts, relative comparison, performance cards, candlesticks, closing-price lines, volume, five-observation averages, in-window closing-price drawdown, and financial comparisons. Static source tables are available when JavaScript is disabled. These calculations are not trading recommendations.
+The macro catalogue has no numeric observations: unavailable values are shown as
+unconnected, not zero, and official navigation links do not imply an active feed.
+Long histories, quote updates, news ingestion and consensus data are not implemented.
+No stopped schedule was restarted. Market-data publication rights for ongoing use
+remain a separate decision before any continuous or bulk distribution is enabled.
 
-## Build and privacy
+## Privacy and publication
 
-Public commits are visible before CI. Review all code and data privately BEFORE pushing. Never import personal data, private histories, credentials or account-linked records. The browser makes no background network requests, uses no storage, forms, analytics or external assets. Only explicitly reviewed source links can be followed by the user, with no-referrer.
+There is one bounded search box for instrument names and symbols. Filtering happens
+only in page memory, with no form submission, persistence, network request, analytics
+or account connection. Never enter individual financial or identifying records.
+Search text is never interpolated as HTML. All render operations use text nodes.
+All source links are explicit HTTPS URLs with no-referrer and noreferrer/noopener.
+Source navigation is user initiated; it leaves the application when clicked.
 
-`templates/base.html` preserves the reviewed research shell. `scripts/build_dashboard.py` combines it with `templates/charts.js`, `templates/charts.css` and local market JSON. It generates `site/index.html` and never updates approval hashes or accesses the network. The generated HTML is not tracked. Tests build it on a fresh checkout, then verify the expected manifest, data schema, security rules and calculations. The scanner also checks embedded data consistency, exact file sets and public noreply commit identities.
+A public commit is public BEFORE CI. Review and scan privately before writing.
+The content gate, SHA-256 manifest, restricted CSP, no-referrer, fixed file allowlist,
+and official pinned deployment workflow remain in place. No deployment permission
+or paid service was added. A separate private monthly audit must approve this
+release and validate all eleven runtime panels and the new controls.
 
-Run `python3 scripts/build_dashboard.py`, `python3 -m unittest discover -s tests -v`, and `python3 scripts/check_site.py --check-history --build`. The existing Pages workflow and permissions are unchanged. Only the four reviewed payload files are deployed, never the source repository root. A separate private monthly audit must approve each release hash and run compatible browser tests; detailed results remain private.
+## Build and verification
 
-## Limits
+The existing deterministic builder combines reviewed base HTML, local market data,
+and the chart/portal program and stylesheet. It recalculates the program CSP hash
+but never changes the approval manifest. index.html is generated, not tracked.
+Only four reviewed payload files are deployed; templates and test code are not.
 
-No market schedule is resumed. No automatic report ingestion, account connection, paid plan, custom domain or ongoing licensed data feed is introduced. Data are limited attributed excerpts for research commentary; this is not a grant of bulk redistribution rights. Primary data reconciliation, long histories, ongoing data rights, actual iPhone/Safari testing and account security remain separate requirements. Hosting still processes connection metadata. Passing automated checks does not prove zero vulnerabilities.
+Run python3 scripts/build_dashboard.py, then python3 -m unittest discover -s tests -v,
+and python3 scripts/check_site.py --check-history --build. Search, comparison,
+keyboard, no-JavaScript fallback and zero-background-request checks also run in the
+private browser audit. PASS is scoped verification, not proof of zero vulnerabilities.
+
+## Next dependencies
+
+1. Review the completed research report and the reference site's available pages.
+2. Approve a lawful data source and update policy before adding automatic history.
+3. Add tested ingestion with observation timestamps, revisions and corporate actions.
+4. Verify physical Safari, account protections and device notification delivery.
+
+These are dependencies, not scheduled background implementation promises.
