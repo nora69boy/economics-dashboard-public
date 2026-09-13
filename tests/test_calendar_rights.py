@@ -1,7 +1,5 @@
 """Regressions for the explicit four-dataset calendar rights approval."""
-import copy
 import hashlib
-import json
 import sys
 import unittest
 from datetime import date
@@ -12,7 +10,7 @@ sys.path.insert(0,str(ROOT/'scripts'))
 import calendar_rights as cr
 import publication_rights as r
 
-TODAY=date(2026,9,14)
+TODAY=date(2026,9,13)
 
 
 def payload():
@@ -31,9 +29,9 @@ class CalendarRightsTests(unittest.TestCase):
             self.assertEqual(entry['commercial_use'],'UNKNOWN')
             self.assertEqual(entry['ai_processing'],'UNKNOWN')
             self.assertEqual(entry['retention'],{'mode':'WHILE_VALID','max_age_days':None})
-            self.assertEqual(entry['reviewed_at'],'2026-09-14')
-            self.assertEqual(entry['review_due_at'],'2027-08-14')
-            self.assertEqual(entry['valid_until'],'2027-09-14')
+            self.assertEqual(entry['reviewed_at'],'2026-09-13')
+            self.assertEqual(entry['review_due_at'],'2027-08-13')
+            self.assertEqual(entry['valid_until'],'2027-09-13')
             self.assertEqual(entry['evidence'][0]['approved_by_role'],'product_owner')
 
     def test_evidence_hashes_are_reproducible(self):
