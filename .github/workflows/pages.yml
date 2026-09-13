@@ -27,6 +27,9 @@ jobs:
           persist-credentials: false
       - name: Isolated legacy regression tests
         run: python3 scripts/run_legacy_tests.py
+      - name: Check market-data automation rights
+        id: market
+        run: python3 scripts/market_refresh_guard.py
       - name: Read published public fixture for pull requests
         if: github.event_name == 'pull_request'
         run: python3 scripts/macro_fetch.py --snapshot-only
@@ -40,6 +43,7 @@ jobs:
         run: |
           python3 -m unittest discover -s tests -p test_release.py -v
           python3 -m unittest discover -s tests -p test_rights.py -v
+          python3 -m unittest discover -s tests -p test_market_refresh_guard.py -v
           node --check templates/macro.js
           node scripts/browser_release.mjs site/index.html
       - name: Validate allowlisted publication
