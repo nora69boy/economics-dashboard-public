@@ -11,3 +11,9 @@ Still required: Cboe republication approval for VIX; lawful long-history stock/i
 A URL such as https://economics-dashboard-public/ is not a normal registered public HTTPS domain. A free branded pages.dev subdomain or a registered custom domain is a separate hosting/DNS decision. No new hostname has been registered or activated by this release. Hiding a username in the address does not erase the public repository's ownership/history.
 
 Test evidence must be taken from the final release workflow and private audit, not inferred from this document. Scheduled runs can be delayed. No vulnerability scan or source fingerprint proves absence of every vulnerability or factual error.
+
+## Automatic-update hardening follow-up
+
+Implemented in source: six-hour daily provider refresh; PR-only published-fixture mode; non-cancelling production concurrency; one transient GET retry but no automatic BLS POST or rate-limit retry; primary and auxiliary date-coverage regression rejection; validated atomic output; per-source Actions summaries; post-deployment degraded-health failure. Existing no-new-observation behavior and source-failure timestamps are preserved.
+
+Scope deliberately unchanged: no extra data providers, personal data, stock or news ingestion, VIX values, browser network calls, HTML baseline changes or rights approvals. No settings or tests in the publication-rights gate are relaxed. Existing UNKNOWN data rights remain pending review. Actual production status must be checked from the merged workflow and exact HTTPS artifact verification, not inferred from a branch or this note.

@@ -10,7 +10,7 @@ Stock and world-index data remain the prior September 10, 2026 secondary snapsho
 
 ## Updates and calendar
 
-The public workflow fetches only the six fixed government histories at 22:17 UTC Monday-Friday (07:17 JST Tuesday-Saturday), and also on approved releases. Source failure retains the previous validated public observations and their original retrieval timestamp with a retained/error label. Initial publication fails if six valid histories are unavailable. Calendar dates are manually reviewed as of September 13, 2026, not automatically refreshed. The calendar includes 12 CPI dates, 12 employment dates, 8 FOMC final days and 5 PCE dates (August-December). Unknown meeting announcement times are left unknown. API/data delays and scheduler delays remain possible.
+The public workflow fetches only the six fixed government histories every six hours, at 04:17/10:17/16:17/22:17 UTC every day (01:17/07:17/13:17/19:17 JST), and also on approved releases and manual workflow dispatch. Pull requests reuse the previously published validated macro snapshot without polling upstream providers. Source failure retains the previous validated public observations and their original retrieval timestamp with a retained/error label. Initial publication fails if six valid histories are unavailable. Calendar dates are manually reviewed as of September 13, 2026, not automatically refreshed. The calendar includes 12 CPI dates, 12 employment dates, 8 FOMC final days and 5 PCE dates (August-December). Unknown meeting announcement times are left unknown. API/data delays and scheduler delays remain possible.
 
 ## Privacy and publication
 
@@ -30,3 +30,15 @@ The existing CSP, no-referrer links, strict field/path/URL allowlists, finite-nu
 No post-test data patch is applied. Builds from the same validated snapshots are deterministic. The production HTTPS file must equal the generated SHA-256. Browser tests cover 390/768/1440 pixel widths, not physical iPhone/Safari certification. PASS is scoped verification, not proof of zero vulnerabilities or economic-data correctness. The separate private monthly audit must approve each source-code release; daily data refreshes do not mutate source commits.
 
 See docs/data-rights.md and docs/release-v060.md for boundaries and remaining work. No paid service, domain purchase, stopped market-watch task restart or live trading has been added.
+
+## Automatic-update hardening
+
+The updater rejects responses that drop any previously published primary or auxiliary observation date. In that case it retains the prior series and its original retrieval timestamp, rather than replacing a long history with an incomplete response. Revision values for dates still present remain allowed. Removed observations that are intentional agency corrections need a separate review; they are not silently accepted.
+
+Transient GET failures receive at most one retry; BLS POST requests and HTTP 429/403 responses are not retried. Four scheduled runs use eight BLS POST queries per day under the current two-window history configuration, excluding manually triggered runs. The unregistered BLS limit is 25 queries per day: https://www.bls.gov/developers/api_faqs.htm . Do not repeatedly dispatch production runs. Output writes are atomic and revalidated before replacement.
+
+Each production run writes a per-series GitHub Actions summary with retrieval status, successful retrieval time and observation date. A separate refresh-health job runs AFTER a successful deployment and fails if any of the six sources was retained. This preserves the visible error labels and last good data while making the workflow red. Email or other notification delivery still depends on the account's notification settings and has not been verified. An unchanged valid monthly observation is not an error or a newly released statistic.
+
+The existing HTML, CSP, payload allowlist, source endpoints, rights registry and migration baseline remain unchanged. This change does not approve existing UNKNOWN rights records. The existing page displays source retrieval timestamps and retained/error labels in the macro panel; no automatic browser reload or external frontend requests are added. Reopen or reload the page to see the newest successfully deployed artifact. Stocks, indices, news, calendar reviews and VIX remain outside automatic updates.
+
+Scheduler delays, missed jobs and inactivity remain possible. Public GitHub schedules can be disabled after 60 days without repository activity: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule . A monthly manual workflow/status review is required; no keepalive commits, external monitor or extra recurring ChatGPT task is installed by this change.
