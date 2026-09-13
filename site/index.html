@@ -1,108 +1,62 @@
 <!doctype html>
-<html lang="ja">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WO+OTQylyLm4RCSIBeCS5nUWJn0ZUHQ5XcjGHbq/fr4='; style-src 'unsafe-inline'; img-src 'none'; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'; upgrade-insecure-requests">
-<meta name="referrer" content="no-referrer">
-<title>Economics Research Dashboard</title>
-<style>:root{--bg:#07111f;--panel:#0d1b2a;--line:#24364c;--text:#eaf1f8;--muted:#abbace;--accent:#55a7ff}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;line-height:1.7}
-.wrap{max-width:1120px;margin:auto;padding:24px}.top{padding:18px 0}.top h1{margin:0;font-size:clamp(25px,4vw,38px)}.top p{color:var(--muted);margin:6px 0}
-.nav{display:flex;gap:8px;overflow:auto;position:sticky;top:0;z-index:2;padding:12px 0;background:var(--bg)}
-button{font:inherit;border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:10px 14px;border-radius:10px;white-space:nowrap;cursor:pointer}
-button.active{color:var(--text);border-color:var(--accent)}button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
-.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.card{border:1px solid var(--line);background:var(--panel);padding:18px;border-radius:14px}
-.full{grid-column:1/-1}.kicker{font-size:12px;letter-spacing:.06em;color:var(--muted)}.metric{font-size:24px;font-weight:700;margin-top:4px}
-.small{font-size:14px;color:var(--muted)}.note{border-left:3px solid var(--accent);padding:12px;background:var(--panel)}
-.badge{display:inline-block;padding:4px 10px;border:1px solid var(--line);border-radius:20px;font-size:13px}
-h2{font-size:23px}h3{font-size:17px;margin:0 0 8px}p{margin:8px 0}.row{padding:12px 0;border-bottom:1px solid var(--line)}
-a{color:#b9dcff;overflow-wrap:anywhere}.footer{color:var(--muted);font-size:12px;padding:30px 0}[hidden]{display:none!important}
-@media(max-width:760px){.grid{grid-template-columns:1fr}.wrap{padding:14px}}
-@media print{.nav{display:none}.section[hidden]{display:block!important}body{background:white;color:black}.card{break-inside:avoid}}
-</style>
-</head>
-<body>
-<div class="wrap">
-<header class="top"><h1>Economics Research Dashboard</h1>
-<p>マクロ・テック・企業戦略の公開情報リサーチ</p>
-<span class="badge">初期公開版 · 2026-09-11 · ライブ市場データ未投入</span>
-</header>
-<p class="note">現在は分析の枠組みを示す初期版です。以下のシナリオは仮説であり、現在の相場判断や売買推奨ではありません。</p>
-<nav class="nav" role="tablist" aria-label="分析ページ" hidden><button type="button" id="tab-overview" data-tab="overview" aria-controls="overview">概要</button><button type="button" id="tab-events" data-tab="events" aria-controls="events">イベント</button><button type="button" id="tab-themes" data-tab="themes" aria-controls="themes">テーマ</button><button type="button" id="tab-risk" data-tab="risk" aria-controls="risk">リスク</button><button type="button" id="tab-method" data-tab="method" aria-controls="method">出典・運用</button></nav>
-<noscript><p class="note">JavaScriptが無効のため、全項目を続けて表示しています。</p></noscript>
-<section id="overview" class="section" aria-labelledby="tab-overview">
-<h2>概要</h2><div class="grid">
-<div class="card"><div class="kicker">MARKET DATA</div><div class="metric">未投入</div><p class="small">株価・金利・為替・決算数値は、一次情報の検証後に追加します。</p></div>
-<div class="card"><div class="kicker">RESEARCH FOCUS</div><div class="metric">AI関連投資</div><p class="small">AI半導体、AIクラウド、AIアプリ、データセンター設備を分けて調べます。</p></div>
-<div class="card"><div class="kicker">JAPAN</div><div class="metric">地域設備投資</div><p class="small">地域の話題性ではなく、企業の受注・売上・利益への寄与を検証します。</p></div>
-<div class="card full"><h3>分析の順番</h3><p>イベント → 業績の前提 → 株価の割高・割安 → 市場の資金需給</p><p class="small">企業実績と仮説を混同せず、何が変われば判断を変えるかを明示します。</p></div>
-<div class="card"><h3>楽観シナリオ［仮説］</h3><p class="small">AI投資が継続し、供給制約の緩和と収益化が進む。</p></div>
-<div class="card"><h3>標準シナリオ［仮説］</h3><p class="small">投資は続くが、企業ごとの収益化速度と評価倍率の差が広がる。</p></div>
-<div class="card"><h3>悲観シナリオ［仮説］</h3><p class="small">需要鈍化、規制、電力制約、資金調達コスト上昇が重なる。</p></div>
-</div></section>
-<section id="events" class="section" aria-labelledby="tab-events">
-<h2>イベントの確認項目</h2><p class="small">具体的な開催日・予想値は未登録です。</p><div class="grid">
-<div class="card full">
-<div class="row"><h3>金融政策・経済統計</h3><p>FOMC、金利、為替、雇用、インフレ。企業利益と金利の影響を分離します。</p></div>
-<div class="row"><h3>大手テック企業の決算</h3><p>AI設備投資、クラウド需要、手元に残る現金の増減を確認します。</p></div>
-<div class="row"><h3>半導体の需給</h3><p>GPU・専用半導体、HBM、DRAM、NAND、先端実装を別々に調べます。</p></div>
-<div class="row"><h3>IPO・増資・指数の銘柄入れ替え</h3><p>業績の変化と、売買資金の移動による影響を分けて評価します。</p></div>
-</div></div></section>
-<section id="themes" class="section" aria-labelledby="tab-themes">
-<h2>テーマ別の調査方針</h2><div class="grid">
-<div class="card"><h3>AI半導体</h3><p class="small">演算、メモリ、先端実装の需要・価格・生産能力を確認します。</p></div>
-<div class="card"><h3>AIクラウド</h3><p class="small">設備投資が売上と現金収入に転換する速度を確認します。</p></div>
-<div class="card"><h3>AIアプリ</h3><p class="small">利用者数だけでなく、課金、利用継続、利益への寄与を確認します。</p></div>
-<div class="card"><h3>データセンター設備</h3><p class="small">電力、冷却、建設、光通信の制約と受注への影響を確認します。</p></div>
-<div class="card"><h3>日本の地域投資</h3><p class="small">北海道・東北・九州などの案件を、公式発表と業績への寄与で検証します。</p></div>
-<div class="card"><h3>日本株の指数需給</h3><p class="small">TOPIX採用候補、浮動株、信用需給を企業業績と別に評価します。</p></div>
-</div></section>
-<section id="risk" class="section" aria-labelledby="tab-risk">
-<h2>リスクの確認項目</h2><div class="grid">
-<div class="card"><h3>最大リスク［評価軸］</h3><p>期待が業績を先行すること。</p><p class="small">売上・現金収入より評価倍率だけが上がっていないかを調べます。</p></div>
-<div class="card"><h3>見落としやすいリスク［評価軸］</h3><p>資金需給と実行制約。</p><p class="small">増資、信用需給、系統接続、許認可、建設延期を確認します。</p></div>
-<div class="card"><h3>反証材料［仮説の見直し条件］</h3><p>顧客の設備投資計画の縮小。</p><p class="small">受注、投資計画、稼働率が継続的に悪化した場合は前提を見直します。</p></div>
-</div></section>
-<section id="method" class="section" aria-labelledby="tab-method">
-<h2>出典・運用</h2><div class="grid">
-<div class="card full"><h3>データとレポート</h3><p><a href="data/current-state.json">公開用テーマデータ（JSON）</a></p><p><a href="reports/2026-09-11-carry-forward.md">継続論点の整理（Markdown）</a></p><p class="small">外部サイトや非公開資料への自動接続はありません。</p></div>
-<div class="card full"><h3>数値を掲載する条件</h3><p>公式IR・決算資料・規制当局資料・公的統計を優先します。出典を確認できない数値は「要確認」とし、事実・推測・意見を分けます。</p></div>
-<div class="card full"><h3>公開範囲</h3><p>公開版は一般的な市場リサーチ専用です。個人に紐づく金融情報や秘密情報は入力・保存・掲載しません。</p><p class="small">公開前の内容確認と機械的な検査を併用します。自動検査だけで安全性を保証するものではありません。</p></div>
-</div></section>
-<footer class="footer">Public market research · No analytics · No external assets<br>市場データの自動収集・売買の自動実行は行いません。</footer>
-</div>
-<script>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-ItNI1UIbWzR1eEvF4WdgFE9K7km/psKHJyDhY5ZnJ28='; style-src 'unsafe-inline'; img-src 'none'; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'; upgrade-insecure-requests"><meta name="referrer" content="no-referrer"><title>Economics Research Dashboard</title><style>
+:root{--bg:#07111f;--panel:#102138;--line:#31465e;--ink:#f1f5fa;--muted:#b5c4d5;--blue:#92caff;--gold:#f5d08b;--green:#a1e5c7}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
+.wrap{max-width:1180px;margin:auto;padding:24px}.mast{padding:24px 0;border-bottom:1px solid var(--line)}.eyebrow{font-size:12px;letter-spacing:.13em;color:var(--blue)}
+h1{font-size:clamp(25px,4vw,40px);line-height:1.3;margin:8px 0}h2{font-size:24px;margin:22px 0 14px}h3{font-size:17px;margin:0 0 8px}p{margin:8px 0}.small{font-size:13px;color:var(--muted)}
+.notice{border-left:3px solid var(--gold);background:#182b40;padding:13px 16px;margin:16px 0;border-radius:0 9px 9px 0}.nav{display:flex;gap:7px;overflow:auto;position:sticky;top:0;z-index:4;background:var(--bg);padding:12px 0}
+button{font:inherit;font-size:14px;min-height:44px;cursor:pointer;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--muted);padding:9px 14px;white-space:nowrap}
+button.active,button[aria-pressed=true]{background:#213e5b;border-color:var(--blue);color:var(--ink)}button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.two{grid-template-columns:repeat(2,minmax(0,1fr))}.four{grid-template-columns:repeat(4,minmax(0,1fr))}.card{background:var(--panel);padding:18px;border:1px solid var(--line);border-radius:14px;min-width:0}
+.full{grid-column:1/-1}.metric{font-size:30px;font-weight:750;line-height:1.4}.tag{display:inline-block;font-size:12px;border:1px solid var(--line);padding:4px 8px;border-radius:6px;margin:2px 4px 4px 0}.good{color:var(--green)}.pending{color:var(--gold)}
+.filters{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.event-card{padding:18px 0;border-bottom:1px solid var(--line)}.event-card:last-child{border:0}.date{color:var(--blue);font-weight:700}a,summary{color:var(--blue)}a{overflow-wrap:anywhere}
+summary{min-height:36px;cursor:pointer}details{margin-top:10px}footer{border-top:1px solid var(--line);margin-top:32px;padding:20px 0;font-size:12px;color:var(--muted)}[hidden]{display:none!important}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.four{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap{padding:14px}.card{padding:15px}.metric{font-size:25px}}
+@media print{.nav,.filters{display:none!important}.panel[hidden],.topic-card[hidden],.event-card[hidden]{display:block!important}body,.card{background:white;color:black}.small{color:#333}.grid{display:block}.card{break-inside:avoid}a{color:#16416c}}
+</style></head><body><div class="wrap"><header class="mast"><div class="eyebrow">ECONOMICS / RESEARCH DESK</div><h1>Economics Research Dashboard</h1><p>日報・速報・イベントを、同じ判断基準で整理する。</p><p class="small">v0.3.0 / 2026-09-13 / 公開版</p></header><div class="notice"><strong>既存の定期調査項目を共通化した公開版です。</strong><br>定期タスクの再開・新設や、本文の自動取込、個人データの公開は行っていません。</div><p class="small" id="age">日程確認：2026-09-13 / 自動更新ではありません</p><nav class="nav" role="tablist" aria-label="分析ページ" hidden><button type="button" id="tab-overview" data-tab="overview" aria-controls="overview">概要</button><button type="button" id="tab-reports" data-tab="reports" aria-controls="reports">レポート</button><button type="button" id="tab-events" data-tab="events" aria-controls="events">イベント</button><button type="button" id="tab-topics" data-tab="topics" aria-controls="topics">継続論点</button><button type="button" id="tab-scenarios" data-tab="scenarios" aria-controls="scenarios">シナリオ</button><button type="button" id="tab-archive" data-tab="archive" aria-controls="archive">履歴</button><button type="button" id="tab-operations" data-tab="operations" aria-controls="operations">出典・運用</button></nav><noscript><p class="notice">JavaScript無効時は全項目を表示します。絞り込みは使用できません。</p></noscript>
+<section class="panel" id="overview" aria-labelledby="tab-overview"><h2>概要</h2><div class="grid four"><div class="card"><div class="eyebrow">調査系統</div><div class="metric">5</div><p class="small">日報・速報・イベントなど</p></div><div class="card"><div class="eyebrow">共通の継続論点</div><div class="metric">13</div><p class="small">同じ論点を複数系統で共有</p></div><div class="card"><div class="eyebrow">公式掲載日程</div><div class="metric">8</div><p class="small">予想値・実績値は未取込</p></div><div class="card"><div class="eyebrow">定期本文の自動取込</div><div class="metric">未接続</div><p class="small">分類統合とは別の工程</p></div></div><div class="notice"><strong>今回の統合は「調査項目と閲覧画面」です。</strong><br>定期レポート本文の自動取得、個人別の配分や非公開の取引記録の取込は行いません。公開版は市場リサーチの分類と確認済み日程だけを扱います。</div><div class="grid"><article class="card full"><h3>今回変わったこと</h3><p>5タブから7タブへ整理。月別・調査系統別・分野別の絞り込み、出典確認日、仮説の見直し条件を追加しました。</p></article><article class="card "><h3>確認済みの事実</h3><p>公式機関の開催・発表日程を掲載しています。政策結果や統計実績は未掲載です。</p></article><article class="card "><h3>推測・仮説</h3><p>テーマ成長や業績への影響は、一次資料で検証する調査論点として表示します。</p></article><article class="card "><h3>判断を変える条件</h3><p>何が確認されたら見通しを変えるかを、各論点の詳細欄で確認できます。</p></article></div></section>
+<section class="panel" id="reports" aria-labelledby="tab-reports"><h2>レポート</h2><p class="small">既存の調査指示から、公開市場情報だけで扱える範囲を共通化しました。過去の出力全文を取り込んだ表示ではありません。</p><div class="grid two"><article class="card "><h3>総合マーケット日報</h3><span class="tag good">調査項目を分類統合</span><span class="tag pending">本文の自動取込なし</span><p>世界市況、重要ニュース、今後の決算、技術テーマ、企業比較。</p></article><article class="card "><h3>重要ニュース</h3><span class="tag good">調査項目を分類統合</span><span class="tag pending">本文の自動取込なし</span><p>新材料、前回からの変化、業界構造への影響、次の確認点。</p></article><article class="card "><h3>重要イベント</h3><span class="tag good">調査項目を分類統合</span><span class="tag pending">本文の自動取込なし</span><p>金融政策、統計、決算、政策発表の前後を比較する。</p></article><article class="card "><h3>9–11月イベント分析</h3><span class="tag good">調査項目を分類統合</span><span class="tag pending">本文の自動取込なし</span><p>期間別のシナリオ、資金需給、判断を変える条件を整理する。個人別の配分は除く。</p></article><article class="card "><h3>TOPIX・指数需給</h3><span class="tag good">調査項目を分類統合</span><span class="tag pending">本文の自動取込なし</span><p>採用基準、対象期間、浮動株と指数変更の影響を分ける。終了した対象期間を自動延長しない。</p></article></div><div class="notice">個人別の資金配分、連携先の内部情報、安全点検の詳細結果は公開版へ取り込みません。定期実行の設定は、この閲覧用ファイルから変更できません。</div></section>
+<section class="panel" id="events" aria-labelledby="tab-events"><h2>イベント</h2><p class="small">2026年9月13日に公式掲載日程を確認。変更される場合があります。会合は開催地の日付、統計は日本時間を併記します。</p><div class="filters" hidden aria-label="表示の絞り込み"><button type="button" data-filter="month" data-value="all" aria-pressed="true">全月</button><button type="button" data-filter="month" data-value="09" aria-pressed="false">9月</button><button type="button" data-filter="month" data-value="10" aria-pressed="false">10月</button><button type="button" data-filter="month" data-value="11" aria-pressed="false">11月</button></div><p class="small" id="event-count" aria-live="polite">8 件の日程</p><div class="card"><article class="event-card" data-month="09" data-event-id="fomc-sep"><p class="date">2026-09-15 → 2026-09-16</p><h3>FOMC・経済見通し</h3><span class="tag good">日程のみ確認済み</span><p>米国現地日付 / 結果公表時刻は未登録</p><p class="small">出典：<a href="https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm" rel="noopener noreferrer" referrerpolicy="no-referrer">FRB：FOMC公式日程</a></p></article><article class="event-card" data-month="09" data-event-id="boj-sep"><p class="date">2026-09-17 → 2026-09-18</p><h3>日銀・金融政策決定会合</h3><span class="tag good">日程のみ確認済み</span><p>日本の日付 / 結果公表時刻は未登録</p><p class="small">出典：<a href="https://www.boj.or.jp/en/mopo/mpmsche_minu/index.htm" rel="noopener noreferrer" referrerpolicy="no-referrer">日銀：金融政策決定会合</a></p></article><article class="event-card" data-month="10" data-event-id="jobs-oct"><p class="date">2026-10-02</p><h3>米雇用統計・9月分</h3><span class="tag good">日程のみ確認済み</span><p>日本時間 2026-10-02 21:30 / 米東部 08:30</p><p class="small">出典：<a href="https://www.bls.gov/schedule/2026/home.htm" rel="noopener noreferrer" referrerpolicy="no-referrer">米労働統計局：2026年発表日程</a></p></article><article class="event-card" data-month="10" data-event-id="cpi-oct"><p class="date">2026-10-14</p><h3>米CPI・9月分</h3><span class="tag good">日程のみ確認済み</span><p>日本時間 2026-10-14 21:30 / 米東部 08:30</p><p class="small">出典：<a href="https://www.bls.gov/schedule/2026/home.htm" rel="noopener noreferrer" referrerpolicy="no-referrer">米労働統計局：2026年発表日程</a></p></article><article class="event-card" data-month="10" data-event-id="fomc-oct"><p class="date">2026-10-27 → 2026-10-28</p><h3>FOMC</h3><span class="tag good">日程のみ確認済み</span><p>米国現地日付 / 結果公表時刻は未登録</p><p class="small">出典：<a href="https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm" rel="noopener noreferrer" referrerpolicy="no-referrer">FRB：FOMC公式日程</a></p></article><article class="event-card" data-month="10" data-event-id="boj-oct"><p class="date">2026-10-29 → 2026-10-30</p><h3>日銀・金融政策決定会合</h3><span class="tag good">日程のみ確認済み</span><p>日本の日付 / 結果公表時刻は未登録</p><p class="small">出典：<a href="https://www.boj.or.jp/en/mopo/mpmsche_minu/index.htm" rel="noopener noreferrer" referrerpolicy="no-referrer">日銀：金融政策決定会合</a></p></article><article class="event-card" data-month="11" data-event-id="jobs-nov"><p class="date">2026-11-06</p><h3>米雇用統計・10月分</h3><span class="tag good">日程のみ確認済み</span><p>日本時間 2026-11-06 22:30 / 米東部 08:30</p><p class="small">出典：<a href="https://www.bls.gov/schedule/2026/home.htm" rel="noopener noreferrer" referrerpolicy="no-referrer">米労働統計局：2026年発表日程</a></p></article><article class="event-card" data-month="11" data-event-id="cpi-nov"><p class="date">2026-11-10</p><h3>米CPI・10月分</h3><span class="tag good">日程のみ確認済み</span><p>日本時間 2026-11-10 22:30 / 米東部 08:30</p><p class="small">出典：<a href="https://www.bls.gov/schedule/2026/home.htm" rel="noopener noreferrer" referrerpolicy="no-referrer">米労働統計局：2026年発表日程</a></p></article></div><div class="notice">企業決算、IPO、指数変更の個別日程は未登録です。未確認の時刻を仮に埋めたり、通知の起点にしたりしません。</div></section>
+<section class="panel" id="topics" aria-labelledby="tab-topics"><h2>継続論点</h2><p class="small">P1・P2は調査の優先度であり、売買推奨や上昇確率ではありません。</p><div class="filters" hidden aria-label="表示の絞り込み"><button type="button" data-filter="stream" data-value="all" aria-pressed="true">全系統</button><button type="button" data-filter="stream" data-value="brief" aria-pressed="false">総合マーケット日報</button><button type="button" data-filter="stream" data-value="breaking" aria-pressed="false">重要ニュース</button><button type="button" data-filter="stream" data-value="event" aria-pressed="false">重要イベント</button><button type="button" data-filter="stream" data-value="autumn" aria-pressed="false">9–11月イベント分析</button><button type="button" data-filter="stream" data-value="topix" aria-pressed="false">TOPIX・指数需給</button></div><div class="filters" hidden aria-label="表示の絞り込み"><button type="button" data-filter="category" data-value="all" aria-pressed="true">全分野</button><button type="button" data-filter="category" data-value="macro" aria-pressed="false">マクロ・政策</button><button type="button" data-filter="category" data-value="ai" aria-pressed="false">AI関連</button><button type="button" data-filter="category" data-value="japan" aria-pressed="false">日本</button><button type="button" data-filter="category" data-value="flow" aria-pressed="false">資金需給</button><button type="button" data-filter="category" data-value="frontier" aria-pressed="false">先端技術</button></div><p id="topic-count" class="small" aria-live="polite">13 件の論点</p><div class="grid two"><article class="card topic-card" data-topic-id="macro-rates" data-streams="brief breaking event autumn" data-category="macro"><span class="tag pending">P1 / 調査論点</span><h3>金利・物価・雇用</h3><p>金融政策と景気の変化を分ける。</p><p class="small">確認点：物価・雇用・金利のどれが判断を変えたか。</p><details><summary>判断を見直す条件</summary><p>公式統計と政策発表が前提を否定する場合。</p></details></article><article class="card topic-card" data-topic-id="ai-capex" data-streams="brief breaking event autumn" data-category="ai"><span class="tag pending">P1 / 調査論点</span><h3>AIクラウド・設備投資</h3><p>投資計画を売上・現金収入と照合する。</p><p class="small">確認点：投資額の増加が課金・利益につながるか。</p><details><summary>判断を見直す条件</summary><p>主要顧客の投資削減、収益化の遅れ。</p></details></article><article class="card topic-card" data-topic-id="memory-cycle" data-streams="brief breaking autumn" data-category="ai"><span class="tag pending">P1 / 調査論点</span><h3>AI半導体・メモリ需給</h3><p>GPU、専用半導体、HBM、DRAM、NANDを分ける。</p><p class="small">確認点：価格・在庫・受注残の方向は一致するか。</p><details><summary>判断を見直す条件</summary><p>在庫悪化と受注減が継続する場合。</p></details></article><article class="card topic-card" data-topic-id="power-dc" data-streams="brief breaking autumn" data-category="ai"><span class="tag pending">P1 / 調査論点</span><h3>電力・データセンター</h3><p>電力、冷却、接続、建設の制約を確認する。</p><p class="small">確認点：計画どおり稼働・売上に転換するか。</p><details><summary>判断を見直す条件</summary><p>建設延期、中止、技術代替で需要が変わる場合。</p></details></article><article class="card topic-card" data-topic-id="japan-regional" data-streams="brief breaking" data-category="japan"><span class="tag pending">P2 / 調査論点</span><h3>日本の地域AI投資</h3><p>北海道・東北・九州などの案件を一次資料で確認する。</p><p class="small">確認点：地域の話題が企業の受注・利益へどう伝わるか。</p><details><summary>判断を見直す条件</summary><p>案件の失注、採算悪化、需要の分散。</p></details></article><article class="card topic-card" data-topic-id="index-flow" data-streams="event autumn topix" data-category="japan"><span class="tag pending">P1 / 調査論点</span><h3>TOPIX・指数需給</h3><p>採用条件と売買需給を会社業績から分離する。</p><p class="small">確認点：対象期間、基準、算定根拠は確認済みか。</p><details><summary>判断を見直す条件</summary><p>基準変更、ボーダー未達、期待の先行。</p></details></article><article class="card topic-card" data-topic-id="geopolitics" data-streams="brief breaking event autumn" data-category="macro"><span class="tag pending">P1 / 調査論点</span><h3>地政学・政策・規制</h3><p>公式発表、報道、観測を区別する。</p><p class="small">確認点：需要・調達・利益への影響を確認できるか。</p><details><summary>判断を見直す条件</summary><p>一次発表が報道内容と異なる場合。</p></details></article><article class="card topic-card" data-topic-id="ipo-flow" data-streams="breaking event autumn" data-category="flow"><span class="tag pending">P2 / 調査論点</span><h3>IPO・増資・資金需給</h3><p>確定案件と噂を混同しない。</p><p class="small">確認点：資金吸収や既存株への影響は検証できるか。</p><details><summary>判断を見直す条件</summary><p>計画延期、規模縮小、需給改善。</p></details></article><article class="card topic-card" data-topic-id="ai-apps" data-streams="brief breaking" data-category="ai"><span class="tag pending">P2 / 調査論点</span><h3>AIアプリ・商用化</h3><p>広義AI、生成AI、アプリの収益を分ける。</p><p class="small">確認点：利用拡大が課金・継続率・利益に結びつくか。</p><details><summary>判断を見直す条件</summary><p>顧客離反や推論費用増で採算が崩れる場合。</p></details></article><article class="card topic-card" data-topic-id="quantum" data-streams="brief breaking" data-category="frontier"><span class="tag pending">P2 / 調査論点</span><h3>量子・次世代計算</h3><p>技術発表と商用契約を分離する。</p><p class="small">確認点：性能の再現性と有償利用を確認できるか。</p><details><summary>判断を見直す条件</summary><p>性能が再現されない、商用化が遅れる場合。</p></details></article><article class="card topic-card" data-topic-id="space" data-streams="brief breaking" data-category="frontier"><span class="tag pending">P2 / 調査論点</span><h3>宇宙・衛星</h3><p>技術実証、受注、量産、資金余力を確認する。</p><p class="small">確認点：契約が売上と現金収入に転換するか。</p><details><summary>判断を見直す条件</summary><p>打ち上げ延期、契約解除、調達負担の増大。</p></details></article><article class="card topic-card" data-topic-id="robotics" data-streams="brief breaking" data-category="frontier"><span class="tag pending">P2 / 調査論点</span><h3>ロボティクス・自動運転</h3><p>実証試験と量産・有償導入を分ける。</p><p class="small">確認点：採用、稼働、継続受注、採算を確認できるか。</p><details><summary>判断を見直す条件</summary><p>量産延期、規制、顧客の導入中止。</p></details></article><article class="card topic-card" data-topic-id="biotech" data-streams="brief breaking" data-category="frontier"><span class="tag pending">P2 / 調査論点</span><h3>バイオ・創薬</h3><p>技術テーマと臨床・承認・収益化を分ける。</p><p class="small">確認点：一次開示の進捗と資金余力はどう変化したか。</p><details><summary>判断を見直す条件</summary><p>試験不達、承認遅れ、追加調達負担。</p></details></article></div></section>
+<section class="panel" id="scenarios" aria-labelledby="tab-scenarios"><h2>シナリオ</h2><p class="small">3シナリオはいずれも仮説です。確率・価格目標・個人別の投資配分は付けていません。</p><div class="grid"><article class="card "><h3>楽観［仮説］</h3><p>需要拡大と供給制約の緩和が収益化につながる。</p><p class="small">確認材料：売上・現金収入・稼働率の改善を確認する。</p></article><article class="card "><h3>標準［仮説］</h3><p>投資は継続するが、企業間で利益成長の差が広がる。</p><p class="small">確認材料：利益率と受注の質、収益化の速度を比較する。</p></article><article class="card "><h3>悲観［仮説］</h3><p>需要鈍化、規制、資金調達負担が重なる。</p><p class="small">確認材料：投資・業績計画の下方修正が続けば前提を見直す。</p></article></div><h2>立場別の確認</h2><div class="grid"><article class="card "><h3>投資家</h3><p>期待と実際の利益を比較し、売る条件を明示する。</p></article><article class="card "><h3>経営者</h3><p>投資と現金収入の時間差、資金余力を確認する。</p></article><article class="card "><h3>事業責任者</h3><p>受注・稼働・顧客継続から需要の質を判断する。</p></article></div><h2>企業比較の共通チェック</h2><div class="card"><span class="tag">成長性</span><span class="tag">収益性</span><span class="tag">市場規模</span><span class="tag">競争優位</span><span class="tag">経営陣</span><span class="tag">資本配分</span><span class="tag">財務健全性</span><span class="tag">希薄化</span><span class="tag">需給</span><span class="tag">会計品質</span><span class="tag">ガバナンス</span><span class="tag">カタリスト</span><span class="tag">バリュエーション</span><span class="tag">売る条件</span><p class="small">カタリスト＝評価が変わるきっかけ。バリュエーション＝株価の割高・割安。個別企業の採点値は未登録です。</p></div></section>
+<section class="panel" id="archive" aria-labelledby="tab-archive"><h2>履歴</h2><div class="grid"><article class="card full"><h3>変更記録</h3><p>v0.3.0 / 2026-09-13</p><p>5系統・13論点の閲覧分類、8日程、7タブ、絞り込み、出典・確認日の表示を追加。</p><p class="small">2026-09-13の刷新で公開分類へ反映。</p></article><article class="card full"><h3>予想と実績の比較</h3><span class="tag pending">未取込</span><p>過去レポートの本文、予想値、実績値の自動取込は未接続です。的中率や運用成績を仮の数字で表示しません。</p></article><article class="card full"><h3>重複の整理</h3><p>同じ調査論点を1つのIDで管理し、複数の調査系統から参照する構成です。ニュース記事や定期本文を実際に自動重複排除する処理はまだありません。</p></article></div></section>
+<section class="panel" id="operations" aria-labelledby="tab-operations"><h2>出典・運用</h2><div class="grid"><article class="card full"><h3>出典と確認日</h3><p><a href="https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm" rel="noopener noreferrer" referrerpolicy="no-referrer">FRB：FOMC公式日程</a><br><span class="small">日程確認：2026-09-13</span></p><p><a href="https://www.boj.or.jp/en/mopo/mpmsche_minu/index.htm" rel="noopener noreferrer" referrerpolicy="no-referrer">日銀：金融政策決定会合</a><br><span class="small">日程確認：2026-09-13</span></p><p><a href="https://www.bls.gov/schedule/2026/home.htm" rel="noopener noreferrer" referrerpolicy="no-referrer">米労働統計局：2026年発表日程</a><br><span class="small">日程確認：2026-09-13</span></p></article><article class="card full"><h3>公開情報と個人データを分ける</h3><p>このファイルは公開市場リサーチ専用です。個人に紐づく金融情報や秘密情報の入力・保存・掲載は行いません。広告・解析タグ・外部画像・外部プログラムはありません。</p><p class="small">出典リンクを押すと、その外部サイトへ移動します。リンクを押さない限り、アプリによる外部通信は行いません。</p></article><article class="card full"><h3>安全検査の範囲</h3><p>許可する外部リンクを3つの公式URLに限定し、ページ内プログラムをハッシュで固定。外部接続とフォーム送信を禁止するブラウザ設定を入れています。</p><p class="small">自動検査だけで匿名性や脆弱性ゼロを保証しません。端末・ブラウザ拡張・アカウントの保護は別に必要です。</p></article><article class="card full"><h3>運用上の残りの工程</h3><p>未接続：定期本文の自動取込、過去出力の完全移植、株価・決算数値の自動更新。この版の対象：分類統合・日程・絞り込み。</p><p>公開先に書いた時点で内容が見えるため、配信前検査だけではなく、書き込む前の内容確認が必要です。</p></article></div></section><footer>公開情報リサーチ / v0.3.0 / 入力欄・追跡タグなし<br>内容の分類統合と、定期実行・自動取込の統合は別です。</footer></div><script>
 'use strict';
-const tabs = Array.from(document.querySelectorAll('button[data-tab]'));
-const panels = Array.from(document.querySelectorAll('.section'));
-function activate(tab) {
-  tabs.forEach(t => {
-    const on = t === tab;
-    t.classList.toggle('active', on);
-    t.setAttribute('aria-selected', String(on));
-    t.tabIndex = on ? 0 : -1;
-  });
-  panels.forEach(p => { p.hidden = p.id !== tab.dataset.tab; });
+const tabs=[...document.querySelectorAll('[data-tab]')];
+const panels=[...document.querySelectorAll('.panel')];
+function activate(tab){
+ tabs.forEach(t=>{const on=t===tab;t.classList.toggle('active',on);t.setAttribute('aria-selected',String(on));t.tabIndex=on?0:-1;});
+ panels.forEach(p=>{p.hidden=p.id!==tab.dataset.tab;});
 }
-tabs.forEach((tab, i) => {
-  tab.addEventListener('click', () => activate(tab));
-  tab.addEventListener('keydown', e => {
-    let n = i;
-    if (e.key === 'ArrowRight') n = (i + 1) % tabs.length;
-    else if (e.key === 'ArrowLeft') n = (i - 1 + tabs.length) % tabs.length;
-    else if (e.key === 'Home') n = 0;
-    else if (e.key === 'End') n = tabs.length - 1;
-    else return;
-    e.preventDefault();
-    activate(tabs[n]);
-    tabs[n].focus();
-  });
+tabs.forEach((t,i)=>{
+ t.setAttribute('role','tab');t.addEventListener('click',()=>activate(t));
+ t.addEventListener('keydown',ev=>{
+  let n=i;
+  if(ev.key==='ArrowRight')n=(i+1)%tabs.length;
+  else if(ev.key==='ArrowLeft')n=(i+tabs.length-1)%tabs.length;
+  else if(ev.key==='Home')n=0;
+  else if(ev.key==='End')n=tabs.length-1;
+  else return;
+  ev.preventDefault();activate(tabs[n]);tabs[n].focus();
+ });
 });
-document.querySelector('.nav').hidden = false;
-tabs.forEach(t => t.setAttribute('role', 'tab'));
-panels.forEach(p => p.setAttribute('role', 'tabpanel'));
-activate(tabs[0]);
-</script>
-</body>
-</html>
+panels.forEach(p=>p.setAttribute('role','tabpanel'));
+document.querySelector('.nav').hidden=false;activate(tabs[0]);
+const choice={stream:'all',category:'all',month:'all'};
+function filter(){
+ const topics=[...document.querySelectorAll('.topic-card')],events=[...document.querySelectorAll('.event-card')];
+ topics.forEach(c=>{c.hidden=!( (choice.stream==='all'||c.dataset.streams.split(' ').includes(choice.stream))&&(choice.category==='all'||c.dataset.category===choice.category));});
+ events.forEach(c=>{c.hidden=choice.month!=='all'&&c.dataset.month!==choice.month;});
+ document.getElementById('topic-count').textContent=topics.filter(c=>!c.hidden).length+' 件の論点'+(topics.some(c=>!c.hidden)?'':' / 条件に一致する論点はありません');
+ document.getElementById('event-count').textContent=events.filter(c=>!c.hidden).length+' 件の日程';
+}
+document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{
+ choice[b.dataset.filter]=b.dataset.value;
+ document.querySelectorAll('[data-filter]').forEach(x=>{if(x.dataset.filter===b.dataset.filter)x.setAttribute('aria-pressed',String(x===b));});
+ filter();
+}));
+document.querySelectorAll('.filters').forEach(p=>{p.hidden=false;});filter();
+const age=document.getElementById('age');
+const days=Math.max(0,Math.floor((Date.now()-Date.parse('2026-09-13T00:00:00+09:00'))/86400000));
+age.textContent='日程確認日から '+days+' 日経過'+(days>7?' / 再確認が必要':' / 自動更新ではありません');
+</script></body></html>

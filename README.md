@@ -1,29 +1,27 @@
-# Economics Research Dashboard
+# Economics Research Dashboard v0.3.0
 
-Initial public-market research framework. No live quotes, personal records, or individualized investment recommendations are included.
+Public-market research only: seven tabs, five research classifications, thirteen topics and eight official calendar events. This release does not resume scheduled tasks or ingest full scheduled reports. No live market data or individual records are included.
 
-## Privacy boundary
+## Publication boundary
 
-This is a public repository: every commit is public before CI starts. Run the scanner in private staging and review all new content BEFORE pushing. Do not rely on a post-commit check to prevent repository disclosure.
+Public commits are visible BEFORE CI runs. Review and scan in private staging before pushing. Never import private history, individual financial information or credentials.
 
-- Never copy private workspace history, account data, personal financial records, credentials, or screenshots into this repository.
-- There is no private-repository token, cross-repository sync, visitor data entry, analytics, or third-party asset loading in the site.
-- `site/manifest.json` fixes the reviewed file names and SHA-256 digests.
-- The gate rejects unexpected files, symlinks, sensitive patterns, active external assets, and changed CSP/script hashes.
-- Only the three reviewed site files and a generated `.nojekyll` marker enter the deployment artifact. The repository root is never deployed.
-- Public commit identities must use GitHub noreply addresses. Private history is not imported.
-- Hosting still involves GitHub processing connection metadata. This is not anonymous hosting.
+- The existing deployment workflow and its permissions are unchanged.
+- Only the three hash-allowlisted site files and a generated .nojekyll are deployed.
+- The inline tab and filter program is CSP hash-approved; background connections and form submission remain disabled.
+- Source navigation permits only three exact official calendar URLs with no-referrer and noreferrer attributes. No external assets, analytics, input forms or storage are used.
+- The gate preserves file, history, credential and active-content checks. It adds duplicate-attribute and duplicate-ID rejection, strict JSON fields and named-time-zone checks.
+- All public commit identities must use GitHub noreply addresses.
 
-## Checks and publication
+## Verification
 
-Run `python3 -m unittest discover -s tests -v`, then `python3 scripts/check_site.py --check-history --build` in this repository. Content-only pre-publication checks are available with `python3 scripts/check_site.py --build` in a private staging copy.
+Run `python3 -m unittest discover -s tests -v` and `python3 scripts/check_site.py --check-history --build`.
+Content-only validation in private staging omits --check-history. Browser verification and the separately maintained private monthly audit must use seven panels and the event-card/topic-card selectors for this release.
 
-The workflow uses pinned official actions and standard hosted runners. It deploys only after validation succeeds and verifies the returned HTTPS site. Pull requests are validated, not deployed. The workflow cannot read any private workspace.
+The gate is a secondary check, not proof of anonymity or absence of vulnerabilities. Review freely written text before publication. Hosting connection metadata and public account identifiers remain visible to the hosting provider.
 
-The application makes no background network requests. The inline tab program is CSP hash-approved; form submission and background connections are blocked. Source downloads are limited to reviewed local files.
+## Data status
 
-## Limitations
+Calendar dates were checked against FRB, Bank of Japan and BLS official pages on 2026-09-13. Publication times not verified remain null. Forecasts and results are not invented. The old 2026-09-11 report is retained as a dated archive, not relabeled as a fresh report.
 
-Pattern matching and hashes do not prove anonymity or prevent authorized administrators from changing protections. Review free text, new data categories, file paths, commit identities, and re-identification risk before every release. GitHub usernames remain public. No service upgrade, custom domain purchase, or paid data feed is required for this initial public Pages site.
-
-Market facts must be verified against primary sources before they are added. This initial release describes research questions and hypothetical scenarios, not current market conclusions.
+No paid service, subscription upgrade, private-to-public sync or new schedule is introduced by this release.
