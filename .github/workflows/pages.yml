@@ -38,6 +38,8 @@ jobs:
         run: python3 -m unittest discover -s tests -p test_calendar_probe.py -v
       - name: Test calendar completeness publication
         run: python3 -m unittest discover -s tests -p test_calendar_publish.py -v
+      - name: Test base publication rights migration
+        run: python3 -m unittest discover -s tests -p test_rights.py -v
       - name: Probe official SEC filings for tracked US companies
         id: sec
         if: github.event_name != 'pull_request'
@@ -58,7 +60,6 @@ jobs:
       - name: Test actual release and data boundaries
         run: |
           python3 -m unittest discover -s tests -p test_release.py -v
-          python3 -m unittest discover -s tests -p test_rights.py -v
           python3 -m unittest discover -s tests -p test_calendar_rights.py -v
           python3 -m unittest discover -s tests -p test_calendar_publish.py -v
           python3 -m unittest discover -s tests -p test_market_refresh_guard.py -v
