@@ -50,6 +50,7 @@ jobs:
           """
           text = text[:start] + new + text[end:]
           text = text.replace('v0.5.0', 'v0.5.1')
+          text = text.replace("version:'0.5.0'", "version:'0.5.1'")
           script = re.findall(r'<script[^>]*>(.*?)</script>', text, re.S)[0]
           digest = base64.b64encode(hashlib.sha256(script.encode()).digest()).decode()
           text = re.sub(r"script-src 'sha256-[^']+'", "script-src 'sha256-" + digest + "'", text, count=1)
@@ -92,8 +93,8 @@ jobs:
         run: |
           case "$SITE_URL" in https://*) ;; *) exit 1 ;; esac
           for attempt in 1 2 3 4 5 6; do
-            if curl --proto '=https' --proto-redir '=https' --fail --silent --show-error --location --max-time 20 "$SITE_URL" -o /tmp/site.html && grep -q 'Economics Research Dashboard' /tmp/site.html && grep -q 'v0.5.1' /tmp/site.html; then
-              echo "HTTPS site content verified"
+            if curl --proto '=https' --proto-redir '=https' --fail --silent --show-error --location --max-time 20 "$SITE_URL" -o /tmp/site.html && grep -q 'Economics Research Dashboard' /tmp/site.html && grep -q 'v0.5.1' /tmp/site.html && grep -q "version:'0.5.1'" /tmp/site.html; then
+              echo "HTTPS site content and runtime version verified"
               exit 0
             fi
             sleep 10
