@@ -6,7 +6,7 @@ import build_dashboard,calendar_publish
 from macro_core import validate,validate_calendar
 ROOT=Path(__file__).resolve().parents[1]
 def build():
- md=(ROOT/'site/data/macro.json').read_text();calendar,calendar_report=calendar_publish.build();cd=json.dumps(calendar,separators=(',',':'))+'\n';(ROOT/'site/data/macro-calendar.json').write_text(cd)
+ md=(ROOT/'site/data/macro.json').read_text();calendar,calendar_report=calendar_publish.build();cd=json.dumps(calendar,separators=(',',':'))+'\n';cr=json.dumps(calendar_report,separators=(',',':'))+'\n';(ROOT/'site/data/macro-calendar.json').write_text(cd)
  macro=json.loads(md);cal=json.loads(cd);validate(macro);validate_calendar(cal);text=build_dashboard.build()
  start=text.index('// Data coverage is a measured inventory, never a fictional market reading.');end=text.index("const operations=$('operations');",start)
  text=text[:start]+'// Macro history rendered by the independent typed-data module.\n'+text[end:]
@@ -15,7 +15,7 @@ def build():
  text=text.replace("const archive=$('archive');archive.append(card('v0.6.0 /", "const archive=$('archive');archive.append(card('v0.5.0 /")
  text=text.replace("['0','接続済み自動取得','リアルタイム値なし']","['6','マクロ自動取得系列','公的データ / 株価は対象外']")
  text=text.replace('自動更新なし / 追跡タグなし','マクロのみ定期取得 / 追跡タグなし')
- embedded='<pre id="macro-data" hidden>'+escape(md)+'</pre><pre id="macro-calendar-data" hidden>'+escape(cd)+'</pre>'
+ embedded='<pre id="macro-data" hidden>'+escape(md)+'</pre><pre id="macro-calendar-data" hidden>'+escape(cd)+'</pre><pre id="macro-calendar-report" hidden>'+escape(cr)+'</pre>'
  fallback='<noscript><article><h2>Macro data / JavaScript disabled</h2><p>Static observations only. VIX withheld pending republication permission. Calendar and charts require JavaScript.</p><table><thead><tr><th>Series</th><th>Observation date</th><th>Raw value</th><th>Status</th></tr></thead><tbody>'
  for s in macro['series']:
   latest=s['observations'][-1] if s['observations'] else ['--','--'];fallback+='<tr>'+''.join('<td>'+escape(str(v))+'</td>' for v in [s['id'],*latest,s['status']])+'</tr>'

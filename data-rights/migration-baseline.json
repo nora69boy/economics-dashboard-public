@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source_commit": "7460524c290b22c8c6f6b1c6bf64cbefeb95549f",
   "migration_status": "PENDING_RIGHTS_REVIEW",
-  "html_shell_sha256": "7ef5c2c53d4f846eaef48a685e736a85ffdfeb163b6413ee1ac0d292b7de56ce",
+  "html_shell_sha256": "1a796bef6e5dbba65062a1df021b210c8ca426228279f26c712e5efffba53902",
   "datasets": {
     "market-spx": {
       "scope_sha256": "77cf0382ba2351e173c111d713fb25a2116d22b75d9fd372f5c5fd6f8cd653ba",

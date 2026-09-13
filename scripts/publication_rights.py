@@ -28,7 +28,7 @@ TARGETS = {'index.html', 'data/market.json', 'data/macro.json',
            'reports/2026-09-11-carry-forward.md'}
 BASELINE_COMMIT = '7460524c290b22c8c6f6b1c6bf64cbefeb95549f'
 # A reviewed, finite migration list, never derived from a candidate registry.
-BASELINE_SHA256 = '122da3319c0d22b21697a913758cc34a192c35f387067b5adb9758783d564e0b'
+BASELINE_SHA256 = '639ce259d9f5c3491a38c4f1c0533d0dbadadf2f00a162b6972feb765fc939c2'
 
 
 class RightsError(ValueError):
@@ -215,7 +215,7 @@ def scope_hash(item):
 
 
 def shell_hash(payload):
-    """Pin static HTML too: new HTML-only values must not bypass JSON inventory."""
+    """Pin static HTML while allowing strictly validated derived runtime status JSON."""
     content = payload['index.html'].decode().replace('\r\n', '\n')
     for ident, name in [('macro-data', 'data/macro.json'), ('macro-calendar-data', 'data/macro-calendar.json')]:
         pattern = '<pre id="' + ident + '" hidden>(.*?)</pre>'
@@ -223,6 +223,38 @@ def shell_hash(payload):
         require(len(matches) == 1 and check_site.loads(html.unescape(matches[0])) == check_site.loads(payload[name]),
                 'UNMAPPED_HTML_CONTENT')
         content = re.sub(pattern, '<pre id="' + ident + '" hidden>RIGHTS_PAYLOAD</pre>', content, flags=re.S)
+    pattern = '<pre id="macro-calendar-report" hidden>(.*?)</pre>'
+    matches = re.findall(pattern, content, re.S)
+    require(len(matches) == 1, 'UNMAPPED_HTML_CONTENT')
+    report = check_site.loads(html.unescape(matches[0]))
+    families = {'cpi', 'jobs', 'pce', 'fomc'}
+    statuses = {'live_complete', 'live_reviewed_coverage', 'partial_rejected',
+                'source_access_blocked', 'retained_reviewed', 'awaiting_official_schedule'}
+    require(isinstance(report, dict) and set(report) == {'mode', 'live_families', 'retained_families',
+            'cutoff_jst', 'extended_years', 'family_year_status'}, 'UNMAPPED_HTML_CONTENT')
+    require(report['mode'] in {'reviewed_static', 'family_merge'}, 'UNMAPPED_HTML_CONTENT')
+    live, retained = report['live_families'], report['retained_families']
+    require(isinstance(live, list) and isinstance(retained, list) and len(live) <= 4 and len(retained) <= 4,
+            'UNMAPPED_HTML_CONTENT')
+    require(len(set(live)) == len(live) and len(set(retained)) == len(retained)
+            and set(live) <= families and set(retained) <= families and not set(live) & set(retained)
+            and set(live) | set(retained) == families, 'UNMAPPED_HTML_CONTENT')
+    require(report['cutoff_jst'] is None or (isinstance(report['cutoff_jst'], str)
+            and re.fullmatch(r'\d{4}-\d{2}-\d{2}', report['cutoff_jst'])), 'UNMAPPED_HTML_CONTENT')
+    require(isinstance(report['extended_years'], dict) and set(report['extended_years']) <= families,
+            'UNMAPPED_HTML_CONTENT')
+    for fam, years in report['extended_years'].items():
+        require(isinstance(years, list) and 1 <= len(years) <= 4 and len(set(years)) == len(years)
+                and all(type(y) is int and 2000 <= y <= 2100 for y in years), 'UNMAPPED_HTML_CONTENT')
+    year_status = report['family_year_status']
+    require(isinstance(year_status, dict) and (not year_status or set(year_status) == families),
+            'UNMAPPED_HTML_CONTENT')
+    for fam, years in year_status.items():
+        require(isinstance(years, dict) and 1 <= len(years) <= 4, 'UNMAPPED_HTML_CONTENT')
+        require(all(isinstance(y, str) and re.fullmatch(r'20\d{2}', y) and status in statuses
+                    for y, status in years.items()), 'UNMAPPED_HTML_CONTENT')
+    content = re.sub(pattern, '<pre id="macro-calendar-report" hidden>RIGHTS_DERIVED_STATUS</pre>',
+                     content, flags=re.S)
     macro = check_site.loads(payload['data/macro.json'])
     fallback = '<noscript><article><h2>Macro data / JavaScript disabled</h2><p>Static observations only. VIX withheld pending republication permission. Calendar and charts require JavaScript.</p><table><thead><tr><th>Series</th><th>Observation date</th><th>Raw value</th><th>Status</th></tr></thead><tbody>'
     for s in macro['series']:
