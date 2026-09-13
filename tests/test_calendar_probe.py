@@ -1,4 +1,4 @@
-import sys,unittest
+import sys,unittest,urllib.error
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'scripts'))
 import calendar_probe as c
@@ -20,6 +20,14 @@ class CalendarProbeTests(unittest.TestCase):
    if url==c.BEA_SCHEDULE:return BEA
    return FED
   r=c.probe(f);self.assertEqual(r['calendar_probe_health'],'fresh');self.assertEqual(len(r['errors']),0);self.assertGreaterEqual(len(r['candidate_events']),14);self.assertEqual(r['publication'],'disabled_pending_rights_approval')
+ def test_partial_403_is_advisory(self):
+  def f(url):
+   if url==c.BLS_ICS:raise urllib.error.HTTPError(url,403,'Forbidden',None,None)
+   return BEA if url==c.BEA_SCHEDULE else FED
+  r=c.probe(f);self.assertEqual(r['calendar_probe_health'],'partial_access_blocked');self.assertEqual(len(r['candidate_events']),12);self.assertEqual(r['errors'],[{'source':'bls','error':'HTTPError','code':403}])
+ def test_parser_failure_remains_degraded(self):
+  def f(url):return b'broken' if url==c.BLS_ICS else (BEA if url==c.BEA_SCHEDULE else FED)
+  r=c.probe(f);self.assertEqual(r['calendar_probe_health'],'degraded');self.assertEqual(r['errors'][0]['source'],'bls');self.assertIsNone(r['errors'][0]['code'])
  def test_no_publication_side_effect(self):
   target=ROOT/'site/data/macro-calendar.json';existed=target.exists();before=target.read_bytes() if existed else None
   def f(url):return BLS if url==c.BLS_ICS else (BEA if url==c.BEA_SCHEDULE else FED)
