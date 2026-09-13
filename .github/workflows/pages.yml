@@ -32,6 +32,7 @@ jobs:
       - name: Test actual release and data boundaries
         run: |
           python3 -m unittest discover -s tests -p test_release.py -v
+          python3 -m unittest discover -s tests -p test_rights.py -v
           node --check templates/macro.js
           node scripts/browser_release.mjs site/index.html
       - name: Validate allowlisted publication
