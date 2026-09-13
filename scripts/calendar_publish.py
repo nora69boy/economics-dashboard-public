@@ -17,7 +17,7 @@ PERIOD_FAMILIES = {'cpi', 'jobs', 'pce'}
 ALLOWED_RAW_SOURCES = {
     'cpi': {calendar_probe.BLS_ICS, calendar_probe.BLS_CPI},
     'jobs': {calendar_probe.BLS_ICS, calendar_probe.BLS_JOBS},
-    'pce': {calendar_probe.BEA_SCHEDULE},
+    'pce': {calendar_probe.BEA_SCHEDULE, calendar_probe.BEA_NEXT_YEAR},
     'fomc': {calendar_probe.FED_FOMC},
 }
 
