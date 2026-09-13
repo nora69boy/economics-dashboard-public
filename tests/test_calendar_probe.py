@@ -21,7 +21,8 @@ class CalendarProbeTests(unittest.TestCase):
    return FED
   r=c.probe(f);self.assertEqual(r['calendar_probe_health'],'fresh');self.assertEqual(len(r['errors']),0);self.assertGreaterEqual(len(r['candidate_events']),14);self.assertEqual(r['publication'],'disabled_pending_rights_approval')
  def test_no_publication_side_effect(self):
-  before=(ROOT/'site/data/macro-calendar.json').read_bytes()
+  target=ROOT/'site/data/macro-calendar.json';existed=target.exists();before=target.read_bytes() if existed else None
   def f(url):return BLS if url==c.BLS_ICS else (BEA if url==c.BEA_SCHEDULE else FED)
-  c.probe(f);self.assertEqual((ROOT/'site/data/macro-calendar.json').read_bytes(),before)
+  c.probe(f);self.assertEqual(target.exists(),existed)
+  if existed:self.assertEqual(target.read_bytes(),before)
 if __name__=='__main__':unittest.main()
