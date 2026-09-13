@@ -1,54 +1,354 @@
 {
-  "updated_at": "2026-09-11",
-  "edition": "public-market-research",
-  "status": "framework-only",
-  "source_policy": {
-    "primary_sources_first": true,
-    "live_market_data": false
-  },
-  "focus": [
+  "version": "0.3.0",
+  "as_of": "2026-09-13",
+  "publication": "public_dashboard",
+  "live_market_data": false,
+  "automated_report_ingestion": false,
+  "sources": [
     {
-      "id": "macro-event-driven",
-      "title": "マクロ・イベント駆動",
-      "watch": [
-        "FOMC",
-        "金利",
-        "為替",
-        "雇用",
-        "インフレ"
-      ]
+      "id": "fed",
+      "label": "FRB：FOMC公式日程",
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+      "checked_at": "2026-09-13"
     },
     {
-      "id": "ai-investment",
-      "title": "AI関連投資",
-      "watch": [
-        "AI半導体",
-        "AIクラウド",
-        "AIアプリ",
-        "データセンター設備"
-      ]
+      "id": "boj",
+      "label": "日銀：金融政策決定会合",
+      "url": "https://www.boj.or.jp/en/mopo/mpmsche_minu/index.htm",
+      "checked_at": "2026-09-13"
+    },
+    {
+      "id": "bls",
+      "label": "米労働統計局：2026年発表日程",
+      "url": "https://www.bls.gov/schedule/2026/home.htm",
+      "checked_at": "2026-09-13"
+    }
+  ],
+  "streams": [
+    {
+      "id": "brief",
+      "label": "総合マーケット日報",
+      "scope": "世界市況、重要ニュース、今後の決算、技術テーマ、企業比較。"
+    },
+    {
+      "id": "breaking",
+      "label": "重要ニュース",
+      "scope": "新材料、前回からの変化、業界構造への影響、次の確認点。"
+    },
+    {
+      "id": "event",
+      "label": "重要イベント",
+      "scope": "金融政策、統計、決算、政策発表の前後を比較する。"
+    },
+    {
+      "id": "autumn",
+      "label": "9–11月イベント分析",
+      "scope": "期間別のシナリオ、資金需給、判断を変える条件を整理する。個人別の配分は除く。"
+    },
+    {
+      "id": "topix",
+      "label": "TOPIX・指数需給",
+      "scope": "採用基準、対象期間、浮動株と指数変更の影響を分ける。終了した対象期間を自動延長しない。"
+    }
+  ],
+  "topics": [
+    {
+      "id": "macro-rates",
+      "title": "金利・物価・雇用",
+      "category": "macro",
+      "priority": "P1",
+      "streams": [
+        "brief",
+        "breaking",
+        "event",
+        "autumn"
+      ],
+      "summary": "金融政策と景気の変化を分ける。",
+      "question": "物価・雇用・金利のどれが判断を変えたか。",
+      "refutation": "公式統計と政策発表が前提を否定する場合。",
+      "claim_type": "research_question"
+    },
+    {
+      "id": "ai-capex",
+      "title": "AIクラウド・設備投資",
+      "category": "ai",
+      "priority": "P1",
+      "streams": [
+        "brief",
+        "breaking",
+        "event",
+        "autumn"
+      ],
+      "summary": "投資計画を売上・現金収入と照合する。",
+      "question": "投資額の増加が課金・利益につながるか。",
+      "refutation": "主要顧客の投資削減、収益化の遅れ。",
+      "claim_type": "research_question"
+    },
+    {
+      "id": "memory-cycle",
+      "title": "AI半導体・メモリ需給",
+      "category": "ai",
+      "priority": "P1",
+      "streams": [
+        "brief",
+        "breaking",
+        "autumn"
+      ],
+      "summary": "GPU、専用半導体、HBM、DRAM、NANDを分ける。",
+      "question": "価格・在庫・受注残の方向は一致するか。",
+      "refutation": "在庫悪化と受注減が継続する場合。",
+      "claim_type": "research_question"
+    },
+    {
+      "id": "power-dc",
+      "title": "電力・データセンター",
+      "category": "ai",
+      "priority": "P1",
+      "streams": [
+        "brief",
+        "breaking",
+        "autumn"
+      ],
+      "summary": "電力、冷却、接続、建設の制約を確認する。",
+      "question": "計画どおり稼働・売上に転換するか。",
+      "refutation": "建設延期、中止、技術代替で需要が変わる場合。",
+      "claim_type": "research_question"
     },
     {
       "id": "japan-regional",
-      "title": "日本の地域投資",
-      "watch": [
-        "北海道",
-        "東北",
-        "九州",
-        "電力",
-        "設備工事",
-        "光通信"
-      ]
+      "title": "日本の地域AI投資",
+      "category": "japan",
+      "priority": "P2",
+      "streams": [
+        "brief",
+        "breaking"
+      ],
+      "summary": "北海道・東北・九州などの案件を一次資料で確認する。",
+      "question": "地域の話題が企業の受注・利益へどう伝わるか。",
+      "refutation": "案件の失注、採算悪化、需要の分散。",
+      "claim_type": "research_question"
     },
     {
       "id": "index-flow",
-      "title": "日本株・指数需給",
-      "watch": [
-        "TOPIX採用候補",
-        "浮動株",
-        "信用需給",
-        "指数リバランス"
-      ]
+      "title": "TOPIX・指数需給",
+      "category": "japan",
+      "priority": "P1",
+      "streams": [
+        "event",
+        "autumn",
+        "topix"
+      ],
+      "summary": "採用条件と売買需給を会社業績から分離する。",
+      "question": "対象期間、基準、算定根拠は確認済みか。",
+      "refutation": "基準変更、ボーダー未達、期待の先行。",
+      "claim_type": "research_question"
+    },
+    {
+      "id": "geopolitics",
+      "title": "地政学・政策・規制",
+      "category": "macro",
+      "priority": "P1",
+      "streams": [
+        "brief",
+        "breaking",
+        "event",
+        "autumn"
+      ],
+      "summary": "公式発表、報道、観測を区別する。",
+      "question": "需要・調達・利益への影響を確認できるか。",
+      "refutation": "一次発表が報道内容と異なる場合。",
+      "claim_type": "research_question"
+    },
+    {
+      "id": "ipo-flow",
+      "title": "IPO・増資・資金需給",
+      "category": "flow",
+      "priority": "P2",
+      "streams": [
+        "breaking",
+        "event",
+        "autumn"
+      ],
+      "summary": "確定案件と噂を混同しない。",
+      "question": "資金吸収や既存株への影響は検証できるか。",
+      "refutation": "計画延期、規模縮小、需給改善。",
+      "claim_type": "research_question"
+    },
+    {
+      "id": "ai-apps",
+      "title": "AIアプリ・商用化",
+      "category": "ai",
+      "priority": "P2",
+      "streams": [
+        "brief",
+        "breaking"
+      ],
+      "summary": "広義AI、生成AI、アプリの収益を分ける。",
+      "question": "利用拡大が課金・継続率・利益に結びつくか。",
+      "refutation": "顧客離反や推論費用増で採算が崩れる場合。",
+      "claim_type": "research_question"
+    },
+    {
+      "id": "quantum",
+      "title": "量子・次世代計算",
+      "category": "frontier",
+      "priority": "P2",
+      "streams": [
+        "brief",
+        "breaking"
+      ],
+      "summary": "技術発表と商用契約を分離する。",
+      "question": "性能の再現性と有償利用を確認できるか。",
+      "refutation": "性能が再現されない、商用化が遅れる場合。",
+      "claim_type": "research_question"
+    },
+    {
+      "id": "space",
+      "title": "宇宙・衛星",
+      "category": "frontier",
+      "priority": "P2",
+      "streams": [
+        "brief",
+        "breaking"
+      ],
+      "summary": "技術実証、受注、量産、資金余力を確認する。",
+      "question": "契約が売上と現金収入に転換するか。",
+      "refutation": "打ち上げ延期、契約解除、調達負担の増大。",
+      "claim_type": "research_question"
+    },
+    {
+      "id": "robotics",
+      "title": "ロボティクス・自動運転",
+      "category": "frontier",
+      "priority": "P2",
+      "streams": [
+        "brief",
+        "breaking"
+      ],
+      "summary": "実証試験と量産・有償導入を分ける。",
+      "question": "採用、稼働、継続受注、採算を確認できるか。",
+      "refutation": "量産延期、規制、顧客の導入中止。",
+      "claim_type": "research_question"
+    },
+    {
+      "id": "biotech",
+      "title": "バイオ・創薬",
+      "category": "frontier",
+      "priority": "P2",
+      "streams": [
+        "brief",
+        "breaking"
+      ],
+      "summary": "技術テーマと臨床・承認・収益化を分ける。",
+      "question": "一次開示の進捗と資金余力はどう変化したか。",
+      "refutation": "試験不達、承認遅れ、追加調達負担。",
+      "claim_type": "research_question"
     }
+  ],
+  "events": [
+    {
+      "id": "fomc-sep",
+      "title": "FOMC・経済見通し",
+      "start": "2026-09-15",
+      "end": "2026-09-16",
+      "zone": "America/New_York",
+      "time_local": null,
+      "time_jst": null,
+      "source": "fed",
+      "status": "verified_schedule_only"
+    },
+    {
+      "id": "boj-sep",
+      "title": "日銀・金融政策決定会合",
+      "start": "2026-09-17",
+      "end": "2026-09-18",
+      "zone": "Asia/Tokyo",
+      "time_local": null,
+      "time_jst": null,
+      "source": "boj",
+      "status": "verified_schedule_only"
+    },
+    {
+      "id": "jobs-oct",
+      "title": "米雇用統計・9月分",
+      "start": "2026-10-02",
+      "end": "2026-10-02",
+      "zone": "America/New_York",
+      "time_local": "08:30",
+      "time_jst": "2026-10-02 21:30",
+      "source": "bls",
+      "status": "verified_schedule_only"
+    },
+    {
+      "id": "cpi-oct",
+      "title": "米CPI・9月分",
+      "start": "2026-10-14",
+      "end": "2026-10-14",
+      "zone": "America/New_York",
+      "time_local": "08:30",
+      "time_jst": "2026-10-14 21:30",
+      "source": "bls",
+      "status": "verified_schedule_only"
+    },
+    {
+      "id": "fomc-oct",
+      "title": "FOMC",
+      "start": "2026-10-27",
+      "end": "2026-10-28",
+      "zone": "America/New_York",
+      "time_local": null,
+      "time_jst": null,
+      "source": "fed",
+      "status": "verified_schedule_only"
+    },
+    {
+      "id": "boj-oct",
+      "title": "日銀・金融政策決定会合",
+      "start": "2026-10-29",
+      "end": "2026-10-30",
+      "zone": "Asia/Tokyo",
+      "time_local": null,
+      "time_jst": null,
+      "source": "boj",
+      "status": "verified_schedule_only"
+    },
+    {
+      "id": "jobs-nov",
+      "title": "米雇用統計・10月分",
+      "start": "2026-11-06",
+      "end": "2026-11-06",
+      "zone": "America/New_York",
+      "time_local": "08:30",
+      "time_jst": "2026-11-06 22:30",
+      "source": "bls",
+      "status": "verified_schedule_only"
+    },
+    {
+      "id": "cpi-nov",
+      "title": "米CPI・10月分",
+      "start": "2026-11-10",
+      "end": "2026-11-10",
+      "zone": "America/New_York",
+      "time_local": "08:30",
+      "time_jst": "2026-11-10 22:30",
+      "source": "bls",
+      "status": "verified_schedule_only"
+    }
+  ],
+  "company_checks": [
+    "成長性",
+    "収益性",
+    "市場規模",
+    "競争優位",
+    "経営陣",
+    "資本配分",
+    "財務健全性",
+    "希薄化",
+    "需給",
+    "会計品質",
+    "ガバナンス",
+    "カタリスト",
+    "バリュエーション",
+    "売る条件"
   ]
 }
