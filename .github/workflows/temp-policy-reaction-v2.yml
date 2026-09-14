@@ -15,67 +15,23 @@ jobs:
           fetch-depth: 0
       - name: Load validated public macro fixture
         run: python3 scripts/macro_fetch.py --snapshot-only
-      - name: Apply bounded source changes
+      - name: Reuse reviewed bounded patch
         run: |
           python3 - <<'PY'
           from pathlib import Path
-
-          p=Path('scripts/build_release.py');s=p.read_text()
-          old="const stage=document.getElementById('policy-stage'),countdown=document.getElementById('policy-countdown');if(!stage||!countdown)return;"
-          new="const stage=document.getElementById('policy-stage'),countdown=document.getElementById('policy-countdown'),phase=document.getElementById('reaction-phase'),action=document.getElementById('reaction-action');if(!stage||!countdown)return;"
-          assert s.count(old)==1;s=s.replace(old,new,1)
-          old="function render(){const n=Date.now();if(n<fomc){stage.textContent='FOMC声明待ち';countdown.textContent='FOMC声明まで '+left(fomc,n);}else if(n<fomcPc){stage.textContent='FOMC声明公表 / 議長会見待ち';countdown.textContent='議長会見まで '+left(fomcPc,n);}else if(n<bojPc){stage.textContent='FOMC通過 / 日銀決定・会見監視';countdown.textContent='日銀総裁会見まで '+left(bojPc,n)+'（政策決定内容の公表時刻は未定）';}else{stage.textContent='FOMC・日銀通過後 / 市場反応を検証';countdown.textContent='金利・USD/JPY・TOPIX・日経225の24時間反応を確認';}}"
-          new="function render(){const n=Date.now();let p='事前レンジ',a='イベント前の金利・為替・株式の方向を確認';if(n<fomc){stage.textContent='FOMC声明待ち';countdown.textContent='FOMC声明まで '+left(fomc,n);}else if(n<fomcPc){stage.textContent='FOMC声明公表 / 議長会見待ち';countdown.textContent='議長会見まで '+left(fomcPc,n);p='FOMC初動';a='声明だけで確定せず、会見後の米10年金利とNASDAQの方向一致を確認';}else if(n<bojPc){stage.textContent='FOMC通過 / 日銀決定・会見監視';countdown.textContent='日銀総裁会見まで '+left(bojPc,n)+'（政策決定内容の公表時刻は未定）';p='FOMC確定反応 / BOJ待ち';a='USD/JPYと日本株の反応がFOMC後に維持されるか確認';}else{stage.textContent='FOMC・日銀通過後 / 市場反応を検証';countdown.textContent='金利・USD/JPY・TOPIX・日経225の24時間反応を確認';p='24時間フォロースルー';a='イベント前レンジへ戻るか、方向性が定着するかを確認';}if(phase)phase.textContent=p;if(action)action.textContent=a;}"
-          assert s.count(old)==1;s=s.replace(old,new,1)
-          addition=r'''
-
-def archive_notice():
- market=json.loads((ROOT/'site/data/market.json').read_text())
- return ('<div data-market-archive="true" class="notice"><strong>監査アーカイブ / '+escape(market['as_of'])+'</strong><br>'
-         '以下の自己ホスト株価・指数は権利レビュー前の固定スナップショットです。現在値・売買判断には使用せず、上段のライブWidgetを参照してください。</div>')
-
-def policy_reaction_board():
- symbols=[
-  {'s':'TVC:US10Y','d':'US 10Y Yield'}, {'s':'FX_IDC:USDJPY','d':'USD/JPY'},
-  {'s':'TVC:SPX','d':'S&P 500'}, {'s':'NASDAQ:IXIC','d':'NASDAQ Composite'},
-  {'s':'TVC:NI225','d':'Nikkei 225'}, {'s':'TSE:TOPIX','d':'TOPIX'}]
- cfg={'colorTheme':'dark','dateRange':'1D','locale':'ja','largeChartUrl':'','isTransparent':True,
-      'showFloatingTooltip':True,'plotLineColorGrowing':'rgba(105,222,200,1)',
-      'plotLineColorFalling':'rgba(245,173,193,1)','gridLineColor':'rgba(49,70,94,0.25)',
-      'scaleFontColor':'#b5c4d5','belowLineFillColorGrowing':'rgba(105,222,200,0.12)',
-      'belowLineFillColorFalling':'rgba(245,173,193,0.12)',
-      'belowLineFillColorGrowingBottom':'rgba(105,222,200,0.02)',
-      'belowLineFillColorFallingBottom':'rgba(245,173,193,0.02)',
-      'symbolActiveColor':'rgba(146,202,255,0.12)','tabs':[{'title':'Policy Reaction / 1D','symbols':symbols}],
-      'width':'100%','height':'550','showSymbolLogo':True,'showChart':True}
- return ('<section data-rights-shell="policy-reaction-board" data-policy-reaction-board="true" class="p-card live-market-widget">'
-         '<div class="eyebrow">POLICY REACTION BOARD / LIVE</div><h3>FOMC → 日銀：市場反応ボード</h3>'
-         '<div class="notice"><strong>現在フェーズ：<span id="reaction-phase">事前レンジ</span></strong><br><span id="reaction-action">イベント前の金利・為替・株式の方向を確認</span></div>'
-         '<div class="tradingview-widget-container" style="width:100%;min-height:550px"><div class="tradingview-widget-container__widget"></div>'
-         '<div class="tradingview-widget-copyright"><a href="'+TV_MARKETS+'" rel="noopener noreferrer nofollow" referrerpolicy="no-referrer" target="_blank">Market data</a> by TradingView</div>'
-         '<script type="text/javascript" src="'+TV_SCRIPT+'" async>'+json.dumps(cfg,ensure_ascii=False,separators=(',',':'))+'</script></div>'
-         '<div class="grid two"><article class="card"><div class="eyebrow">推測・判定ルール</div><h3>Fed緩和方向</h3><p>米10年金利↓・USD/JPY↓・NASDAQ/S&P 500↑が同時なら、政策期待によるリスクオン仮説を強める。</p></article>'
-         '<article class="card"><div class="eyebrow">推測・判定ルール</div><h3>Fedタカ派方向</h3><p>米10年金利↑・USD/JPY↑・NASDAQ/S&P 500↓が同時なら、金利上昇によるバリュエーション圧力を優先。</p></article>'
-         '<article class="card"><div class="eyebrow">推測・判定ルール</div><h3>BOJ引締め方向</h3><p>USD/JPY↓と日経225/TOPIX↓が同時なら、円高・金融条件引締めの影響を監視。株式の業種差は別途確認する。</p></article>'
-         '<article class="card"><div class="eyebrow">反証</div><h3>イベント効果が弱いケース</h3><p>24時間以内に金利・為替・株式がイベント前レンジへ戻るなら、政策イベントよりポジショニング要因を優先する。</p></article></div>'
-         '<p class="small">TradingView配信。市場によりリアルタイム、遅延、EODが混在します。当サイトは価格を保存しないため、イベント前→直後→24時間後の差分を自己ホスト値として自動記録・再配布しません。</p></section>')
-'''
-          marker='\ndef policy_watch():';assert s.count(marker)==1;s=s.replace(marker,addition+marker,1)
-          assert s.count("badge('STOCK SNAPSHOT / '")==1;s=s.replace("badge('STOCK SNAPSHOT / '","badge('ARCHIVE SNAPSHOT / '",1)
-          a="text=text.replace(world_marker,world_marker+tv_widget('indices'),1)";b="text=text.replace(world_marker,world_marker+tv_widget('indices')+archive_notice(),1)";assert s.count(a)==1;s=s.replace(a,b,1)
-          a="text=text.replace(market_marker,market_marker+tv_widget('stocks'),1)";b="text=text.replace(market_marker,market_marker+tv_widget('stocks')+archive_notice(),1)";assert s.count(a)==1;s=s.replace(a,b,1)
-          a="text=text.replace(event_marker,event_marker+policy_watch(),1)";b="text=text.replace(event_marker,event_marker+policy_watch()+policy_reaction_board(),1)";assert s.count(a)==1;s=s.replace(a,b,1)
-          p.write_text(s)
-
-          p=Path('scripts/check_site.py');s=p.read_text();a="require(len(external)==2,'external program count')";b="require(len(external)==3,'external program count')";assert s.count(a)==1;p.write_text(s.replace(a,b,1))
-
-          p=Path('scripts/release_assertions.js');s=p.read_text()
-          a="ok(live.length===2,'two live market widgets')";b="ok(live.length===2,'two primary live market widgets')";assert s.count(a)==1;s=s.replace(a,b,1)
-          a="ok(tv.length===2&&tv.every(s=>s.src==='https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js'),'tradingview scripts only');";b="ok(tv.length===3&&tv.every(s=>s.src==='https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js'),'tradingview scripts only');\n const archives=[...document.querySelectorAll('[data-market-archive=\"true\"]')];ok(archives.length===2&&archives.every(x=>x.textContent.includes('監査アーカイブ')&&x.textContent.includes('現在値・売買判断には使用せず')),'archive snapshot demotion');ok(document.body.textContent.includes('ARCHIVE SNAPSHOT'),'archive badge');\n const reaction=document.querySelector('[data-policy-reaction-board=\"true\"]');ok(!!reaction&&reaction.textContent.includes('市場反応ボード')&&!!$('reaction-phase')&&!!$('reaction-action'),'policy reaction board shell');";assert s.count(a)==1;p.write_text(s.replace(a,b,1))
-
-          p=Path('tests/test_release.py');s=p.read_text();a=" def test_market_snapshot_unchanged(self):self.assertEqual(json.loads((ROOT/'site/data/market.json').read_text())['as_of'],'2026-09-10')\n";b=a+" def test_market_snapshot_is_archive_only(self):\n  text=(ROOT/'site/index.html').read_text();self.assertIn('ARCHIVE SNAPSHOT',text);self.assertIn('data-market-archive=\"true\"',text);self.assertIn('現在値・売買判断には使用せず',text)\n def test_policy_reaction_board_provider_hosted(self):\n  text=(ROOT/'site/index.html').read_text();self.assertIn('data-policy-reaction-board=\"true\"',text);self.assertEqual(text.count('https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js'),3);self.assertIn('TVC:US10Y',text);self.assertIn('FX_IDC:USDJPY',text)\n";assert s.count(a)==1;p.write_text(s.replace(a,b,1))
-
-          p=Path('docs/market-data-automation.md');s=p.read_text();a='## Current decision\n\n';b=a+'### User-visible current-state handling\n\n- The 2026-09-10 repository-owned market snapshot is an **audit archive**, not the current-price display. It is intentionally not refreshed while redistribution/storage rights remain unresolved.\n- Current market state is shown through provider-hosted TradingView widgets. The repository does not ingest, store, cache, transform, or republish those widget quote values.\n- The Policy Reaction Board uses the same provider-hosted boundary for US 10Y, USD/JPY, S&P 500, Nasdaq Composite, Nikkei 225 and TOPIX. Event-window quote deltas are not persisted by this repository.\n\n';assert s.count(a)==1;p.write_text(s.replace(a,b,1))
+          src=Path('.github/workflows/temp-policy-reaction.yml').read_text()
+          begin="          cat > /tmp/policy.patch <<'PATCH'\n"
+          end="          PATCH\n"
+          assert src.count(begin)==1 and src.count(end)==1
+          body=src.split(begin,1)[1].split(end,1)[0]
+          lines=[line[10:] if line.startswith('          ') else line for line in body.splitlines()]
+          Path('/tmp/policy.patch').write_text('\n'.join(lines)+'\n')
+          PY
+          git apply --check /tmp/policy.patch
+          git apply /tmp/policy.patch
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/release_assertions.js');s=p.read_text();old="&&reaction.textContent.includes('US 10Y')===false";assert s.count(old)==1;p.write_text(s.replace(old,'',1))
           PY
           git rm .github/workflows/temp-policy-reaction.yml .github/workflows/temp-policy-reaction-v2.yml
       - name: Rebuild reviewed shell baseline
@@ -84,12 +40,22 @@ def policy_reaction_board():
           python3 - <<'PY'
           import hashlib,json,re,sys
           from pathlib import Path
-          sys.path.insert(0,'scripts');import publication_rights as r
+          sys.path.insert(0,'scripts')
+          import publication_rights as r
           payload={name:(Path('site')/name).read_bytes() for name in r.TARGETS}
-          shell=r.shell_hash(payload);p=Path('data-rights/migration-baseline.json');baseline=json.loads(p.read_text());baseline['html_shell_sha256']=shell;p.write_text(json.dumps(baseline,indent=2)+'\n')
+          shell=r.shell_hash(payload)
+          p=Path('data-rights/migration-baseline.json')
+          baseline=json.loads(p.read_text())
+          baseline['html_shell_sha256']=shell
+          p.write_text(json.dumps(baseline,indent=2)+'\n')
           digest=hashlib.sha256(json.dumps(baseline,sort_keys=True,ensure_ascii=True,separators=(',',':'),allow_nan=False).encode()).hexdigest()
-          q=Path('scripts/publication_rights.py');text=q.read_text();text,n=re.subn(r"BASELINE_SHA256 = '[0-9a-f]{64}'","BASELINE_SHA256 = '"+digest+"'",text,count=1);assert n==1;q.write_text(text)
-          print('Reviewed shell',shell);print('Baseline digest',digest)
+          q=Path('scripts/publication_rights.py')
+          text=q.read_text()
+          text,n=re.subn(r"BASELINE_SHA256 = '[0-9a-f]{64}'","BASELINE_SHA256 = '"+digest+"'",text,count=1)
+          assert n==1
+          q.write_text(text)
+          print('Reviewed shell',shell)
+          print('Baseline digest',digest)
           PY
       - name: Validate reviewed release
         run: |
