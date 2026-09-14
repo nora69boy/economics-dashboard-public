@@ -54,6 +54,7 @@ def build():
  m={'version':2,'classification':'public-market-research','files':{n:hashlib.sha256((ROOT/'site'/n).read_bytes()).hexdigest() for n in names}};(ROOT/'site/manifest.json').write_text(json.dumps(m,indent=2)+'\n')
  payload={name:(ROOT/'site'/name).read_bytes() for name in publication_rights.TARGETS}
  print('Reviewed shell hash '+publication_rights.shell_hash(payload))
+ print('Reviewed baseline digest '+publication_rights.digest(publication_rights.read_json(ROOT/'data-rights/migration-baseline.json')))
  print('Calendar publication '+json.dumps(calendar_report,sort_keys=True,separators=(',',':')))
  print('Market rights health '+json.dumps(market_refresh_guard.evaluate(json.loads((ROOT/'data-rights/registry.json').read_text()),json.loads((ROOT/'site/data/market.json').read_text())),sort_keys=True,separators=(',',':')))
  return text
