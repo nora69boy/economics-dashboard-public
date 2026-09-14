@@ -27,6 +27,10 @@ def market_rights_health():
   cards.append('<article class="card" data-market-rights-stage="'+escape(stage['stage'])+'" data-market-rights-status="'+escape(stage['status'])+'"><div class="eyebrow">'+escape(STAGE_LABELS[stage['stage']])+'</div><div class="metric '+cls+'">'+label+'</div><p>'+str(stage['eligible_count'])+' / '+str(total)+' 系列が公開自動更新の権利条件を満たす。</p><p class="small">自動取得・保存・加工・公開表示・再配布・キャッシュの全条件が必要。</p></article>')
  return '<h2>市場データ権利 / 自動更新</h2><div class="notice"><strong>株価・指数は権利確認が完了するまで凍結スナップショットを維持します。</strong><br>APIが利用可能でも、公開表示・再配布まで明示許諾されていなければ自動更新しません。現在のスナップショット基準日：'+escape(report['snapshot_as_of'])+'</div><div class="grid two" id="market-rights-health">'+''.join(cards)+'</div>'
 
+def baseline_digest():
+ baseline=json.loads((ROOT/'data-rights/migration-baseline.json').read_text())
+ return hashlib.sha256(json.dumps(baseline,sort_keys=True,ensure_ascii=True,separators=(',',':'),allow_nan=False).encode()).hexdigest()
+
 def build():
  md=(ROOT/'site/data/macro.json').read_text();calendar,calendar_report=calendar_publish.build();cd=json.dumps(calendar,separators=(',',':'))+'\n';cr=json.dumps(calendar_report,separators=(',',':'))+'\n';(ROOT/'site/data/macro-calendar.json').write_text(cd)
  macro=json.loads(md);cal=json.loads(cd);validate(macro);validate_calendar(cal);text=build_dashboard.build()
@@ -52,6 +56,7 @@ def build():
  (ROOT/'site/index.html').write_text(text,encoding='utf-8')
  names=['index.html','data/current-state.json','data/market.json','reports/2026-09-11-carry-forward.md','data/macro.json','data/macro-calendar.json']
  m={'version':2,'classification':'public-market-research','files':{n:hashlib.sha256((ROOT/'site'/n).read_bytes()).hexdigest() for n in names}};(ROOT/'site/manifest.json').write_text(json.dumps(m,indent=2)+'\n')
+ print('Candidate baseline SHA-256 '+baseline_digest())
  print('Calendar publication '+json.dumps(calendar_report,sort_keys=True,separators=(',',':')))
  print('Market rights health '+json.dumps(market_refresh_guard.evaluate(json.loads((ROOT/'data-rights/registry.json').read_text()),json.loads((ROOT/'site/data/market.json').read_text())),sort_keys=True,separators=(',',':')))
  return text
