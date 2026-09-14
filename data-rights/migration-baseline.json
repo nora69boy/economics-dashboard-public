@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source_commit": "7460524c290b22c8c6f6b1c6bf64cbefeb95549f",
   "migration_status": "PENDING_RIGHTS_REVIEW",
-  "html_shell_sha256": "f5a5acf47b0cfc91bb490641ca8825cc372b0d12d8ae42287f9e50e12d994204",
+  "html_shell_sha256": "dfbbeb7429015112d1208b6e2df6197c50f6a233f27b50fe31098b164b98fe7a",
   "datasets": {
     "market-spx": {"scope_sha256":"77cf0382ba2351e173c111d713fb25a2116d22b75d9fd372f5c5fd6f8cd653ba","content_sha256":"bb5f62794cf651ca218f1f7cd1c29e1effc0575eef783360ad6f9cb8897101e5","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
     "market-ixic": {"scope_sha256":"c8a3e881ff876cfd4cb63b4413e9747204be36b0097c5ec27e0436e6cbc03039","content_sha256":"4418c874f2a3b598e12608be2bd36ec228d306778ae99cef9f23899fd67aec90","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},

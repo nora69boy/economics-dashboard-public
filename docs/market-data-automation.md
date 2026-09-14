@@ -15,6 +15,12 @@ The dashboard is operated under a **JPY 0 monthly-cost ceiling** for market-data
 
 ## Current decision
 
+### User-visible current-state handling
+
+- The 2026-09-10 repository-owned market snapshot is an **audit archive**, not the current-price display. It is intentionally not refreshed while redistribution/storage rights remain unresolved.
+- Current market state is shown through provider-hosted TradingView widgets. The repository does not ingest, store, cache, transform, or republish those widget quote values.
+- The Policy Reaction Board uses the same provider-hosted boundary for US 10Y, USD/JPY, S&P 500, Nasdaq Composite, Nikkei 225 and TOPIX. Event-window quote deltas are not persisted by this repository.
+
 - Primary market display: TradingView official Market Overview widget. It is loaded by the visitor's browser and may show real-time, delayed, or end-of-day data depending on market/exchange entitlements and TradingView availability.
 - Audit/history layer: the existing reviewed stock/index snapshot remains unchanged with `as_of = 2026-09-10`.
 - The repository does not write TradingView quote values to `site/data/market.json`, the release artifact, caches, logs, or analytics.
