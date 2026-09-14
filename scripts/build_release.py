@@ -17,6 +17,16 @@ STAGE_LABELS={
 TV_SCRIPT='https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js'
 TV_MARKETS='https://www.tradingview.com/markets/'
 BOJ_RELEASE='https://www.boj.or.jp/about/calendar/index.htm'
+POLICY_JS="""
+(()=>{
+'use strict';
+const stage=document.getElementById('policy-stage'),countdown=document.getElementById('policy-countdown');if(!stage||!countdown)return;
+const fomc=Date.parse('2026-09-17T03:00:00+09:00'),fomcPc=Date.parse('2026-09-17T03:30:00+09:00'),bojPc=Date.parse('2026-09-18T15:30:00+09:00');
+function left(t,n){const m=Math.max(0,Math.floor((t-n)/60000)),d=Math.floor(m/1440),h=Math.floor((m%1440)/60),x=m%60;return (d?d+'日 ':'')+h+'時間 '+x+'分';}
+function render(){const n=Date.now();if(n<fomc){stage.textContent='FOMC声明待ち';countdown.textContent='FOMC声明まで '+left(fomc,n);}else if(n<fomcPc){stage.textContent='FOMC声明公表 / 議長会見待ち';countdown.textContent='議長会見まで '+left(fomcPc,n);}else if(n<bojPc){stage.textContent='FOMC通過 / 日銀決定・会見監視';countdown.textContent='日銀総裁会見まで '+left(bojPc,n)+'（政策決定内容の公表時刻は未定）';}else{stage.textContent='FOMC・日銀通過後 / 市場反応を検証';countdown.textContent='金利・USD/JPY・TOPIX・日経225の24時間反応を確認';}}
+render();setInterval(render,60000);
+})();
+"""
 
 def market_rights_health():
  registry=json.loads((ROOT/'data-rights/registry.json').read_text())
@@ -27,8 +37,8 @@ def market_rights_health():
   ready=stage['status']=='ready';total=stage['eligible_count']+stage['blocked_count']
   label='無料自動更新可能' if ready else '無料運用：凍結'
   cls='good' if ready else 'pending'
-  cards.append('<article class="card" data-market-rights-stage="'+escape(stage['stage'])+'" data-market-rights-status="'+escape(stage['status'])+'"><div class="eyebrow">'+escape(STAGE_LABELS[stage['stage']])+'</div><div class="metric '+cls+'">'+label+'</div><p>'+str(stage['eligible_count'])+' / '+str(total)+' 系列が月額0円かつ公開自動更新の権利条件を満たす。</p><p class="small">無料で自動取得・保存・加工・公開表示・再配布・キャッシュの全条件を満たさない限り更新しません。</p></article>')
- return '<h2>無料運用モード / 市場データ</h2><div class="notice" data-market-free-mode="true"><strong>月額0円運用を固定。株価・指数は凍結スナップショットを維持します。</strong><br>有料API・有料ライセンスの比較や導入は行いません。公的マクロ6系列と経済カレンダーの公式ソース自動更新は継続します。現在の株価・指数スナップショット基準日：'+escape(report['snapshot_as_of'])+'</div><div class="grid two" id="market-rights-health">'+''.join(cards)+'</div>'
+  cards.append('<article class="card" data-market-rights-stage="'+escape(stage['stage'])+'" data-market-rights-status="'+escape(stage['status'])+'"><div class="eyebrow">'+escape(STAGE_LABELS[stage['stage']])+'</div><div class="metric '+cls+'">'+label+'</div><p>'+str(stage['eligible_count'])+' / '+str(total)+' 系列が月額0円かつ公開自動更新の権利条件を満たす。</p><p class="small">無料で自動取得・保存・加工・公開表示・再配布・キャッシュの全条件を満たさない限り自己ホスト値は更新しません。</p></article>')
+ return '<h2>無料運用モード / 市場データ</h2><div class="notice" data-market-free-mode="true"><strong>月額0円運用を固定。自己ホストの株価・指数は監査用凍結スナップショットを維持します。</strong><br>主表示はTradingView公式Widgetでライブ更新しますが、価格データをこのリポジトリへ保存・再配布しません。有料API・有料ライセンスの比較や導入は行いません。現在の自己ホスト株価・指数スナップショット基準日：'+escape(report['snapshot_as_of'])+'</div><div class="grid two" id="market-rights-health">'+''.join(cards)+'</div>'
 
 def tv_widget(kind):
  if kind=='indices':
@@ -66,16 +76,11 @@ def tv_widget(kind):
          '<script type="text/javascript" src="'+TV_SCRIPT+'" async>'+json.dumps(cfg,ensure_ascii=False,separators=(',',':'))+'</script>'
          '</div><p class="small">外部Widgetのため閲覧時にTradingViewへ通信します。表示値は当サイトの保存データではありません。</p></section>')
 
-def policy_watch(calendar_report):
- cutoff=calendar_report.get('cutoff_jst') or '2026-09-14'
- if cutoff<='2026-09-16': stage='FOMC待ち / BOJ連続イベント前'
- elif cutoff=='2026-09-17': stage='FOMC通過 / BOJ会合中'
- elif cutoff=='2026-09-18': stage='BOJ決定・総裁会見を監視'
- else: stage='FOMC・BOJ通過後 / 市場反応を検証'
+def policy_watch():
  fed='https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm'
  boj='https://www.boj.or.jp/en/mopo/mpmsche_minu/index.htm'
  return ('<section data-rights-shell="policy-watch" class="p-card"><div class="eyebrow">POLICY EVENT WATCH / 2026-09</div>'
-         '<h3>FOMC × 日銀 イベント駆動パネル</h3><div class="notice"><strong>現在ステージ：'+escape(stage)+'</strong><br>判定基準日 '+escape(cutoff)+' JST。時刻未定の公表は推測で補完しません。</div>'
+         '<h3>FOMC × 日銀 イベント駆動パネル</h3><div class="notice"><strong id="policy-stage">FOMC声明待ち</strong><br><span id="policy-countdown" aria-live="polite">時刻を計算中</span><br>時刻未定の公表は推測で補完しません。</div>'
          '<div class="grid two"><article class="card"><h3>FOMC</h3><p><strong>9/15–16（米東部）</strong></p><p>政策声明：9/16 14:00 ET → <strong>9/17 03:00 JST</strong><br>議長会見：14:30 ET → <strong>03:30 JST</strong></p><p class="small">監視：米10年金利、USD/JPY、NASDAQ/S&P 500。声明→会見で方向が反転する場合は初動を確定シグナルと扱わない。</p><p><a href="'+fed+'" rel="noopener noreferrer" referrerpolicy="no-referrer">FRB公式日程</a></p></article>'
          '<article class="card"><h3>日本銀行</h3><p><strong>9/17–18 JST</strong></p><p>金融政策決定内容：9/18 <strong>時刻未定</strong><br>植田総裁会見：<strong>9/18 15:30 JST</strong></p><p class="small">監視：USD/JPY、TOPIX、日経225。決定公表時刻は未定のため、時刻を仮定した自動売買判断はしない。</p><p><a href="'+boj+'" rel="noopener noreferrer" referrerpolicy="no-referrer">日銀会合日程</a> / <a href="'+BOJ_RELEASE+'" rel="noopener noreferrer" referrerpolicy="no-referrer">日銀公表予定</a></p></article></div>'
          '<div class="grid"><article class="card"><h3>楽観シナリオ</h3><p>Fedが過度にタカ派化せず、日銀も急激な引締めを避ける。金利・円の急変が抑えられればグロース株のバリュエーション圧力が緩和。</p></article>'
@@ -93,6 +98,8 @@ def build():
  text=text.replace("const archive=$('archive');archive.append(card('v0.6.0 /", "const archive=$('archive');archive.append(card('v0.5.0 /")
  text=text.replace("['0','接続済み自動取得','リアルタイム値なし']","['6','マクロ自動取得系列','公的データ / 株価は対象外']")
  text=text.replace('自動更新なし / 追跡タグなし','マクロのみ定期取得 / 追跡タグなし')
+ text=text.replace('個人に紐づく金融情報や秘密情報の入力・保存・掲載は行いません。広告・解析タグ・外部画像・外部プログラムはありません。','個人に紐づく金融情報や秘密情報の入力・保存・掲載は行いません。広告・解析タグ・フォーム送信はありません。ライブ市場表示に限りTradingView公式Widgetを読み込みます。')
+ text=text.replace('出典リンクを押すと、その外部サイトへ移動します。リンクを押さない限り、アプリによる外部通信は行いません。','ライブ市場Widgetは表示時にTradingViewへ通信します。その他の出典リンクは押したときだけ外部サイトへ移動します。')
  marker='<section class="panel" id="operations" aria-labelledby="tab-operations"><h2>出典・運用</h2>'
  if text.count(marker)!=1:raise ValueError('operations marker')
  text=text.replace(marker,marker+market_rights_health(),1)
@@ -101,7 +108,7 @@ def build():
  for s in macro['series']:
   latest=s['observations'][-1] if s['observations'] else ['--','--'];fallback+='<tr>'+''.join('<td>'+escape(str(v))+'</td>' for v in [s['id'],*latest,s['status']])+'</tr>'
  fallback+='</tbody></table></article></noscript>';text=text.replace('</body>',embedded+fallback+'</body>')
- code=re.findall(r'<script[^>]*>(.*?)</script>',text,re.S)[0]+'\n'+(ROOT/'templates/macro.js').read_text()
+ code=re.findall(r'<script[^>]*>(.*?)</script>',text,re.S)[0]+'\n'+(ROOT/'templates/macro.js').read_text()+'\n'+POLICY_JS
  text=re.sub(r'<script[^>]*>.*?</script>',lambda _:'<script>'+code+'</script>',text,flags=re.S)
  script='<script>'+code+'</script>';text=text.replace(script,'').replace('</body>',script+'</body>');text=text.replace('</style>',(ROOT/'templates/macro.css').read_text()+'</style>',1)
  digest=base64.b64encode(hashlib.sha256(code.encode()).digest()).decode();text=re.sub(r"script-src 'sha256-[^']+'",lambda _:"script-src 'sha256-"+digest+"'",text)
@@ -111,7 +118,7 @@ def build():
  if any(text.count(x)!=1 for x in [world_marker,market_marker,event_marker]):raise ValueError('live widget marker')
  text=text.replace(world_marker,world_marker+tv_widget('indices'),1)
  text=text.replace(market_marker,market_marker+tv_widget('stocks'),1)
- text=text.replace(event_marker,event_marker+policy_watch(calendar_report),1)
+ text=text.replace(event_marker,event_marker+policy_watch(),1)
  text=text.replace("script-src 'sha256-"+digest+"';","script-src 'sha256-"+digest+"' https://s3.tradingview.com;",1)
  text=text.replace("frame-src 'none';","frame-src https://s.tradingview.com https://www.tradingview.com https://www.tradingview-widget.com;",1)
  (ROOT/'site/index.html').write_text(text,encoding='utf-8')
