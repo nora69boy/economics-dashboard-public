@@ -22,10 +22,10 @@ def market_rights_health():
  cards=[]
  for stage in report['stages']:
   ready=stage['status']=='ready';total=stage['eligible_count']+stage['blocked_count']
-  label='自動更新可能' if ready else '権利確認待ち'
+  label='無料自動更新可能' if ready else '無料運用：凍結'
   cls='good' if ready else 'pending'
-  cards.append('<article class="card" data-market-rights-stage="'+escape(stage['stage'])+'" data-market-rights-status="'+escape(stage['status'])+'"><div class="eyebrow">'+escape(STAGE_LABELS[stage['stage']])+'</div><div class="metric '+cls+'">'+label+'</div><p>'+str(stage['eligible_count'])+' / '+str(total)+' 系列が公開自動更新の権利条件を満たす。</p><p class="small">自動取得・保存・加工・公開表示・再配布・キャッシュの全条件が必要。</p></article>')
- return '<h2>市場データ権利 / 自動更新</h2><div class="notice"><strong>株価・指数は権利確認が完了するまで凍結スナップショットを維持します。</strong><br>APIが利用可能でも、公開表示・再配布まで明示許諾されていなければ自動更新しません。現在のスナップショット基準日：'+escape(report['snapshot_as_of'])+'</div><div class="grid two" id="market-rights-health">'+''.join(cards)+'</div>'
+  cards.append('<article class="card" data-market-rights-stage="'+escape(stage['stage'])+'" data-market-rights-status="'+escape(stage['status'])+'"><div class="eyebrow">'+escape(STAGE_LABELS[stage['stage']])+'</div><div class="metric '+cls+'">'+label+'</div><p>'+str(stage['eligible_count'])+' / '+str(total)+' 系列が月額0円かつ公開自動更新の権利条件を満たす。</p><p class="small">無料で自動取得・保存・加工・公開表示・再配布・キャッシュの全条件を満たさない限り更新しません。</p></article>')
+ return '<h2>無料運用モード / 市場データ</h2><div class="notice" data-market-free-mode="true"><strong>月額0円運用を固定。株価・指数は凍結スナップショットを維持します。</strong><br>有料API・有料ライセンスの比較や導入は行いません。公的マクロ6系列と経済カレンダーの公式ソース自動更新は継続します。現在の株価・指数スナップショット基準日：'+escape(report['snapshot_as_of'])+'</div><div class="grid two" id="market-rights-health">'+''.join(cards)+'</div>'
 
 def build():
  md=(ROOT/'site/data/macro.json').read_text();calendar,calendar_report=calendar_publish.build();cd=json.dumps(calendar,separators=(',',':'))+'\n';cr=json.dumps(calendar_report,separators=(',',':'))+'\n';(ROOT/'site/data/macro-calendar.json').write_text(cd)
