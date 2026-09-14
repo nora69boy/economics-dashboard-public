@@ -13,7 +13,6 @@ def validate(site:Path, rights_reports=None):
  for id,name in [('macro-data','data/macro.json'),('macro-calendar-data','data/macro-calendar.json')]:
   match=re.search('<pre id="'+id+'" hidden>(.*?)</pre>',s,re.S);gate.require(match and gate.loads(html.unescape(match[1]))==gate.loads(payload[name]),'Macro embedded mismatch')
  gate.require(s.count("version:'0.6.0'")==2 and 'macro-chart-' in s,'Actual release program');gate.require((ROOT/'templates/macro.js').read_text() in s,'Macro template mismatch')
- print('Candidate HTML shell SHA-256 '+rights.shell_hash(payload))
  report=calendar_rights.enforce(payload)
  if rights_reports is not None:rights_reports.append(report)
  return payload
