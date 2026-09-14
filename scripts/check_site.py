@@ -131,7 +131,7 @@ class Parser(HTMLParser):
  def handle_startendtag(self,t,a):self.handle_starttag(t,a)
 def html_check(s):
  p=Parser();p.feed(s);scripts=re.findall(r'<script\b([^>]*)>(.*?)</script\s*>',s,re.I|re.S);inline=[body for attrs,body in scripts if 'src=' not in attrs.lower()];external=[(attrs,body) for attrs,body in scripts if 'src=' in attrs.lower()]
- require(len(inline)==1 and not NETWORK.search(normal(inline[0])),'program');require(len(external)==2,'external program count')
+ require(len(inline)==1 and not NETWORK.search(normal(inline[0])),'program');require(len(external)==3,'external program count')
  for attrs,body in external:
   require(('src="'+TV_SCRIPT+'"') in attrs and re.search(r'\basync\b',attrs),'external program')
   cfg=loads(body.strip());require(isinstance(cfg,dict) and cfg.get('colorTheme')=='dark' and cfg.get('locale')=='ja' and cfg.get('width')=='100%' and cfg.get('height')=='550','widget config')

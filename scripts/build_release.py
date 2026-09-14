@@ -20,10 +20,10 @@ BOJ_RELEASE='https://www.boj.or.jp/about/calendar/index.htm'
 POLICY_JS="""
 (()=>{
 'use strict';
-const stage=document.getElementById('policy-stage'),countdown=document.getElementById('policy-countdown');if(!stage||!countdown)return;
+const stage=document.getElementById('policy-stage'),countdown=document.getElementById('policy-countdown'),phase=document.getElementById('reaction-phase'),action=document.getElementById('reaction-action');if(!stage||!countdown)return;
 const fomc=Date.parse('2026-09-17T03:00:00+09:00'),fomcPc=Date.parse('2026-09-17T03:30:00+09:00'),bojPc=Date.parse('2026-09-18T15:30:00+09:00');
 function left(t,n){const m=Math.max(0,Math.floor((t-n)/60000)),d=Math.floor(m/1440),h=Math.floor((m%1440)/60),x=m%60;return (d?d+'日 ':'')+h+'時間 '+x+'分';}
-function render(){const n=Date.now();if(n<fomc){stage.textContent='FOMC声明待ち';countdown.textContent='FOMC声明まで '+left(fomc,n);}else if(n<fomcPc){stage.textContent='FOMC声明公表 / 議長会見待ち';countdown.textContent='議長会見まで '+left(fomcPc,n);}else if(n<bojPc){stage.textContent='FOMC通過 / 日銀決定・会見監視';countdown.textContent='日銀総裁会見まで '+left(bojPc,n)+'（政策決定内容の公表時刻は未定）';}else{stage.textContent='FOMC・日銀通過後 / 市場反応を検証';countdown.textContent='金利・USD/JPY・TOPIX・日経225の24時間反応を確認';}}
+function render(){const n=Date.now();let p='事前レンジ',a='イベント前の金利・為替・株式の方向を確認';if(n<fomc){stage.textContent='FOMC声明待ち';countdown.textContent='FOMC声明まで '+left(fomc,n);}else if(n<fomcPc){stage.textContent='FOMC声明公表 / 議長会見待ち';countdown.textContent='議長会見まで '+left(fomcPc,n);p='FOMC初動';a='声明だけで確定せず、会見後の米10年金利とNASDAQの方向一致を確認';}else if(n<bojPc){stage.textContent='FOMC通過 / 日銀決定・会見監視';countdown.textContent='日銀総裁会見まで '+left(bojPc,n)+'（政策決定内容の公表時刻は未定）';p='FOMC確定反応 / BOJ待ち';a='USD/JPYと日本株の反応がFOMC後に維持されるか確認';}else{stage.textContent='FOMC・日銀通過後 / 市場反応を検証';countdown.textContent='金利・USD/JPY・TOPIX・日経225の24時間反応を確認';p='24時間フォロースルー';a='イベント前レンジへ戻るか、方向性が定着するかを確認';}if(phase)phase.textContent=p;if(action)action.textContent=a;}
 render();setInterval(render,60000);
 })();
 """
@@ -76,6 +76,38 @@ def tv_widget(kind):
          '<script type="text/javascript" src="'+TV_SCRIPT+'" async>'+json.dumps(cfg,ensure_ascii=False,separators=(',',':'))+'</script>'
          '</div><p class="small">外部Widgetのため閲覧時にTradingViewへ通信します。表示値は当サイトの保存データではありません。</p></section>')
 
+
+def archive_notice():
+ market=json.loads((ROOT/'site/data/market.json').read_text())
+ return ('<div data-market-archive="true" class="notice"><strong>監査アーカイブ / '+escape(market['as_of'])+'</strong><br>'
+         '以下の自己ホスト株価・指数は権利レビュー前の固定スナップショットです。現在値・売買判断には使用せず、上段のライブWidgetを参照してください。</div>')
+
+def policy_reaction_board():
+ symbols=[
+  {'s':'TVC:US10Y','d':'US 10Y Yield'}, {'s':'FX_IDC:USDJPY','d':'USD/JPY'},
+  {'s':'TVC:SPX','d':'S&P 500'}, {'s':'NASDAQ:IXIC','d':'NASDAQ Composite'},
+  {'s':'TVC:NI225','d':'Nikkei 225'}, {'s':'TSE:TOPIX','d':'TOPIX'}]
+ cfg={'colorTheme':'dark','dateRange':'1D','locale':'ja','largeChartUrl':'','isTransparent':True,
+      'showFloatingTooltip':True,'plotLineColorGrowing':'rgba(105,222,200,1)',
+      'plotLineColorFalling':'rgba(245,173,193,1)','gridLineColor':'rgba(49,70,94,0.25)',
+      'scaleFontColor':'#b5c4d5','belowLineFillColorGrowing':'rgba(105,222,200,0.12)',
+      'belowLineFillColorFalling':'rgba(245,173,193,0.12)',
+      'belowLineFillColorGrowingBottom':'rgba(105,222,200,0.02)',
+      'belowLineFillColorFallingBottom':'rgba(245,173,193,0.02)',
+      'symbolActiveColor':'rgba(146,202,255,0.12)','tabs':[{'title':'Policy Reaction / 1D','symbols':symbols}],
+      'width':'100%','height':'550','showSymbolLogo':True,'showChart':True}
+ return ('<section data-rights-shell="policy-reaction-board" data-policy-reaction-board="true" class="p-card live-market-widget">'
+         '<div class="eyebrow">POLICY REACTION BOARD / LIVE</div><h3>FOMC → 日銀：市場反応ボード</h3>'
+         '<div class="notice"><strong>現在フェーズ：<span id="reaction-phase">事前レンジ</span></strong><br><span id="reaction-action">イベント前の金利・為替・株式の方向を確認</span></div>'
+         '<div class="tradingview-widget-container" style="width:100%;min-height:550px"><div class="tradingview-widget-container__widget"></div>'
+         '<div class="tradingview-widget-copyright"><a href="'+TV_MARKETS+'" rel="noopener noreferrer nofollow" referrerpolicy="no-referrer" target="_blank">Market data</a> by TradingView</div>'
+         '<script type="text/javascript" src="'+TV_SCRIPT+'" async>'+json.dumps(cfg,ensure_ascii=False,separators=(',',':'))+'</script></div>'
+         '<div class="grid two"><article class="card"><div class="eyebrow">推測・判定ルール</div><h3>Fed緩和方向</h3><p>米10年金利↓・USD/JPY↓・NASDAQ/S&P 500↑が同時なら、政策期待によるリスクオン仮説を強める。</p></article>'
+         '<article class="card"><div class="eyebrow">推測・判定ルール</div><h3>Fedタカ派方向</h3><p>米10年金利↑・USD/JPY↑・NASDAQ/S&P 500↓が同時なら、金利上昇によるバリュエーション圧力を優先。</p></article>'
+         '<article class="card"><div class="eyebrow">推測・判定ルール</div><h3>BOJ引締め方向</h3><p>USD/JPY↓と日経225/TOPIX↓が同時なら、円高・金融条件引締めの影響を監視。株式の業種差は別途確認する。</p></article>'
+         '<article class="card"><div class="eyebrow">反証</div><h3>イベント効果が弱いケース</h3><p>24時間以内に金利・為替・株式がイベント前レンジへ戻るなら、政策イベントよりポジショニング要因を優先する。</p></article></div>'
+         '<p class="small">TradingView配信。市場によりリアルタイム、遅延、EODが混在します。当サイトは価格を保存しないため、イベント前→直後→24時間後の差分を自己ホスト値として自動記録・再配布しません。</p></section>')
+
 def policy_watch():
  fed='https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm'
  boj='https://www.boj.or.jp/en/mopo/mpmsche_minu/index.htm'
@@ -93,7 +125,7 @@ def build():
  macro=json.loads(md);cal=json.loads(cd);validate(macro);validate_calendar(cal);text=build_dashboard.build()
  start=text.index('// Data coverage is a measured inventory, never a fictional market reading.');end=text.index("const operations=$('operations');",start)
  text=text[:start]+'// Macro history rendered by the independent typed-data module.\n'+text[end:]
- text=text.replace("badge('SNAPSHOT / '","badge('STOCK SNAPSHOT / '")
+ text=text.replace("badge('SNAPSHOT / '","badge('ARCHIVE SNAPSHOT / '")
  text=text.replace('v0.5.0','v0.6.0').replace("version:'0.5.0'","version:'0.6.0'")
  text=text.replace("const archive=$('archive');archive.append(card('v0.6.0 /", "const archive=$('archive');archive.append(card('v0.5.0 /")
  text=text.replace("['0','接続済み自動取得','リアルタイム値なし']","['6','マクロ自動取得系列','公的データ / 株価は対象外']")
@@ -116,9 +148,9 @@ def build():
  market_marker='<section class="panel" id="market" aria-labelledby="tab-market"><h2>個別株・ETF・決算</h2>'
  event_marker='<section class="panel" id="events" aria-labelledby="tab-events"><h2>イベント</h2>'
  if any(text.count(x)!=1 for x in [world_marker,market_marker,event_marker]):raise ValueError('live widget marker')
- text=text.replace(world_marker,world_marker+tv_widget('indices'),1)
- text=text.replace(market_marker,market_marker+tv_widget('stocks'),1)
- text=text.replace(event_marker,event_marker+policy_watch(),1)
+ text=text.replace(world_marker,world_marker+tv_widget('indices')+archive_notice(),1)
+ text=text.replace(market_marker,market_marker+tv_widget('stocks')+archive_notice(),1)
+ text=text.replace(event_marker,event_marker+policy_watch()+policy_reaction_board(),1)
  text=text.replace("script-src 'sha256-"+digest+"';","script-src 'sha256-"+digest+"' https://s3.tradingview.com;",1)
  text=text.replace("frame-src 'none';","frame-src https://s.tradingview.com https://www.tradingview.com https://www.tradingview-widget.com;",1)
  (ROOT/'site/index.html').write_text(text,encoding='utf-8')

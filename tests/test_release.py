@@ -49,6 +49,10 @@ class ArtifactTests(unittest.TestCase):
  def test_deterministic(self):
   before=(ROOT/'site/index.html').read_bytes();build_release.build();self.assertEqual(before,(ROOT/'site/index.html').read_bytes())
  def test_market_snapshot_unchanged(self):self.assertEqual(json.loads((ROOT/'site/data/market.json').read_text())['as_of'],'2026-09-10')
+ def test_market_snapshot_is_archive_only(self):
+  text=(ROOT/'site/index.html').read_text();self.assertIn('ARCHIVE SNAPSHOT',text);self.assertIn('data-market-archive="true"',text);self.assertIn('現在値・売買判断には使用せず',text)
+ def test_policy_reaction_board_provider_hosted(self):
+  text=(ROOT/'site/index.html').read_text();self.assertIn('data-policy-reaction-board="true"',text);self.assertEqual(text.count('https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js'),3);self.assertIn('TVC:US10Y',text);self.assertIn('FX_IDC:USDJPY',text)
  def test_no_frontend_transport(self):self.assertIsNone(gate.gate.NETWORK.search((ROOT/'templates/macro.js').read_text()))
  def test_no_dom_injection(self):
   code=(ROOT/'templates/macro.js').read_text()
