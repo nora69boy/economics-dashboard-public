@@ -28,7 +28,7 @@ TARGETS = {'index.html', 'data/market.json', 'data/macro.json',
            'reports/2026-09-11-carry-forward.md'}
 BASELINE_COMMIT = '7460524c290b22c8c6f6b1c6bf64cbefeb95549f'
 # A reviewed, finite migration list, never derived from a candidate registry.
-BASELINE_SHA256 = '639ce259d9f5c3491a38c4f1c0533d0dbadadf2f00a162b6972feb765fc939c2'
+BASELINE_SHA256 = 'dbc50641cf288f78e2c5e466a5a96a5bb416989e5fad37b32c42725bce4cc736'
 
 
 class RightsError(ValueError):
