@@ -6,7 +6,9 @@ from zoneinfo import ZoneInfo
 from html.parser import HTMLParser
 ROOT=Path(__file__).resolve().parents[1]
 SOURCES={'fed':'https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm','boj':'https://www.boj.or.jp/en/mopo/mpmsche_minu/index.htm','bls':'https://www.bls.gov/schedule/2026/home.htm'}
-POLICY=json.loads((ROOT/'scripts/source_policy.json').read_text());URLS=set(SOURCES.values())|set(POLICY['urls'])
+TV_SCRIPT='https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js'
+EXTRA_URLS={'https://www.tradingview.com/markets/','https://www.boj.or.jp/about/calendar/index.htm'}
+POLICY=json.loads((ROOT/'scripts/source_policy.json').read_text());URLS=set(SOURCES.values())|set(POLICY['urls'])|EXTRA_URLS
 PATTERNS={'email':r'(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b','phone':r'(?<!\d)(?:0\d{1,4}[- ]\d{1,4}[- ]\d{3,4}|0\d{9,10})(?!\d)','international':r'(?<!\w)\+\d{1,3}[ -](?:\d[ -]?){7,14}(?!\d)','credential':r'(?i)\b(?:api[_-]?key|access[_-]?token|refresh[_-]?token|secret|password|passwd|private[_-]?key)\b[\s\"\x27]*[:=][\s\"\x27]*[A-Za-z0-9_/-]{6,}','token':r'\b(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16})\b','key':r'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----','local':r'(?i)(?:file://|localhost|\b127\.0\.0\.1\b|\b192\.168\.\d+\.\d+\b|\b10\.\d+\.\d+\.\d+\b|\b172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+\b)'}
 TERMS=['\u6c0f\u540d','\u4f4f\u6240','\u96fb\u8a71\u756a\u53f7','\u751f\u5e74\u6708\u65e5','\u30de\u30a4\u30ca\u30f3\u30d0\u30fc','\u53e3\u5ea7\u756a\u53f7','\u8a3c\u5238\u53e3\u5ea7','\u4fdd\u6709\u682a\u6570','\u53d6\u5f97\u5358\u4fa1','\u8cb7\u4ed8\u4f59\u529b','\u53e3\u5ea7\u6b8b\u9ad8','\u8cc7\u7523\u7dcf\u984d','\u542b\u307f\u76ca','\u542b\u307f\u640d','\u58f2\u8cb7\u5c65\u6b74','home address','date of birth','account number','cost basis','account balance','trading history']
 NETWORK=re.compile(r'(?i)\b(?:fetch\s*\(|XMLHttpRequest\b|WebSocket\b|sendBeacon\b|EventSource\b|Worker\b|import\s*\(|eval\s*\(|Function\s*\(|location\b|localStorage\b|sessionStorage\b|indexedDB\b|cookie\b|FileReader\b|RTCPeerConnection\b)|window\s*\.\s*open')
@@ -115,7 +117,9 @@ def market(d):
 class Parser(HTMLParser):
  def __init__(self):super().__init__(convert_charrefs=True);self.ids=set();self.csp=[];self.ref=[];self.head=True
  def handle_starttag(self,t,a):
-  require(len(a)==len(dict(a)),'duplicate attribute');v=dict(a);require(t not in {'iframe','object','embed','form','input','textarea','select','img','svg','math','audio','video','source','base','link'},'active tag');require(not any(k.startswith('on') or k in {'src','srcset','srcdoc','ping'} for k,_ in a),'active attribute')
+  require(len(a)==len(dict(a)),'duplicate attribute');v=dict(a);require(t not in {'iframe','object','embed','form','input','textarea','select','img','svg','math','audio','video','source','base','link'},'active tag')
+  require(not any(k.startswith('on') or k in {'srcset','srcdoc','ping'} for k,_ in a),'active attribute')
+  if 'src' in v:require(t=='script' and v['src']==TV_SCRIPT,'active attribute')
   if 'id' in v:require(v['id'] not in self.ids,'duplicate id');self.ids.add(v['id'])
   if 'href' in v:
    h=v['href'] or '';require(h.startswith('#') or h in PAYLOAD or (t=='a' and h in URLS and v.get('referrerpolicy')=='no-referrer' and {'noopener','noreferrer'}<=set(v.get('rel','').split())),'link')
@@ -126,7 +130,15 @@ class Parser(HTMLParser):
    if v.get('name','').lower()=='referrer':self.ref.append(v.get('content'))
  def handle_startendtag(self,t,a):self.handle_starttag(t,a)
 def html_check(s):
- p=Parser();p.feed(s);a=re.findall(r'<script\b[^>]*>(.*?)</script\s*>',s,re.I|re.S);require(len(a)==1 and not NETWORK.search(normal(a[0])),'program');h=base64.b64encode(hashlib.sha256(a[0].encode()).digest()).decode();c="default-src 'none'; script-src 'sha256-"+h+"'; style-src 'unsafe-inline'; img-src 'none'; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'; upgrade-insecure-requests";require(p.csp==[c] and p.ref==['no-referrer'],'CSP');require(not re.search(r'@import|url\s*\(',s,re.I) and s.rstrip().endswith('</html>'),'HTML')
+ p=Parser();p.feed(s);scripts=re.findall(r'<script\b([^>]*)>(.*?)</script\s*>',s,re.I|re.S);inline=[body for attrs,body in scripts if 'src=' not in attrs.lower()];external=[(attrs,body) for attrs,body in scripts if 'src=' in attrs.lower()]
+ require(len(inline)==1 and not NETWORK.search(normal(inline[0])),'program');require(len(external)==2,'external program count')
+ for attrs,body in external:
+  require(('src="'+TV_SCRIPT+'"') in attrs and re.search(r'\basync\b',attrs),'external program')
+  cfg=loads(body.strip());require(isinstance(cfg,dict) and cfg.get('colorTheme')=='dark' and cfg.get('locale')=='ja' and cfg.get('width')=='100%' and cfg.get('height')=='550','widget config')
+  tabs=cfg.get('tabs');require(isinstance(tabs,list) and len(tabs)==1 and isinstance(tabs[0],dict),'widget config')
+  symbols=tabs[0].get('symbols');require(isinstance(symbols,list) and 6<=len(symbols)<=12,'widget symbols')
+  for x in symbols:require(isinstance(x,dict) and set(x)=={'s','d'} and re.fullmatch(r'[A-Z0-9_!]+:[A-Z0-9_.!]+',x['s']) and isinstance(x['d'],str) and 1<=len(x['d'])<=40,'widget symbol')
+ h=base64.b64encode(hashlib.sha256(inline[0].encode()).digest()).decode();c="default-src 'none'; script-src 'sha256-"+h+"' https://s3.tradingview.com; style-src 'unsafe-inline'; img-src 'none'; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src https://s.tradingview.com https://www.tradingview.com https://www.tradingview-widget.com; form-action 'none'; base-uri 'none'; upgrade-insecure-requests";require(p.csp==[c] and p.ref==['no-referrer'],'CSP');require(not re.search(r'@import|url\s*\(',s,re.I) and s.rstrip().endswith('</html>'),'HTML')
 def validate(site):
  require(site.is_dir() and not site.is_symlink(),'site');mp=site/'manifest.json';require(mp.is_file() and not mp.is_symlink() and mp.stat().st_size<1000000,'manifest');m=loads(mp.read_text());fields(m,'version classification files');require(m['version']==2 and m['classification']=='public-market-research' and set(m['files'])==PAYLOAD,'manifest state');actual=set()
  for p in site.rglob('*'):

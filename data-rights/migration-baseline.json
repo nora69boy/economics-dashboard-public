@@ -2,241 +2,46 @@
   "schema_version": 1,
   "source_commit": "7460524c290b22c8c6f6b1c6bf64cbefeb95549f",
   "migration_status": "PENDING_RIGHTS_REVIEW",
-  "html_shell_sha256": "5541a9ad7d293900e3af9b5146265219bc4123aaa4a11eef977fd6d5504f60a9",
+  "html_shell_sha256": "f5a5acf47b0cfc91bb490641ca8825cc372b0d12d8ae42287f9e50e12d994204",
   "datasets": {
-    "market-spx": {
-      "scope_sha256": "77cf0382ba2351e173c111d713fb25a2116d22b75d9fd372f5c5fd6f8cd653ba",
-      "content_sha256": "bb5f62794cf651ca218f1f7cd1c29e1effc0575eef783360ad6f9cb8897101e5",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "market-ixic": {
-      "scope_sha256": "c8a3e881ff876cfd4cb63b4413e9747204be36b0097c5ec27e0436e6cbc03039",
-      "content_sha256": "4418c874f2a3b598e12608be2bd36ec228d306778ae99cef9f23899fd67aec90",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "market-dji": {
-      "scope_sha256": "596bf8104c1a8cd73582e513f718bbc8234023d5beb6e427b450ba2ee3eb8cde",
-      "content_sha256": "3103e08ecda20886adc6fb9cee6b4d8225ecc5d4e0ca75cc2ffa55f93d370924",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "market-n225": {
-      "scope_sha256": "7f29e510f2439fef09debd532d9ea91d9857ca73d38b515531868075aab55f7e",
-      "content_sha256": "8a42ac6722628f152b6ad39ff5217cf8e1ee469c5edaa0068473458eb2733d60",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "market-topix": {
-      "scope_sha256": "5a35259611e9addd9f53665d062a97931f7e2d8539a453d54fde23c139c9b3c9",
-      "content_sha256": "e960020522ee857815a1f66a9ab5199edab87567f53c1143f5eb639ccd40e6e6",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "market-ftse": {
-      "scope_sha256": "060946f609d7cc5128b241dc391ac1913aaaaeee9755d6473af51c5ff6bc833a",
-      "content_sha256": "6ddeacd98685a4ecef6f55632d3a755858f31fc9e7c88bb8d9f4027e1b462a0d",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "market-dax": {
-      "scope_sha256": "e47823ddd7ac579ebcc69c5add2c2356cda43a55e1b6e927f175193fcee357e5",
-      "content_sha256": "b73c2d182fc04ef74ccea6c42709005bcc3f4e4235e0f6178665ae7a8718d1a2",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "market-cac": {
-      "scope_sha256": "18adc0115baf684df7d3c04e9feb815ec36a4ebceb2b22fe5a2511e7c2299826",
-      "content_sha256": "496354b7aa6b337d6c9625899952c1e7c6afb69d23a73db538a08034ea35c9b1",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "market-stoxx50e": {
-      "scope_sha256": "5e34bd0564ff5650e97d15ed2989d0069c868477aa7ef3310addfea02cb3ebf2",
-      "content_sha256": "e179a407ebf14c544709230ad0dedb633bbbc64eb9e8034bbcc6c1e6a954093b",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "market-hsi": {
-      "scope_sha256": "ae8fbaf6a0e187474316bff1a9008b7cf7a16a8dd339825fce7ce9f4237b2784",
-      "content_sha256": "dee5236f158764b21028592734e73882f3ecd1a99cacc811fc05d345436cf5e1",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "market-ssec": {
-      "scope_sha256": "9a66d22cb945d954efe4f0411d0deb765d36fe2317e2ae89fc6abf1203837065",
-      "content_sha256": "b5fd54223dff6865cae2d33b05f170c891cbdc23ede8a28e7469c360b3f35261",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "market-kospi": {
-      "scope_sha256": "317190546e163213a825937074f1ae947b6f9a802d5cb663aed4e6b518243a86",
-      "content_sha256": "803331e160f26b083219db2306edf3a2cb67a0dba14aa98eb3651b84f48c376d",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "market-nifty": {
-      "scope_sha256": "d2056a269a1851d3e561a99012968d7ea4dde8a38bc02d5b3bfa0a245bc86ef3",
-      "content_sha256": "a08eab344a3a13ea7eb3d7068490d33226837c4f04755056d7a46e8f2d0ad892",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "market-asx200": {
-      "scope_sha256": "61922bdc4ce6a31aac395ad1afe0b3fd5eb86911179d110646b8f0067547a4c2",
-      "content_sha256": "af8b50c6f4903ef29ea1c4b3b20e9a6f1c0d2967f93f34e36b8a4916310ea43d",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "market-nvda": {
-      "scope_sha256": "a3b8a360e72b7b4ebc86ce62eeba3d777106df50f1da46e8d057db6324c76bf2",
-      "content_sha256": "6de77a6570bbe39179c12179b5592e056336e7f98775fdd4dd0c83ee358b5e5c",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "market-msft": {
-      "scope_sha256": "ca12f10c77a183dd64760d7cf8acac66963167cac30aeb8a2ac8e696ec0a70be",
-      "content_sha256": "164eccb03b1947cf48bc3ce0232f27efed2f57e093f9b22ba00480c6a9d5a844",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "market-aapl": {
-      "scope_sha256": "27b70b435fdb42d0165439bc3936d9753b3eaa6c3c36f5de3b8fb9578b6be7fd",
-      "content_sha256": "77e558486458a7ff64b82d07619be7cfe2d74dbc9bab916ad7bbc764a4b3af99",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "market-googl": {
-      "scope_sha256": "71f2b2999320e28d065475c4e96449d6228ba3799849ae31f9a123474a838536",
-      "content_sha256": "34db5281f3acc8b40312db164ea2c661fd944a954fcb46440546e467d0dc2da5",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "market-amzn": {
-      "scope_sha256": "1cae8bf615fb0e841e70d14352030042c79406c392c7c7dae38ee7612762c4d5",
-      "content_sha256": "f932e19b713b54fab356cd9ab9199354aab18ad1432323f2a5335496f08e229f",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "market-spy": {
-      "scope_sha256": "91a227991e239d8050f0b52772bb8eaaabb8284cc92a271dc2fd8f9ab5e477b7",
-      "content_sha256": "6aa953a2c5fc46afb8914509efa17a3a846667aa04a4788b18a9994ce51fb58f",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "financial-nvda": {
-      "scope_sha256": "7194716dbb913a49a123e807df8045f7d969c19151b22457a573d72d36b00ed9",
-      "content_sha256": "fa2091d7b13e4afbf6577138a2f9aa7fc1a01fa2a3cff6c7d3e6b78e263dea17",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "macro-ust10": {
-      "scope_sha256": "6825758aa6b33a3c6f33283f566d2c9261bf9c0b7789fe99f0ea614630ef3711",
-      "content_sha256": null,
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "EXISTING_SERIES_ONLY"
-    },
-    "macro-ust10-ust2": {
-      "scope_sha256": "90fd7aed4f3d3bfd3c1d9de238d19b4f39b2c9283d219b63bdc2203fa3170d6e",
-      "content_sha256": null,
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "EXISTING_SERIES_ONLY"
-    },
-    "macro-cpi": {
-      "scope_sha256": "dd88d4b735a2a9d620341bb7abc628ad026305a210b351ea7fe3e99fffb02c45",
-      "content_sha256": null,
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "EXISTING_SERIES_ONLY"
-    },
-    "macro-cpi-headline-sa": {
-      "scope_sha256": "63d8d74c82016af010b38b50cf32cc892301f226b7fe54831e29f0b2a2474b7c",
-      "content_sha256": null,
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "EXISTING_SERIES_ONLY"
-    },
-    "macro-cpi-core": {
-      "scope_sha256": "b96feade58fd028ef1cc8e0de814aea14114bd72e90e2d0a4f20d144948dc3db",
-      "content_sha256": null,
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "EXISTING_SERIES_ONLY"
-    },
-    "macro-cpi-core-sa": {
-      "scope_sha256": "51ae5fa04fec222690ded5ceb448bb2f294532fa4b96f716a683867fc8e08180",
-      "content_sha256": null,
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "EXISTING_SERIES_ONLY"
-    },
-    "macro-pce": {
-      "scope_sha256": "68c0466bae17982bdc3ce63b2a4ea92ba2d7d456629e461fbb90e7961eb293a2",
-      "content_sha256": null,
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "EXISTING_SERIES_ONLY"
-    },
-    "macro-pce-core": {
-      "scope_sha256": "b0c889c6a60893236331e558c2515c3f852dee0bb14835d344ecef53b5e5629c",
-      "content_sha256": null,
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "EXISTING_SERIES_ONLY"
-    },
-    "macro-unemployment": {
-      "scope_sha256": "6ae940e267bb2880a57d382ccafa52dca0f5490ae270d9c8c379da0b0f2002d3",
-      "content_sha256": null,
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "EXISTING_SERIES_ONLY"
-    },
-    "macro-unemployment-payrolls-thousands": {
-      "scope_sha256": "8b3565a855397f30339e05fa68294c546de3e17d1ed53cb7914a53e27ea50626",
-      "content_sha256": null,
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "EXISTING_SERIES_ONLY"
-    },
-    "macro-usdjpy": {
-      "scope_sha256": "2ee96420910143c1afac97bb166975104e43e73897fcb4958f61ad9a193fc759",
-      "content_sha256": null,
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "EXISTING_SERIES_ONLY"
-    },
-    "macro-wti": {
-      "scope_sha256": "cd96000125baf5cd1230a856cc180beedacce5203b2060156ad9538caa766069",
-      "content_sha256": null,
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "EXISTING_SERIES_ONLY"
-    },
-    "calendar-cpi": {
-      "scope_sha256": "bda7f4f786fd94a3eda8c4c837924f158549ad860ef6aac535221d91e8975db5",
-      "content_sha256": "eefd1cc54f361660b104797affcffc50c365ef68bac17282246849a06766a4e6",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "calendar-fomc": {
-      "scope_sha256": "6ace9f0ebe1077d0313461dea174324501ef99fa4e95b94be4f59b46f958104e",
-      "content_sha256": "1796322430690fc0ce34812cd64b78a3bc47e84205e027dba8301dff93defe5a",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "calendar-jobs": {
-      "scope_sha256": "70c18072f61f2cf3a23daa2e3c5c6e91bc6b4a4a45c3bc1802add3951b6ba844",
-      "content_sha256": "d0cdda02b94b04c504367c4db4f23540f38443cbb35907e330b13a2aee035617",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "calendar-pce": {
-      "scope_sha256": "4edbaa337e6600677d6e92dd39228d93010b70bea76c6a32ee1ab61e86784b9d",
-      "content_sha256": "5e12005af59bf80b0a1a29c6e50936518263d397ecbd878cfaa0f1a413976232",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "research-state": {
-      "scope_sha256": "d5ae3c8499d3140e3e3b177355dbb5f471827cc135c7c1c20c455c684d10041b",
-      "content_sha256": "8acbd4f72aa59eb8d5b2e23a1a518d58361f44124db137b5504cd1b5bb2a7892",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    },
-    "research-report": {
-      "scope_sha256": "0dc4112f3c05edbf83dd69c1b805b1630b906e1b8d16391068b91450d8545592",
-      "content_sha256": "17636f4ad4b648ae8a2affa86416c13246d58d11a46ff2d2c3d66ff8cc0e4326",
-      "migration_status": "PENDING_RIGHTS_REVIEW",
-      "update_policy": "FROZEN_SNAPSHOT"
-    }
+    "market-spx": {"scope_sha256":"77cf0382ba2351e173c111d713fb25a2116d22b75d9fd372f5c5fd6f8cd653ba","content_sha256":"bb5f62794cf651ca218f1f7cd1c29e1effc0575eef783360ad6f9cb8897101e5","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "market-ixic": {"scope_sha256":"c8a3e881ff876cfd4cb63b4413e9747204be36b0097c5ec27e0436e6cbc03039","content_sha256":"4418c874f2a3b598e12608be2bd36ec228d306778ae99cef9f23899fd67aec90","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "market-dji": {"scope_sha256":"596bf8104c1a8cd73582e513f718bbc8234023d5beb6e427b450ba2ee3eb8cde","content_sha256":"3103e08ecda20886adc6fb9cee6b4d8225ecc5d4e0ca75cc2ffa55f93d370924","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "market-n225": {"scope_sha256":"7f29e510f2439fef09debd532d9ea91d9857ca73d38b515531868075aab55f7e","content_sha256":"8a42ac6722628f152b6ad39ff5217cf8e1ee469c5edaa0068473458eb2733d60","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "market-topix": {"scope_sha256":"5a35259611e9addd9f53665d062a97931f7e2d8539a453d54fde23c139c9b3c9","content_sha256":"e960020522ee857815a1f66a9ab5199edab87567f53c1143f5eb639ccd40e6e6","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "market-ftse": {"scope_sha256":"060946f609d7cc5128b241dc391ac1913aaaaeee9755d6473af51c5ff6bc833a","content_sha256":"6ddeacd98685a4ecef6f55632d3a755858f31fc9e7c88bb8d9f4027e1b462a0d","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "market-dax": {"scope_sha256":"e47823ddd7ac579ebcc69c5add2c2356cda43a55e1b6e927f175193fcee357e5","content_sha256":"b73c2d182fc04ef74ccea6c42709005bcc3f4e4235e0f6178665ae7a8718d1a2","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "market-cac": {"scope_sha256":"18adc0115baf684df7d3c04e9feb815ec36a4ebceb2b22fe5a2511e7c2299826","content_sha256":"496354b7aa6b337d6c9625899952c1e7c6afb69d23a73db538a08034ea35c9b1","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "market-stoxx50e": {"scope_sha256":"5e34bd0564ff5650e97d15ed2989d0069c868477aa7ef3310addfea02cb3ebf2","content_sha256":"e179a407ebf14c544709230ad0dedb633bbbc64eb9e8034bbcc6c1e6a954093b","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "market-hsi": {"scope_sha256":"ae8fbaf6a0e187474316bff1a9008b7cf7a16a8dd339825fce7ce9f4237b2784","content_sha256":"dee5236f158764b21028592734e73882f3ecd1a99cacc811fc05d345436cf5e1","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "market-ssec": {"scope_sha256":"9a66d22cb945d954efe4f0411d0deb765d36fe2317e2ae89fc6abf1203837065","content_sha256":"b5fd54223dff6865cae2d33b05f170c891cbdc23ede8a28e7469c360b3f35261","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "market-kospi": {"scope_sha256":"317190546e163213a825937074f1ae947b6f9a802d5cb663aed4e6b518243a86","content_sha256":"803331e160f26b083219db2306edf3a2cb67a0dba14aa98eb3651b84f48c376d","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "market-nifty": {"scope_sha256":"d2056a269a1851d3e561a99012968d7ea4dde8a38bc02d5b3bfa0a245bc86ef3","content_sha256":"a08eab344a3a13ea7eb3d7068490d33226837c4f04755056d7a46e8f2d0ad892","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "market-asx200": {"scope_sha256":"61922bdc4ce6a31aac395ad1afe0b3fd5eb86911179d110646b8f0067547a4c2","content_sha256":"af8b50c6f4903ef29ea1c4b3b20e9a6f1c0d2967f93f34e36b8a4916310ea43d","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "market-nvda": {"scope_sha256":"a3b8a360e72b7b4ebc86ce62eeba3d777106df50f1da46e8d057db6324c76bf2","content_sha256":"6de77a6570bbe39179c12179b5592e056336e7f98775fdd4dd0c83ee358b5e5c","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "market-msft": {"scope_sha256":"ca12f10c77a183dd64760d7cf8acac66963167cac30aeb8a2ac8e696ec0a70be","content_sha256":"164eccb03b1947cf48bc3ce0232f27efed2f57e093f9b22ba00480c6a9d5a844","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "market-aapl": {"scope_sha256":"27b70b435fdb42d0165439bc3936d9753b3eaa6c3c36f5de3b8fb9578b6be7fd","content_sha256":"77e558486458a7ff64b82d07619be7cfe2d74dbc9bab916ad7bbc764a4b3af99","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "market-googl": {"scope_sha256":"71f2b2999320e28d065475c4e96449d6228ba3799849ae31f9a123474a838536","content_sha256":"34db5281f3acc8b40312db164ea2c661fd944a954fcb46440546e467d0dc2da5","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "market-amzn": {"scope_sha256":"1cae8bf615fb0e841e70d14352030042c79406c392c7c7dae38ee7612762c4d5","content_sha256":"f932e19b713b54fab356cd9ab9199354aab18ad1432323f2a5335496f08e229f","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "market-spy": {"scope_sha256":"91a227991e239d8050f0b52772bb8eaaabb8284cc92a271dc2fd8f9ab5e477b7","content_sha256":"6aa953a2c5fc46afb8914509efa17a3a846667aa04a4788b18a9994ce51fb58f","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "financial-nvda": {"scope_sha256":"7194716dbb913a49a123e807df8045f7d969c19151b22457a573d72d36b00ed9","content_sha256":"fa2091d7b13e4afbf6577138a2f9aa7fc1a01fa2a3cff6c7d3e6b78e263dea17","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "macro-ust10": {"scope_sha256":"6825758aa6b33a3c6f33283f566d2c9261bf9c0b7789fe99f0ea614630ef3711","content_sha256":null,"migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"EXISTING_SERIES_ONLY"},
+    "macro-ust10-ust2": {"scope_sha256":"90fd7aed4f3d3bfd3c1d9de238d19b4f39b2c9283d219b63bdc2203fa3170d6e","content_sha256":null,"migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"EXISTING_SERIES_ONLY"},
+    "macro-cpi": {"scope_sha256":"dd88d4b735a2a9d620341bb7abc628ad026305a210b351ea7fe3e99fffb02c45","content_sha256":null,"migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"EXISTING_SERIES_ONLY"},
+    "macro-cpi-headline-sa": {"scope_sha256":"63d8d74c82016af010b38b50cf32cc892301f226b7fe54831e29f0b2a2474b7c","content_sha256":null,"migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"EXISTING_SERIES_ONLY"},
+    "macro-cpi-core": {"scope_sha256":"b96feade58fd028ef1cc8e0de814aea14114bd72e90e2d0a4f20d144948dc3db","content_sha256":null,"migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"EXISTING_SERIES_ONLY"},
+    "macro-cpi-core-sa": {"scope_sha256":"51ae5fa04fec222690ded5ceb448bb2f294532fa4b96f716a683867fc8e08180","content_sha256":null,"migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"EXISTING_SERIES_ONLY"},
+    "macro-pce": {"scope_sha256":"68c0466bae17982bdc3ce63b2a4ea92ba2d7d456629e461fbb90e7961eb293a2","content_sha256":null,"migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"EXISTING_SERIES_ONLY"},
+    "macro-pce-core": {"scope_sha256":"b0c889c6a60893236331e558c2515c3f852dee0bb14835d344ecef53b5e5629c","content_sha256":null,"migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"EXISTING_SERIES_ONLY"},
+    "macro-unemployment": {"scope_sha256":"6ae940e267bb2880a57d382ccafa52dca0f5490ae270d9c8c379da0b0f2002d3","content_sha256":null,"migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"EXISTING_SERIES_ONLY"},
+    "macro-unemployment-payrolls-thousands": {"scope_sha256":"8b3565a855397f30339e05fa68294c546de3e17d1ed53cb7914a53e27ea50626","content_sha256":null,"migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"EXISTING_SERIES_ONLY"},
+    "macro-usdjpy": {"scope_sha256":"2ee96420910143c1afac97bb166975104e43e73897fcb4958f61ad9a193fc759","content_sha256":null,"migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"EXISTING_SERIES_ONLY"},
+    "macro-wti": {"scope_sha256":"cd96000125baf5cd1230a856cc180beedacce5203b2060156ad9538caa766069","content_sha256":null,"migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"EXISTING_SERIES_ONLY"},
+    "calendar-cpi": {"scope_sha256":"bda7f4f786fd94a3eda8c4c837924f158549ad860ef6aac535221d91e8975db5","content_sha256":"eefd1cc54f361660b104797affcffc50c365ef68bac17282246849a06766a4e6","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "calendar-fomc": {"scope_sha256":"6ace9f0ebe1077d0313461dea174324501ef99fa4e95b94be4f59b46f958104e","content_sha256":"1796322430690fc0ce34812cd64b78a3bc47e84205e027dba8301dff93defe5a","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "calendar-jobs": {"scope_sha256":"70c18072f61f2cf3a23daa2e3c5c6e91bc6b4a4a45c3bc1802add3951b6ba844","content_sha256":"d0cdda02b94b04c504367c4db4f23540f38443cbb35907e330b13a2aee035617","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "calendar-pce": {"scope_sha256":"4edbaa337e6600677d6e92dd39228d93010b70bea76c6a32ee1ab61e86784b9d","content_sha256":"5e12005af59bf80b0a1a29c6e50936518263d397ecbd878cfaa0f1a413976232","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "research-state": {"scope_sha256":"d5ae3c8499d3140e3e3b177355dbb5f471827cc135c7c1c20c455c684d10041b","content_sha256":"8acbd4f72aa59eb8d5b2e23a1a518d58361f44124db137b5504cd1b5bb2a7892","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"},
+    "research-report": {"scope_sha256":"0dc4112f3c05edbf83dd69c1b805b1630b906e1b8d16391068b91450d8545592","content_sha256":"17636f4ad4b648ae8a2affa86416c13246d58d11a46ff2d2c3d66ff8cc0e4326","migration_status":"PENDING_RIGHTS_REVIEW","update_policy":"FROZEN_SNAPSHOT"}
   }
 }

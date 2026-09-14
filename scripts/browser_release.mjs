@@ -1,4 +1,4 @@
-// Browser regression on the actual public artifact; no npm packages or user inputs.
+// Browser regression on the actual public artifact; TradingView transport is allowlisted and blocked during deterministic CI.
 import {spawn} from 'node:child_process';
 import {mkdtemp,rm,readFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
@@ -17,11 +17,15 @@ try{
  function send(method,params={},scoped=true){return new Promise((ok,bad)=>{const id=++seq,timer=setTimeout(()=>{pending.delete(id);bad(Error('CDP timeout'));},20000);pending.set(id,{ok,bad,timer});const m={id,method,params};if(scoped&&session)m.sessionId=session;socket.send(JSON.stringify(m));});}
  const t=await send('Target.createTarget',{url:'about:blank'},false);session=(await send('Target.attachToTarget',{targetId:t.targetId,flatten:true},false)).sessionId;
  await send('Page.enable');await send('Runtime.enable');await send('Network.enable');
+ await send('Network.setBlockedURLs',{urls:['https://s3.tradingview.com/*','https://*.tradingview.com/*','https://*.tradingview-widget.com/*','wss://*.tradingview.com/*','wss://*.tradingview-widget.com/*']});
  async function evaluate(expression){const r=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw Error('browser assertion');return r.result.value;}
- async function load(){await send('Page.navigate',{url:'about:blank'});await new Promise(ok=>setTimeout(ok,100));const f=await send('Page.getFrameTree');await send('Page.setDocumentContent',{frameId:f.frameTree.frame.id,html});await new Promise(ok=>setTimeout(ok,150));}
+ async function load(){await send('Page.navigate',{url:'about:blank'});await new Promise(ok=>setTimeout(ok,100));const f=await send('Page.getFrameTree');await send('Page.setDocumentContent',{frameId:f.frameTree.frame.id,html});await new Promise(ok=>setTimeout(ok,180));}
  const results=[];for(const width of [390,768,1440]){await send('Emulation.setDeviceMetricsOverride',{width,height:900,deviceScaleFactor:1,mobile:false});await load();results.push(await evaluate('('+assertions+')()'));}
  await send('Emulation.setScriptExecutionDisabled',{value:true});await load();
- if(!(await evaluate("document.querySelectorAll('.panel').length===9 && [...document.querySelectorAll('.panel')].every(p=>!p.hidden) && document.querySelector('.nav').hidden && document.body.textContent.includes('VIX withheld')"))||errors.length||requests.some(u=>/^https?:/i.test(u)))throw Error('fallback or background request');
- console.log(JSON.stringify({status:'PASS',viewports:[390,768,1440],cases:results,external_requests:0,page_errors:0,no_script:true,source_links_not_clicked:true}));await send('Browser.close',{},false).catch(()=>{});
+ const external=requests.filter(u=>/^(?:https?|wss?):/i.test(u));
+ const allowed=u=>/^https:\/\/(?:[^./]+\.)?tradingview\.com\//i.test(u)||/^https:\/\/(?:[^./]+\.)?tradingview-widget\.com\//i.test(u)||/^wss:\/\/(?:[^./]+\.)?tradingview\.com\//i.test(u)||/^wss:\/\/(?:[^./]+\.)?tradingview-widget\.com\//i.test(u);
+ const unexpected=external.filter(u=>!allowed(u));
+ if(!(await evaluate("document.querySelectorAll('.panel').length===9 && [...document.querySelectorAll('.panel')].every(p=>!p.hidden) && document.querySelector('.nav').hidden && document.body.textContent.includes('VIX withheld')"))||errors.length||unexpected.length)throw Error('fallback or unexpected background request');
+ console.log(JSON.stringify({status:'PASS',viewports:[390,768,1440],cases:results,external_requests:external.length,unexpected_external_requests:unexpected.length,page_errors:0,no_script:true,source_links_not_clicked:true}));await send('Browser.close',{},false).catch(()=>{});
 }catch(e){console.error('BROWSER CHECK FAILED: '+e.message);process.exitCode=1;}
 finally{if(socket)socket.close();proc.kill('SIGKILL');await new Promise(ok=>setTimeout(ok,250));await rm(profile,{recursive:true,force:true}).catch(()=>{});}
