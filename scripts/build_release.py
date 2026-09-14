@@ -2,7 +2,7 @@
 import base64,hashlib,json,re
 from html import escape
 from pathlib import Path
-import build_dashboard,calendar_publish,market_refresh_guard
+import build_dashboard,calendar_publish,market_refresh_guard,publication_rights
 from macro_core import validate,validate_calendar
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -52,6 +52,8 @@ def build():
  (ROOT/'site/index.html').write_text(text,encoding='utf-8')
  names=['index.html','data/current-state.json','data/market.json','reports/2026-09-11-carry-forward.md','data/macro.json','data/macro-calendar.json']
  m={'version':2,'classification':'public-market-research','files':{n:hashlib.sha256((ROOT/'site'/n).read_bytes()).hexdigest() for n in names}};(ROOT/'site/manifest.json').write_text(json.dumps(m,indent=2)+'\n')
+ payload={name:(ROOT/'site'/name).read_bytes() for name in publication_rights.TARGETS}
+ print('Reviewed shell hash '+publication_rights.shell_hash(payload))
  print('Calendar publication '+json.dumps(calendar_report,sort_keys=True,separators=(',',':')))
  print('Market rights health '+json.dumps(market_refresh_guard.evaluate(json.loads((ROOT/'data-rights/registry.json').read_text()),json.loads((ROOT/'site/data/market.json').read_text())),sort_keys=True,separators=(',',':')))
  return text
