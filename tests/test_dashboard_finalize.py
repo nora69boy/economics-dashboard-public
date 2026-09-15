@@ -1,5 +1,5 @@
 """Regression tests for the final public dashboard presentation layer."""
-import re,unittest
+import hashlib,json,unittest
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -18,5 +18,7 @@ class DashboardFinalizeTests(unittest.TestCase):
   for panel,next_panel in [('world','market'),('market','events')]:
    start=self.text.index(f'<section class="panel" id="{panel}"');end=self.text.index(f'<section class="panel" id="{next_panel}"',start);segment=self.text[start:end];legacy=segment.index('data-market-legacy="true" hidden');visible=segment[:legacy]
    self.assertNotIn('2026-09-10固定値',visible);self.assertNotIn('最終収録値',visible)
+ def test_manifest_tracks_finalized_index(self):
+  manifest=json.loads((ROOT/'site/manifest.json').read_text());actual=hashlib.sha256((ROOT/'site/index.html').read_bytes()).hexdigest();self.assertEqual(manifest['files']['index.html'],actual)
 
 if __name__=='__main__':unittest.main()
