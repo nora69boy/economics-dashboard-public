@@ -67,9 +67,16 @@ def apply(text,macro):
  text=text.replace(marker,marker+health_panel(macro,calendar_report(text)),1)
  return refresh_csp(text)
 
+def sync_manifest(site,index_bytes):
+ path=site/'manifest.json';manifest=json.loads(path.read_text());files=manifest.get('files')
+ if not isinstance(files,dict) or 'index.html' not in files:raise ValueError('manifest index entry')
+ files['index.html']=hashlib.sha256(index_bytes).hexdigest()
+ path.write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
+
 def main():
  ap=argparse.ArgumentParser();ap.add_argument('--apply',action='store_true');ap.add_argument('--site',default='site');a=ap.parse_args()
  site=Path(a.site);idx=site/'index.html';macro=json.loads((site/'data/macro.json').read_text());out=apply(idx.read_text(),macro)
- if a.apply:idx.write_text(out)
+ if a.apply:
+  encoded=out.encode();idx.write_bytes(encoded);sync_manifest(site,encoded)
  print(json.dumps({'dashboard_health':'embedded','market_primary':'provider_hosted_live','legacy_market':'hidden','macro_attempted_at':macro.get('attempted_at')},ensure_ascii=False))
 if __name__=='__main__':main()
