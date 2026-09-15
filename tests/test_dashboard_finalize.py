@@ -1,11 +1,14 @@
 """Regression tests for the final public dashboard presentation layer."""
-import hashlib,json,unittest
+import copy,hashlib,json,sys,unittest
 from pathlib import Path
 
-ROOT=Path(__file__).resolve().parents[1]
+ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'scripts'))
+import presentation_rights
+import publication_rights as rights
 
 class DashboardFinalizeTests(unittest.TestCase):
  def setUp(self):self.text=(ROOT/'site/index.html').read_text()
+ def payload(self):return {name:(ROOT/'site'/name).read_bytes() for name in rights.TARGETS}
  def test_health_panel_is_embedded(self):
   self.assertIn('data-dashboard-health="true"',self.text);self.assertIn('DASHBOARD HEALTH / CURRENT BUILD',self.text);self.assertIn('BROWSER QA',self.text)
  def test_market_primary_label_is_live(self):
@@ -20,5 +23,13 @@ class DashboardFinalizeTests(unittest.TestCase):
    self.assertNotIn('2026-09-10固定値',visible);self.assertNotIn('最終収録値',visible)
  def test_manifest_tracks_finalized_index(self):
   manifest=json.loads((ROOT/'site/manifest.json').read_text());actual=hashlib.sha256((ROOT/'site/index.html').read_bytes()).hexdigest();self.assertEqual(manifest['files']['index.html'],actual)
+ def test_reviewed_presentation_normalizes_to_baseline_shell(self):
+  normalized=presentation_rights.normalize_payload(self.payload());self.assertEqual(rights.shell_hash(normalized),rights.load_baseline()['html_shell_sha256'])
+ def test_presentation_normalizer_rejects_health_tampering(self):
+  payload=self.payload();payload=copy.copy(payload);payload['index.html']=payload['index.html'].replace(b'>LIVE VIEW<',b'>LIVE VIEW TAMPERED<',1)
+  with self.assertRaises(rights.RightsError):presentation_rights.normalize_payload(payload)
+ def test_presentation_normalizer_rejects_wrapper_tampering(self):
+  payload=self.payload();payload=copy.copy(payload);payload['index.html']=payload['index.html'].replace(b'data-market-legacy="true" hidden aria-hidden="true"',b'data-market-legacy="true" aria-hidden="true"',1)
+  with self.assertRaises(rights.RightsError):presentation_rights.normalize_payload(payload)
 
 if __name__=='__main__':unittest.main()
