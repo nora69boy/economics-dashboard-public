@@ -112,4 +112,30 @@ def phase_at(at:datetime,events=EVENTS):
  if boj_pc["outcome_state"]!="outcome_verified":return "boj_press_conference_due_unverified"
  return "post_policy_events_verified"
 
+def runtime_time_line(events=EVENTS):
+ """Return the exact reviewed schedule line expected in the legacy runtime shell."""
+ statement=by_id("fomc-statement-2026-09",events)
+ press=by_id("fomc-press-conference-2026-09",events)
+ boj_press=by_id("boj-governor-press-conference-2026-09",events)
+ return "const fomc=Date.parse('%s'),fomcPc=Date.parse('%s'),bojPc=Date.parse('%s');"%(statement["scheduled_at"],press["scheduled_at"],boj_press["scheduled_at"])
+
+def runtime_render_js(events=EVENTS):
+ """Generate browser phase logic from verified outcome flags, not clock passage alone."""
+ validate_events(events)
+ verified=lambda event_id: str(by_id(event_id,events)["outcome_state"]=="outcome_verified").lower()
+ flags=("const fomcVerified=%s,fomcPcVerified=%s,bojVerified=%s,bojPcVerified=%s;"%(
+  verified("fomc-statement-2026-09"),verified("fomc-press-conference-2026-09"),
+  verified("boj-policy-decision-2026-09"),verified("boj-governor-press-conference-2026-09")))
+ render=("function render(){const n=Date.now();let p='事前レンジ',a='イベント前の金利・為替・株式の方向を確認';"
+  "if(n<fomc){stage.textContent='FOMC声明待ち';countdown.textContent='FOMC声明まで '+left(fomc,n);}" 
+  "else if(!fomcVerified){stage.textContent='FOMC声明予定時刻経過 / 結果確認待ち';countdown.textContent='公式結果を確認するまで通過扱いにしません';p='FOMC結果未確認';a='FRB公式発表を確認してから市場反応を判定';}"
+  "else if(n<fomcPc){stage.textContent='FOMC声明確認済み / 議長会見待ち';countdown.textContent='議長会見まで '+left(fomcPc,n);p='FOMC声明確認済み';a='会見後の米10年金利とNASDAQの方向一致を確認';}"
+  "else if(!fomcPcVerified){stage.textContent='FOMC会見予定時刻経過 / 結果確認待ち';countdown.textContent='会見内容を確認するまでFOMC通過扱いにしません';p='FOMC会見結果未確認';a='FRB公式会見情報を確認してから次フェーズへ進む';}"
+  "else if(!bojVerified){stage.textContent='FOMC確認済み / 日銀決定確認待ち';countdown.textContent='日銀政策決定内容の公表時刻は未定。公式公表を確認';p='FOMC確認済み / BOJ未確認';a='日銀の決定内容を時刻推測せず確認';}"
+  "else if(n<bojPc){stage.textContent='日銀決定確認済み / 総裁会見待ち';countdown.textContent='日銀総裁会見まで '+left(bojPc,n);p='BOJ決定確認済み';a='会見後のUSD/JPYと日本株の方向一致を確認';}"
+  "else if(!bojPcVerified){stage.textContent='日銀会見予定時刻経過 / 結果確認待ち';countdown.textContent='公式会見内容を確認するまで政策イベント通過扱いにしません';p='BOJ会見結果未確認';a='日銀公式情報を確認してから24時間反応を評価';}"
+  "else{stage.textContent='FOMC・日銀結果確認済み / 市場反応を検証';countdown.textContent='金利・USD/JPY・TOPIX・日経225の24時間反応を確認';p='24時間フォロースルー';a='イベント前レンジへ戻るか、方向性が定着するかを確認';}"
+  "if(phase)phase.textContent=p;if(action)action.textContent=a;}")
+ return flags+"\n"+render
+
 validate_events()
