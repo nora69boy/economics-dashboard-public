@@ -69,6 +69,10 @@ jobs:
           python3 -m unittest discover -s tests -p test_calendar_probe.py -v
           python3 -m unittest discover -s tests -p test_browser_retry.py -v
           node --check templates/macro.js
+      - name: Finalize Dashboard Health and live market presentation
+        run: |
+          python3 scripts/dashboard_finalize.py --apply
+          python3 -m unittest discover -s tests -p test_dashboard_finalize.py -v
           node scripts/browser_release.mjs site/index.html
       - name: Validate allowlisted publication
         id: release
