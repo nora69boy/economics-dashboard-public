@@ -6,6 +6,7 @@ import hashlib
 from pathlib import Path
 
 import check_site
+import presentation_rights
 import publication_rights as rights
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,16 +42,21 @@ def effective_registry(base=None, approvals=None):
 
 
 def assess(payload, today=None):
-    return rights.assess(effective_registry(), rights.inventory(payload), rights.load_baseline(), payload, today)
+    reviewed = presentation_rights.normalize_payload(payload)
+    return rights.assess(effective_registry(), rights.inventory(reviewed), rights.load_baseline(), reviewed, today)
 
 
 def enforce(payload):
+    # The presentation normalizer is fail-closed and accepts only the reviewed
+    # Dashboard Health/live-market transform. Dataset values and registry scope
+    # are unchanged; every other HTML change is still rejected by the base shell hash.
+    reviewed = presentation_rights.normalize_payload(payload)
     # Run the original fail-closed gate first. Once the four calendar datasets are
     # explicitly approved, the only legacy block we may supersede is the frozen
     # UNKNOWN snapshot-change block for those exact IDs. Every other base block
     # still aborts publication before the effective registry is considered.
     try:
-        rights.enforce(payload)
+        rights.enforce(reviewed)
     except rights.PublicationBlocked as exc:
         blocks = exc.report.get('blocked', [])
         allowed_legacy = blocks and all(
@@ -59,7 +65,7 @@ def enforce(payload):
         )
         if not allowed_legacy:
             raise
-    report = assess(payload)
+    report = rights.assess(effective_registry(), rights.inventory(reviewed), rights.load_baseline(), reviewed)
     if report['blocked']:
         raise rights.PublicationBlocked(report)
     return report
