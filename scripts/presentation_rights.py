@@ -9,13 +9,13 @@ import re
 import publication_rights as rights
 
 BADGE_OLD="badge('ARCHIVE SNAPSHOT / '+D.as_of,'p-warn')"
-BADGE_NEW="badge('MARKET LIVE / PROVIDER-HOSTED','p-good')"
+BADGE_NEW="badge('MARKET / PROVIDER-HOSTED','p-good')"
 AGE_OLD="株価・指数: 2026-09-10固定 / マクロ: 各系列の観測日 / カレンダー: Source Healthを確認"
-AGE_NEW="株価・指数: TradingView live（市場によりリアルタイム・遅延・EOD） / マクロ: 各系列の観測日 / カレンダー: Source Healthを確認"
+AGE_NEW="株価・指数: TradingView provider-hosted（配信応答はビルド未検証） / マクロ: 各系列の観測日 / カレンダー: Source Healthを確認"
 HEADER_OLD="v0.4.0 / 2026-09-13 / 世界指数・株価分析"
-HEADER_NEW="v0.6.0 / 公開版 / MARKET LIVE + MACRO AUTO REFRESH"
+HEADER_NEW="v0.6.0 / 公開版 / MARKET PROVIDER-HOSTED + MACRO AUTO REFRESH"
 STATIC_AGE_OLD="日程確認：2026-09-13 / 自動更新ではありません"
-STATIC_AGE_NEW="株価・指数: TradingView provider-hosted / マクロ: 1日4回更新 / カレンダー: Source Healthを確認"
+STATIC_AGE_NEW="株価・指数: TradingView provider-hosted（価格応答は未検証） / マクロ: 1日4回更新 / カレンダー: Source Healthを確認"
 EVENT_NOTE_OLD="2026年9月13日に公式掲載日程を確認。変更される場合があります。会合は開催地の日付、統計は日本時間を併記します。"
 EVENT_NOTE_NEW="このタブの固定8件は2026-09-13レビュー時点。最新の日程確認は「マクロ」の経済カレンダー / Source Healthを参照。会合は開催地の日付、統計は日本時間を併記します。"
 SAFETY_OLD="外部接続とフォーム送信を禁止するブラウザ設定を入れています。"
@@ -41,10 +41,11 @@ HEALTH_RE=re.compile(
  r'<div class="eyebrow">DASHBOARD HEALTH / CURRENT BUILD</div>'
  r'<h3>更新・取得・公開の状態</h3><div class="grid four">'
  r'<article class="card"><div class="eyebrow">MACRO</div><div class="metric (?:good|pending)">\d+/\d+ fresh</div><p class="small">最終取得試行 (?:\d{4}-\d{2}-\d{2} \d{2}:\d{2} JST|確認が必要)</p></article>'
- r'<article class="card"><div class="eyebrow">CALENDAR</div><div class="metric (?:good|pending)">(?:DEGRADED|PARTIAL ACCESS|FAMILY MERGE|REVIEWED STATIC)</div><p class="small">完全性ゲートを維持。取得障害時はレビュー済み日程を保持。</p></article>'
- r'<article class="card"><div class="eyebrow">MARKET</div><div class="metric good">LIVE VIEW</div><p class="small">TradingView provider-hosted。自己ホスト価格は権利ゲートで凍結し、通常表示から除外。</p></article>'
+ r'<article class="card"><div class="eyebrow">CALENDAR</div><div class="metric (?:good|pending)">(?:DEGRADED|PARTIAL ACCESS|ACCESS BLOCKED|FAMILY MERGE|REVIEWED STATIC|UNKNOWN)</div><p class="small">完全性ゲートを維持。取得障害時はレビュー済み日程を保持。</p></article>'
+ r'<article class="card"><div class="eyebrow">MARKET</div><div class="metric pending">PROVIDER-HOSTED</div><p class="small">TradingView埋込を公開。CIは外部価格応答を遮断するため、表示価格の到達・鮮度は当ビルドでは検証しません。</p></article>'
  r'<article class="card"><div class="eyebrow">BROWSER QA</div><div class="metric good">FAIL-CLOSED</div><p class="small">Chrome起動タイムアウトのみ最大1回再試行。その他の異常は公開停止。</p></article>'
- r'</div><p class="small">定期実行: JST 01:17 / 07:17 / 13:17 / 19:17 ・ Run (?:\d+|not-recorded) ・ 履歴成功率の蓄積表示は次段階。</p></section>'
+ r'</div><p class="small" data-market-publication-state="true">旧自己ホスト市場データ: (?:公開HTML内に保持|公開物から除外) / (?:画面非表示|画面表示) / 現在値判断には不使用。</p>'
+ r'<p class="small">定期実行: JST 01:17 / 07:17 / 13:17 / 19:17 ・ Run (?:\d+|not-recorded) ・ 履歴成功率の蓄積表示は次段階。</p></section>'
 )
 
 def _require(ok):
@@ -76,7 +77,7 @@ def _restore_csp(text):
 
 def normalize_index(index_bytes):
     text=index_bytes.decode().replace('\r\n','\n')
-    markers=tuple(new for _,new in PRESENTATION_PAIRS)+('data-dashboard-health="true"',LEGACY_OPEN,NEW_ARCHIVE,LIVE_NEW)
+    markers=tuple(new for _,new in PRESENTATION_PAIRS)+('data-dashboard-health="true"','data-market-publication-state="true"',LEGACY_OPEN,NEW_ARCHIVE,LIVE_NEW)
     present=[m in text for m in markers]
     if not any(present):
         return index_bytes
@@ -87,7 +88,7 @@ def normalize_index(index_bytes):
     _require(text.count(OPERATIONS)==1)
     op=text.index(OPERATIONS)+len(OPERATIONS)
     match=HEALTH_RE.match(text,op)
-    _require(match is not None and text.count('data-dashboard-health="true"')==1)
+    _require(match is not None and text.count('data-dashboard-health="true"')==1 and text.count('data-market-publication-state="true"')==1)
     text=text[:op]+text[match.end():]
     text=_restore_panel(text,'world','market',WORLD_OLD)
     text=_restore_panel(text,'market','events',MARKET_OLD)
