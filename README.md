@@ -1,49 +1,90 @@
 # Economics Research Dashboard v0.6.0
 
-Independent public-market research. No affiliation with the reference website; its complete research report has not been reconciled, and exact reproduction is not claimed.
+Independent public-market research dashboard. The public site is generated from versioned source, validated data, explicit publication-rights gates, browser regression checks, and an exact HTTPS artifact check.
 
-## What is available
+## Current production model
 
-Eleven panels, same-date stock/index screening, up-to-four compatible series comparison, six government macro histories from 2015, 1/5/10-year and full-range charts, and 37 reviewed economic release dates linked to macro charts. A seventh VIX slot is explicitly withheld pending republication permission. CPI/PCE year-on-year rates use matching calendar months, not an array offset. Government missing values are not zero-filled. Monthly observation months and economic announcement dates are distinct. Current revised values must not be treated as point-in-time backtest inputs.
+The dashboard combines three different data modes and labels them separately:
 
-Stock and world-index data remain the prior September 10, 2026 secondary snapshot: 14 indices with three observations and five stocks plus SPY with six observations. No new stock quotes, real-time stock feed, consensus dataset or news ingestion was added. DAX total-return and provider-derived series remain excluded from compatible screening.
+1. **Provider-hosted market view** — current stock, ETF, index and policy-reaction views use the official TradingView embed. Depending on market/exchange entitlements, TradingView may show real-time, delayed, or end-of-day values. Those widget quote values are not ingested, cached, transformed, or republished by this repository.
+2. **Self-hosted macro histories** — six government/public histories are refreshed four times per day at 01:17 / 07:17 / 13:17 / 19:17 JST. VIX remains withheld pending republication permission.
+3. **Reviewed archive data** — the repository-owned stock/index snapshot remains frozen at 2026-09-10 for audit and regression purposes. It is hidden from normal current-market display and is not used as the primary current-price view.
 
-Market-data automation is explicitly fail-closed. `scripts/market_refresh_guard.py` performs no quote-provider network access and cannot mutate `site/data/market.json`; it reports whether every published stock/index series has explicit rights for automated retrieval, storage, transformation, display, redistribution and caching. The current 20 published market series remain blocked from automated refresh until their rights records are approved. See `docs/market-data-automation.md`.
+The runtime navigation contains the market, research, scenario, event, macro and operations views. The macro module includes long histories, period switching, source-health status, year-aware economic-calendar handling, and event-linked chart windows.
 
-## Updates and calendar
+## Calendar and event handling
 
-The public workflow fetches only the six fixed government histories every six hours, at 04:17/10:17/16:17/22:17 UTC every day (01:17/07:17/13:17/19:17 JST), and also on approved releases and manual workflow dispatch. Pull requests reuse the previously published validated macro snapshot without polling upstream providers. Source failure retains the previous validated public observations and their original retrieval timestamp with a retained/error label. Initial publication fails if six valid histories are unavailable. Calendar dates are manually reviewed as of September 13, 2026, not automatically refreshed. The calendar includes 12 CPI dates, 12 employment dates, 8 FOMC final days and 5 PCE dates (August-December). Unknown meeting announcement times are left unknown. API/data delays and scheduler delays remain possible.
+Production runs probe official BLS, BEA and Federal Reserve calendar sources. Calendar publication is fail-closed by family: a complete/reviewed family may update, while blocked or incomplete families retain the previously reviewed schedule instead of publishing a partial calendar as current.
 
-## Privacy and publication
+The strategic event panel also contains a separately reviewed FOMC / Bank of Japan watch for September 2026. This short-horizon policy panel is not the authoritative source for the full economic calendar; the macro calendar is the continuously checked release-calendar layer.
 
-No personal holdings, account connection, browser persistence, form submission, analytics, advertising, external frontend scripts or background frontend requests. The sole instrument search is bounded to 40 characters and stays in page memory. Data-provider requests run on GitHub-hosted infrastructure without private repository credentials or API keys. Hosting providers still process ordinary access metadata; no anonymity or zero-leakage guarantee is made. A shorter hostname does not erase public GitHub ownership history.
+## Dashboard Health
 
-The existing CSP, no-referrer links, strict field/path/URL allowlists, finite-number checks, source fingerprints and SHA-256 artifact checks remain. Only six validated payloads plus an empty .nojekyll marker are deployed; templates, tests and private records are not. Public commits are public before CI: review all contents before writing.
+The `出典・運用` view exposes current-build health for:
 
-## Build and test
+- macro retrieval freshness;
+- economic-calendar source status;
+- provider-hosted market display status;
+- fail-closed browser QA behavior;
+- the GitHub Actions run identifier and scheduled execution times.
 
-1. python3 scripts/run_legacy_tests.py
-2. python3 scripts/market_refresh_guard.py
-3. python3 scripts/macro_fetch.py
-4. python3 scripts/build_release.py
-5. python3 -m unittest discover -s tests -p test_release.py -v
-6. python3 -m unittest discover -s tests -p test_rights.py -v
-7. python3 -m unittest discover -s tests -p test_market_refresh_guard.py -v
-8. node scripts/browser_release.mjs site/index.html
-9. python3 scripts/check_release.py --check-history --build
+Historical 7-day / 30-day uptime and first-attempt success rates are not yet persisted in the dashboard. Current health is a build-state view, not an uptime-monitoring service.
 
-No post-test data patch is applied. Builds from the same validated snapshots are deterministic. The production HTTPS file must equal the generated SHA-256. Browser tests cover 390/768/1440 pixel widths, not physical iPhone/Safari certification. PASS is scoped verification, not proof of zero vulnerabilities or economic-data correctness. The separate private monthly audit must approve each source-code release; daily data refreshes do not mutate source commits.
+## Privacy and external connections
 
-See docs/data-rights.md and docs/release-v060.md for boundaries and remaining work. No paid service, domain purchase, stopped market-watch task restart or live trading has been added.
+The dashboard does not use personal holdings, account connections, forms, analytics, advertising, browser persistence, local storage, or browser-side API keys.
 
-## Automatic-update hardening
+The provider-hosted TradingView widgets are the intentional exception to the otherwise closed frontend network boundary: opening pages that contain a widget causes the visitor browser to connect to allowlisted TradingView script/frame origins. The dashboard discloses this near the widget. Source links to regulators, issuers and agencies remain user-initiated navigation with no-referrer behavior.
 
-The updater rejects responses that drop any previously published primary or auxiliary observation date. In that case it retains the prior series and its original retrieval timestamp, rather than replacing a long history with an incomplete response. Revision values for dates still present remain allowed. Removed observations that are intentional agency corrections need a separate review; they are not silently accepted.
+The CSP restricts scripts and frames to the reviewed TradingView embed boundary. The deterministic CI browser blocks TradingView network traffic while validating dashboard behavior, so the release can be tested without depending on live third-party widget responses.
 
-Transient GET failures receive at most one retry; BLS POST requests and HTTP 429/403 responses are not retried. Four scheduled runs use eight BLS POST queries per day under the current two-window history configuration, excluding manually triggered runs. The unregistered BLS limit is 25 queries per day: https://www.bls.gov/developers/api_faqs.htm . Do not repeatedly dispatch production runs. Output writes are atomic and revalidated before replacement.
+## Market-data rights boundary
 
-Each production run writes a per-series GitHub Actions summary with retrieval status, successful retrieval time and observation date. A separate refresh-health job runs AFTER a successful deployment and fails if any of the six sources was retained. This preserves the visible error labels and last good data while making the workflow red. Email or other notification delivery still depends on the account's notification settings and has not been verified. An unchanged valid monthly observation is not an error or a newly released statistic.
+`scripts/market_refresh_guard.py` performs no quote-provider retrieval and cannot update `site/data/market.json`. A self-hosted market series may refresh only after its registry entry has explicit permission for automated retrieval, storage/caching, transformation, public display and redistribution and still satisfies the JPY 0 monthly-cost policy.
 
-The existing HTML, CSP, payload allowlist, source endpoints, rights registry and migration baseline remain unchanged. This change does not approve existing UNKNOWN rights records. The existing page displays source retrieval timestamps and retained/error labels in the macro panel; no automatic browser reload or external frontend requests are added. Reopen or reload the page to see the newest successfully deployed artifact. Stocks, indices, news, calendar reviews and VIX remain outside automatic updates.
+Until then, the current market view remains provider-hosted and the self-hosted September 10 snapshot remains an audit archive. See `docs/market-data-automation.md`.
 
-Scheduler delays, missed jobs and inactivity remain possible. Public GitHub schedules can be disabled after 60 days without repository activity: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule . A monthly manual workflow/status review is required; no keepalive commits, external monitor or extra recurring ChatGPT task is installed by this change.
+## Automatic macro update hardening
+
+The updater rejects responses that drop previously published primary or auxiliary observation dates. A failing or truncated provider response retains the previous validated series and its original successful retrieval timestamp instead of replacing it with incomplete history.
+
+Transient GET failures receive at most one retry. BLS POST requests and HTTP 403/429 responses are not automatically retried. Output writes are atomic and revalidated before replacement. Four production runs per day keep the current BLS query volume below the documented unregistered limit under the existing two-window history configuration.
+
+A post-deployment `refresh-health` job fails visibly when macro retrieval is degraded, while safe retained data can remain published. SEC and calendar probes are separately classified so source access blocks are not silently presented as successful data ingestion.
+
+## Build and release gates
+
+The production workflow currently performs, in order:
+
+1. legacy regression tests;
+2. market-data rights gate;
+3. SEC and official-calendar probe tests;
+4. macro retrieval or PR snapshot fixture;
+5. calendar publication and rights checks;
+6. release generation;
+7. release, calendar, market, SEC and browser-retry tests;
+8. Dashboard Health / live-market presentation finalization;
+9. 390 / 768 / 1440 pixel browser regression checks;
+10. allowlisted publication and reproducibility checks;
+11. Pages deployment;
+12. exact HTTPS SHA-256 verification;
+13. post-deployment refresh-health evaluation.
+
+No post-validation quote patch is applied. Builds from the same validated inputs are deterministic. Browser QA covers the specified viewport widths but is not physical Safari/iPhone certification.
+
+## Current limitations and next work
+
+The main remaining product gaps are:
+
+- one authoritative release/state contract instead of legacy version metadata in multiple source layers;
+- a unified event model for strategic policy events and the continuously checked macro calendar;
+- evidence-backed research items instead of mostly static topic prompts;
+- automated research-report ingestion with FACT / ESTIMATE / INFERENCE / RUMOR classification;
+- lawful long-history self-hosted stock/index data if a JPY 0 source with sufficient rights becomes available;
+- consensus forecasts and surprise data with explicit publication rights;
+- point-in-time data vintages for historical backtesting;
+- persisted 7-day / 30-day operational-health history;
+- physical mobile/Safari verification;
+- VIX republication approval.
+
+See `docs/release-v060.md`, `docs/data-rights.md`, and `docs/market-data-automation.md` for detailed boundaries.
