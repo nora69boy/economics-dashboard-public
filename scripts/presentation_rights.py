@@ -12,6 +12,14 @@ BADGE_OLD="badge('ARCHIVE SNAPSHOT / '+D.as_of,'p-warn')"
 BADGE_NEW="badge('MARKET LIVE / PROVIDER-HOSTED','p-good')"
 AGE_OLD="株価・指数: 2026-09-10固定 / マクロ: 各系列の観測日 / カレンダー: Source Healthを確認"
 AGE_NEW="株価・指数: TradingView live（市場によりリアルタイム・遅延・EOD） / マクロ: 各系列の観測日 / カレンダー: Source Healthを確認"
+HEADER_OLD="v0.4.0 / 2026-09-13 / 世界指数・株価分析"
+HEADER_NEW="v0.6.0 / 公開版 / MARKET LIVE + MACRO AUTO REFRESH"
+STATIC_AGE_OLD="日程確認：2026-09-13 / 自動更新ではありません"
+STATIC_AGE_NEW="株価・指数: TradingView provider-hosted / マクロ: 1日4回更新 / カレンダー: Source Healthを確認"
+EVENT_NOTE_OLD="2026年9月13日に公式掲載日程を確認。変更される場合があります。会合は開催地の日付、統計は日本時間を併記します。"
+EVENT_NOTE_NEW="このタブの固定8件は2026-09-13レビュー時点。最新の日程確認は「マクロ」の経済カレンダー / Source Healthを参照。会合は開催地の日付、統計は日本時間を併記します。"
+SAFETY_OLD="外部接続とフォーム送信を禁止するブラウザ設定を入れています。"
+SAFETY_NEW="TradingView公式Widgetの許可済み接続を除き、任意の外部接続とフォーム送信をCSPで禁止しています。"
 LEGACY_OPEN='<div data-market-legacy="true" hidden aria-hidden="true">'
 OLD_ARCHIVE='<div data-market-archive="true" class="notice"><strong>監査アーカイブ / 2026-09-10</strong><br>以下の自己ホスト株価・指数は権利レビュー前の固定スナップショットです。現在値・売買判断には使用せず、上段のライブWidgetを参照してください。</div>'
 NEW_ARCHIVE='<div data-market-archive="true" class="notice"><strong>旧自己ホスト市場データは監査用に内部保持</strong><br>2026-09-10以前の固定値は通常表示から除外しました。現在の市場確認は上段のTradingView Widgetを使用してください。</div>'
@@ -19,6 +27,14 @@ WORLD_OLD='下段の2026-09-10固定値は監査用スナップショットで�
 MARKET_OLD='下段の2026-09-10以前の値は監査用スナップショットです。'
 LIVE_NEW='旧固定値は監査用に内部保持し、通常画面では非表示です。'
 OPERATIONS='<section class="panel" id="operations" aria-labelledby="tab-operations"><h2>出典・運用</h2>'
+PRESENTATION_PAIRS=(
+ (BADGE_OLD,BADGE_NEW),
+ (AGE_OLD,AGE_NEW),
+ (HEADER_OLD,HEADER_NEW),
+ (STATIC_AGE_OLD,STATIC_AGE_NEW),
+ (EVENT_NOTE_OLD,EVENT_NOTE_NEW),
+ (SAFETY_OLD,SAFETY_NEW),
+)
 
 HEALTH_RE=re.compile(
  r'<section data-dashboard-health="true" class="p-card">'
@@ -60,13 +76,13 @@ def _restore_csp(text):
 
 def normalize_index(index_bytes):
     text=index_bytes.decode().replace('\r\n','\n')
-    markers=(BADGE_NEW,AGE_NEW,'data-dashboard-health="true"',LEGACY_OPEN,NEW_ARCHIVE,LIVE_NEW)
+    markers=tuple(new for _,new in PRESENTATION_PAIRS)+('data-dashboard-health="true"',LEGACY_OPEN,NEW_ARCHIVE,LIVE_NEW)
     present=[m in text for m in markers]
     if not any(present):
         return index_bytes
     _require(all(present))
-    _require(text.count(BADGE_NEW)==1 and text.count(BADGE_OLD)==0)
-    _require(text.count(AGE_NEW)==1 and text.count(AGE_OLD)==0)
+    for old,new in PRESENTATION_PAIRS:
+        _require(text.count(new)==1 and text.count(old)==0)
     _require(text.count(LEGACY_OPEN)==2 and text.count(NEW_ARCHIVE)==2 and text.count(LIVE_NEW)==2)
     _require(text.count(OPERATIONS)==1)
     op=text.index(OPERATIONS)+len(OPERATIONS)
@@ -75,7 +91,8 @@ def normalize_index(index_bytes):
     text=text[:op]+text[match.end():]
     text=_restore_panel(text,'world','market',WORLD_OLD)
     text=_restore_panel(text,'market','events',MARKET_OLD)
-    text=text.replace(BADGE_NEW,BADGE_OLD,1).replace(AGE_NEW,AGE_OLD,1)
+    for old,new in PRESENTATION_PAIRS:
+        text=text.replace(new,old,1)
     _require(not any(m in text for m in markers))
     return _restore_csp(text).encode()
 
