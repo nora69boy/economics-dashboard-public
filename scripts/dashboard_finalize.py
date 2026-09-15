@@ -5,6 +5,7 @@ from pathlib import Path
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import release_state as state_contract
+import policy_events
 
 BADGE_OLD="badge('ARCHIVE SNAPSHOT / '+D.as_of,'p-warn')"
 BADGE_NEW="badge('MARKET / PROVIDER-HOSTED','p-good')"
@@ -104,6 +105,15 @@ def replace_exact(text,old,new,label):
  if text.count(old)!=1:raise ValueError(label)
  return text.replace(old,new,1)
 
+def migrate_policy_runtime(text):
+ """Gate the legacy schedule against the typed model and replace clock-only completion logic."""
+ policy_events.validate_events()
+ schedule=policy_events.runtime_time_line()
+ if text.count(schedule)!=1:raise ValueError('policy schedule/model mismatch')
+ new_runtime=policy_events.runtime_render_js()
+ if new_runtime in text:return text
+ return replace_exact(text,policy_events.LEGACY_RUNTIME_RENDER,new_runtime,'policy runtime marker')
+
 def apply(text,macro,market):
  if 'data-dashboard-health="true"' in text:return text
  if BADGE_OLD not in text or AGE_OLD not in text:raise ValueError('market status markers')
@@ -112,6 +122,7 @@ def apply(text,macro,market):
  text=replace_exact(text,STATIC_AGE_OLD,STATIC_AGE_NEW,'static freshness marker')
  text=replace_exact(text,EVENT_NOTE_OLD,EVENT_NOTE_NEW,'event freshness note')
  text=replace_exact(text,SAFETY_OLD,SAFETY_NEW,'frontend connection note')
+ text=migrate_policy_runtime(text)
  text=text.replace('下段の2026-09-10固定値は監査用スナップショットです。','旧固定値は監査用に内部保持し、通常画面では非表示です。',1)
  text=text.replace('下段の2026-09-10以前の値は監査用スナップショットです。','旧固定値は監査用に内部保持し、通常画面では非表示です。',1)
  text=hide_legacy_panel(text,'world','market');text=hide_legacy_panel(text,'market','events')
@@ -133,5 +144,5 @@ def main():
  if a.apply:
   encoded=out.encode();idx.write_bytes(encoded);sync_manifest(site,encoded)
  current=operational_state(macro,market,calendar_report(out))
- print(json.dumps({'dashboard_health':'embedded','release_state_schema':current['schema_version'],'market_delivery':current['market']['delivery_mode'],'market_quote_observation':current['market']['quote_observation'],'legacy_market_public_presence':current['publication']['legacy_market_public_presence'],'legacy_market_visibility':current['publication']['legacy_market_visibility'],'macro_attempted_at':macro.get('attempted_at')},ensure_ascii=False))
+ print(json.dumps({'dashboard_health':'embedded','release_state_schema':current['schema_version'],'market_delivery':current['market']['delivery_mode'],'market_quote_observation':current['market']['quote_observation'],'legacy_market_public_presence':current['publication']['legacy_market_public_presence'],'legacy_market_visibility':current['publication']['legacy_market_visibility'],'policy_runtime':'verified_outcomes_required','macro_attempted_at':macro.get('attempted_at')},ensure_ascii=False))
 if __name__=='__main__':main()
