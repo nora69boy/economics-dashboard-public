@@ -13,6 +13,17 @@ class DashboardFinalizeTests(unittest.TestCase):
   self.assertIn('data-dashboard-health="true"',self.text);self.assertIn('DASHBOARD HEALTH / CURRENT BUILD',self.text);self.assertIn('BROWSER QA',self.text)
  def test_market_primary_label_is_live(self):
   self.assertIn('MARKET LIVE / PROVIDER-HOSTED',self.text);self.assertIn('株価・指数: TradingView live',self.text);self.assertNotIn('ARCHIVE SNAPSHOT /',self.text);self.assertNotIn('株価・指数: 2026-09-10固定',self.text)
+ def test_release_metadata_matches_current_behavior(self):
+  self.assertIn('v0.6.0 / 公開版 / MARKET LIVE + MACRO AUTO REFRESH',self.text)
+  self.assertNotIn('v0.4.0 / 2026-09-13 / 世界指数・株価分析',self.text)
+  self.assertIn('株価・指数: TradingView provider-hosted / マクロ: 1日4回更新 / カレンダー: Source Healthを確認',self.text)
+  self.assertNotIn('日程確認：2026-09-13 / 自動更新ではありません',self.text)
+ def test_static_event_note_distinguishes_reviewed_fixture_from_live_calendar(self):
+  self.assertIn('このタブの固定8件は2026-09-13レビュー時点。最新の日程確認は「マクロ」の経済カレンダー / Source Healthを参照。',self.text)
+  self.assertNotIn('2026年9月13日に公式掲載日程を確認。変更される場合があります。',self.text)
+ def test_frontend_connection_note_matches_tradingview_exception(self):
+  self.assertIn('TradingView公式Widgetの許可済み接続を除き、任意の外部接続とフォーム送信をCSPで禁止しています。',self.text)
+  self.assertNotIn('外部接続とフォーム送信を禁止するブラウザ設定を入れています。',self.text)
  def test_legacy_market_is_hidden_but_retained(self):
   self.assertEqual(self.text.count('data-market-legacy="true" hidden'),2);self.assertEqual(self.text.count('data-market-archive="true"'),2);self.assertIn('旧自己ホスト市場データは監査用に内部保持',self.text);self.assertIn('2026-09-10以前の固定値は通常表示から除外しました',self.text);self.assertIn('data-global-symbol="SPX"',self.text);self.assertIn('data-asset="NVDA"',self.text)
  def test_live_widgets_remain_primary(self):
@@ -30,6 +41,9 @@ class DashboardFinalizeTests(unittest.TestCase):
   with self.assertRaises(rights.RightsError):presentation_rights.normalize_payload(payload)
  def test_presentation_normalizer_rejects_wrapper_tampering(self):
   payload=self.payload();payload=copy.copy(payload);payload['index.html']=payload['index.html'].replace(b'data-market-legacy="true" hidden aria-hidden="true"',b'data-market-legacy="true" aria-hidden="true"',1)
+  with self.assertRaises(rights.RightsError):presentation_rights.normalize_payload(payload)
+ def test_presentation_normalizer_rejects_release_metadata_tampering(self):
+  payload=self.payload();payload=copy.copy(payload);payload['index.html']=payload['index.html'].replace(b'MARKET LIVE + MACRO AUTO REFRESH',b'MARKET LIVE + UNREVIEWED',1)
   with self.assertRaises(rights.RightsError):presentation_rights.normalize_payload(payload)
 
 if __name__=='__main__':unittest.main()
