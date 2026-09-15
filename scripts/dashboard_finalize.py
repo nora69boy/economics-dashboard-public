@@ -62,8 +62,8 @@ def apply(text,macro):
  text=text.replace('下段の2026-09-10固定値は監査用スナップショットです。','旧固定値は監査用に内部保持し、通常画面では非表示です。',1)
  text=text.replace('下段の2026-09-10以前の値は監査用スナップショットです。','旧固定値は監査用に内部保持し、通常画面では非表示です。',1)
  text=hide_legacy_panel(text,'world','market');text=hide_legacy_panel(text,'market','events')
- marker='<section class="panel" id="overview" aria-labelledby="tab-overview"><h2>概要</h2>'
- if text.count(marker)!=1:raise ValueError('overview marker')
+ marker='<section class="panel" id="operations" aria-labelledby="tab-operations"><h2>出典・運用</h2>'
+ if text.count(marker)!=1:raise ValueError('operations marker')
  text=text.replace(marker,marker+health_panel(macro,calendar_report(text)),1)
  return refresh_csp(text)
 
