@@ -57,7 +57,7 @@ class DashboardFinalizeTests(unittest.TestCase):
   payload=self.payload();payload=copy.copy(payload);payload['index.html']=payload['index.html'].replace(b'>PROVIDER-HOSTED<',b'>PROVIDER-HOSTED TAMPERED<',1)
   with self.assertRaises(rights.RightsError):presentation_rights.normalize_payload(payload)
  def test_presentation_normalizer_rejects_publication_state_tampering(self):
-  payload=self.payload();payload=copy.copy(payload);payload['index.html']=payload['index.html'].replace(b'>\xe5\x85\xac\xe9\x96\x8bHTML\xe5\x86\x85\xe3\x81\xab\xe4\xbf\x9d\xe6\x8c\x81 / \xe7\x94\xbb\xe9\x9d\xa2\xe9\x9d\x9e\xe8\xa1\xa8\xe7\xa4\xba /',b'>\xe5\x85\xac\xe9\x96\x8b\xe7\x89\xa9\xe3\x81\x8b\xe3\x82\x89\xe9\x99\xa4\xe5\xa4\x96 / \xe7\x94\xbb\xe9\x9d\xa2\xe9\x9d\x9e\xe8\xa1\xa8\xe7\xa4\xba /',1)
+  payload=self.payload();payload=copy.copy(payload);payload['index.html']=payload['index.html'].replace(b'data-market-publication-state="true"',b'data-market-publication-state="tampered"',1)
   with self.assertRaises(rights.RightsError):presentation_rights.normalize_payload(payload)
  def test_presentation_normalizer_rejects_wrapper_tampering(self):
   payload=self.payload();payload=copy.copy(payload);payload['index.html']=payload['index.html'].replace(b'data-market-legacy="true" hidden aria-hidden="true"',b'data-market-legacy="true" aria-hidden="true"',1)
