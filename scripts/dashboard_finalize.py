@@ -9,6 +9,14 @@ BADGE_OLD="badge('ARCHIVE SNAPSHOT / '+D.as_of,'p-warn')"
 BADGE_NEW="badge('MARKET LIVE / PROVIDER-HOSTED','p-good')"
 AGE_OLD="株価・指数: 2026-09-10固定 / マクロ: 各系列の観測日 / カレンダー: Source Healthを確認"
 AGE_NEW="株価・指数: TradingView live（市場によりリアルタイム・遅延・EOD） / マクロ: 各系列の観測日 / カレンダー: Source Healthを確認"
+HEADER_OLD="v0.4.0 / 2026-09-13 / 世界指数・株価分析"
+HEADER_NEW="v0.6.0 / 公開版 / MARKET LIVE + MACRO AUTO REFRESH"
+STATIC_AGE_OLD="日程確認：2026-09-13 / 自動更新ではありません"
+STATIC_AGE_NEW="株価・指数: TradingView provider-hosted / マクロ: 1日4回更新 / カレンダー: Source Healthを確認"
+EVENT_NOTE_OLD="2026年9月13日に公式掲載日程を確認。変更される場合があります。会合は開催地の日付、統計は日本時間を併記します。"
+EVENT_NOTE_NEW="このタブの固定8件は2026-09-13レビュー時点。最新の日程確認は「マクロ」の経済カレンダー / Source Healthを参照。会合は開催地の日付、統計は日本時間を併記します。"
+SAFETY_OLD="外部接続とフォーム送信を禁止するブラウザ設定を入れています。"
+SAFETY_NEW="TradingView公式Widgetの許可済み接続を除き、任意の外部接続とフォーム送信をCSPで禁止しています。"
 
 def jst(iso):
  try:
@@ -55,10 +63,18 @@ def refresh_csp(text):
  digest=base64.b64encode(hashlib.sha256(inline[0].encode()).digest()).decode()
  return re.sub(r"script-src 'sha256-[^']+'","script-src 'sha256-"+digest+"'",text,count=1)
 
+def replace_exact(text,old,new,label):
+ if text.count(old)!=1:raise ValueError(label)
+ return text.replace(old,new,1)
+
 def apply(text,macro):
  if 'data-dashboard-health="true"' in text:return text
  if BADGE_OLD not in text or AGE_OLD not in text:raise ValueError('market status markers')
  text=text.replace(BADGE_OLD,BADGE_NEW,1).replace(AGE_OLD,AGE_NEW,1)
+ text=replace_exact(text,HEADER_OLD,HEADER_NEW,'header release marker')
+ text=replace_exact(text,STATIC_AGE_OLD,STATIC_AGE_NEW,'static freshness marker')
+ text=replace_exact(text,EVENT_NOTE_OLD,EVENT_NOTE_NEW,'event freshness note')
+ text=replace_exact(text,SAFETY_OLD,SAFETY_NEW,'frontend connection note')
  text=text.replace('下段の2026-09-10固定値は監査用スナップショットです。','旧固定値は監査用に内部保持し、通常画面では非表示です。',1)
  text=text.replace('下段の2026-09-10以前の値は監査用スナップショットです。','旧固定値は監査用に内部保持し、通常画面では非表示です。',1)
  text=hide_legacy_panel(text,'world','market');text=hide_legacy_panel(text,'market','events')
