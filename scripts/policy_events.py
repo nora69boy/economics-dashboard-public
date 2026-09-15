@@ -17,6 +17,8 @@ FED_SOURCE="https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
 BOJ_MEETING_SOURCE="https://www.boj.or.jp/en/mopo/mpmsche_minu/index.htm"
 BOJ_RELEASE_SOURCE="https://www.boj.or.jp/about/calendar/index.htm"
 
+LEGACY_RUNTIME_RENDER="function render(){const n=Date.now();let p='事前レンジ',a='イベント前の金利・為替・株式の方向を確認';if(n<fomc){stage.textContent='FOMC声明待ち';countdown.textContent='FOMC声明まで '+left(fomc,n);}else if(n<fomcPc){stage.textContent='FOMC声明公表 / 議長会見待ち';countdown.textContent='議長会見まで '+left(fomcPc,n);p='FOMC初動';a='声明だけで確定せず、会見後の米10年金利とNASDAQの方向一致を確認';}else if(n<bojPc){stage.textContent='FOMC通過 / 日銀決定・会見監視';countdown.textContent='日銀総裁会見まで '+left(bojPc,n)+'（政策決定内容の公表時刻は未定）';p='FOMC確定反応 / BOJ待ち';a='USD/JPYと日本株の反応がFOMC後に維持されるか確認';}else{stage.textContent='FOMC・日銀通過後 / 市場反応を検証';countdown.textContent='金利・USD/JPY・TOPIX・日経225の24時間反応を確認';p='24時間フォロースルー';a='イベント前レンジへ戻るか、方向性が定着するかを確認';}if(phase)phase.textContent=p;if(action)action.textContent=a;}"
+
 EVENTS=(
  {
   "id":"fomc-statement-2026-09","group_id":"policy-2026-09-fed-boj","authority":"Federal Reserve",
