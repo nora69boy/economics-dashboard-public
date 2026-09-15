@@ -23,7 +23,7 @@ async function runBrowserCheck(){
   const t=await send('Target.createTarget',{url:'about:blank'},false);session=(await send('Target.attachToTarget',{targetId:t.targetId,flatten:true},false)).sessionId;
   await send('Page.enable');await send('Runtime.enable');await send('Network.enable');
   await send('Network.setBlockedURLs',{urls:['https://s3.tradingview.com/*','https://*.tradingview.com/*','https://*.tradingview-widget.com/*','wss://*.tradingview.com/*','wss://*.tradingview-widget.com/*']});
-  async function evaluate(expression){const r=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw Error('browser assertion');return r.result.value;}
+  async function evaluate(expression){const r=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails){const detail=r.exceptionDetails.exception?.description||r.exceptionDetails.text||'browser assertion';throw Error(detail.split('\n')[0]);}return r.result.value;}
   async function load(){await send('Page.navigate',{url:'about:blank'});await new Promise(ok=>setTimeout(ok,100));const f=await send('Page.getFrameTree');await send('Page.setDocumentContent',{frameId:f.frameTree.frame.id,html});await new Promise(ok=>setTimeout(ok,180));}
   const results=[];for(const width of [390,768,1440]){await send('Emulation.setDeviceMetricsOverride',{width,height:900,deviceScaleFactor:1,mobile:false});await load();results.push(await evaluate('('+assertions+')()'));}
   await send('Emulation.setScriptExecutionDisabled',{value:true});await load();
