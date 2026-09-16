@@ -1,6 +1,8 @@
 import copy,sys,unittest
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'scripts'))
+import check_site as gate
+import executive_overview as overview
 import systemic_registry as registry
 
 class SystemicRegistryTests(unittest.TestCase):
@@ -36,5 +38,10 @@ class SystemicRegistryTests(unittest.TestCase):
  def test_unknown_instrument_does_not_guess(self):
   self.assertIsNone(registry.issuer_for_instrument('NASDAQ','UNKNOWN'))
   with self.assertRaises(KeyError):registry.by_id('company-unknown')
+ def test_registry_html_has_no_phone_false_positive_but_real_phone_still_blocks(self):
+  rendered=overview.render()
+  gate.scan(rendered,public_document='index.html')
+  with self.assertRaisesRegex(ValueError,'sensitive phone'):
+   gate.scan(rendered+'<p>000-0000-0000</p>',public_document='index.html')
 
 if __name__=='__main__':unittest.main()
