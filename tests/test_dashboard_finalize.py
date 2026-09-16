@@ -66,7 +66,7 @@ class DashboardFinalizeTests(unittest.TestCase):
   payload=self.payload();payload=copy.copy(payload);payload['index.html']=payload['index.html'].replace(b'MARKET PROVIDER-HOSTED + MACRO AUTO REFRESH',b'MARKET UNREVIEWED',1)
   with self.assertRaises(rights.RightsError):presentation_rights.normalize_payload(payload)
  def test_presentation_normalizer_rejects_executive_overview_tampering(self):
-  payload=self.payload();payload=copy.copy(payload);payload['index.html']=payload['index.html'].replace('Market direction</div><div class="metric">未判定'.encode(), 'Market direction</div><div class="metric">強気'.encode(),1)
+  payload=self.payload();payload=copy.copy(payload);original=b'Issuer coverage</div><div class="metric">12/12';tampered=b'Issuer coverage</div><div class="metric">13/12';self.assertIn(original,payload['index.html']);payload['index.html']=payload['index.html'].replace(original,tampered,1)
   with self.assertRaises(rights.RightsError):presentation_rights.normalize_payload(payload)
 
 if __name__=='__main__':unittest.main()
