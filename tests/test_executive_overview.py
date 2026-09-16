@@ -42,7 +42,8 @@ class ExecutiveOverviewTests(unittest.TestCase):
   html=overview.render();self.assertEqual(html.count('結果未確認'),4);self.assertIn('Outcome verified</div><div class="metric">0</div>',html)
  def test_verified_count_changes_only_from_typed_state(self):
   values=list(copy.deepcopy(policy_events.EVENTS));values[0]['outcome_state']='outcome_verified';values[0]['outcome_verified_at']='2026-09-17T03:02:00+09:00'
-  html=overview.render(tuple(values));self.assertIn('Outcome verified</div><div class="metric">1</div>',html);self.assertEqual(html.count('結果確認済み'),1)
+  html=overview.render(tuple(values));self.assertIn('Outcome verified</div><div class="metric">1</div>',html)
+  self.assertEqual(html.count('<span class="tag good">結果確認済み</span>'),1);self.assertEqual(html.count('結果確認済み / 監視中'),1)
  def test_apply_is_idempotent(self):
   source=overview.ANCHOR+'<p>existing</p></section>';once=overview.apply(source);twice=overview.apply(once);self.assertEqual(once,twice);self.assertEqual(once.count(overview.MARKER),1)
  def test_missing_anchor_fails_closed(self):
