@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Inject the v0.7 Executive Overview Phase 1 into the reviewed public HTML.
+"""Inject the v0.7 Executive Overview into the reviewed public HTML.
 
-The panel is derived from typed policy-event records and adds no new market-data
-transport or self-hosted quote payloads.
+The panel is derived from typed policy-event records plus reviewed identity-only
+systemic registry records. It adds no new market-data transport or self-hosted
+quote payloads.
 """
 from __future__ import annotations
 
@@ -13,6 +14,7 @@ from html import escape
 from pathlib import Path
 
 import policy_events
+import systemic_registry
 
 ROOT=Path(__file__).resolve().parents[1]
 MARKER='data-v07-executive-overview="true"'
@@ -36,8 +38,42 @@ def _schedule(event):
   return event["scheduled_at"].replace("T"," ")
  return event["scheduled_date"]+" / 公表時刻は未確定"
 
+def _registry_links(records,label_key):
+ items=[]
+ for record in records:
+  suffix=''
+  if record['kind']=='company':
+   instrument=record['canonical_instrument']
+   suffix=' <span class="small">'+escape(instrument['venue']+':'+instrument['symbol'])+'</span>'
+  else:
+   suffix=' <span class="small">'+escape(record['provider'])+'</span>'
+  items.append('<a data-registry-'+label_key+'="'+escape(record['id'])+'" href="'+escape(record['source_url'],quote=True)+'" rel="noopener noreferrer" referrerpolicy="no-referrer">'+escape(record['name'])+'</a>'+suffix)
+ return ' · '.join(items)
+
+def _registry_block():
+ meta=systemic_registry.validate()
+ return (
+  '<section data-systemic-registry="true" class="card full">'
+  '<div class="eyebrow">FACT / SYSTEMIC IDENTITY REGISTRY</div>'
+  '<h3>12指数 + 12発行体を共通IDで管理</h3>'
+  '<div class="grid four">'
+  '<article class="card"><div class="eyebrow">Indices</div><div class="metric">'+str(meta['index_count'])+'</div><p class="small">主要市場・地域の参照軸</p></article>'
+  '<article class="card"><div class="eyebrow">Issuers</div><div class="metric">'+str(meta['company_count'])+'</div><p class="small">企業は発行体単位</p></article>'
+  '<article class="card"><div class="eyebrow">Instruments</div><div class="metric">'+str(meta['instrument_count'])+'</div><p class="small">ADR・複数株式クラスを別管理</p></article>'
+  '<article class="card"><div class="eyebrow">Verified</div><div class="metric">'+escape(meta['verified_at'])+'</div><p class="small">公式IR・指数提供者でidentity確認</p></article>'
+  '</div>'
+  '<div class="grid two">'
+  '<article class="card"><div class="eyebrow">INDEX REGISTRY / FACT</div><p class="small">'+_registry_links(systemic_registry.INDEXES,'index')+'</p></article>'
+  '<article class="card"><div class="eyebrow">ISSUER REGISTRY / FACT</div><p class="small">'+_registry_links(systemic_registry.COMPANIES,'company')+'</p></article>'
+  '</div>'
+  '<div class="notice"><strong>Deduplication rule:</strong> GOOGL/GOOG、TWSE:2330/NYSE:TSM、TSE:6857/ATEYYのような複数取引ラインは同一発行体IDへ束ねます。12社の選定はシステム波及を検証する初期アーキテクチャ用であり、投資ランキングではありません。</div>'
+  '<p class="small">Registry scope: identity metadata only。株価、指数値、構成比、財務数値、バリュエーション、売買スコアはこのRegistryに保持しません。</p>'
+  '</section>'
+ )
+
 def render(events=policy_events.EVENTS):
  policy_events.validate_events(events)
+ systemic_registry.validate()
  verified=sum(e["outcome_state"]=="outcome_verified" for e in events)
  event_cards=[]
  for event in events:
@@ -54,9 +90,10 @@ def render(events=policy_events.EVENTS):
   )
  systemic=(
   '<div class="grid">'
-  '<article class="card"><div class="eyebrow">INFERENCE / TRANSMISSION</div><h3>Fed → 金利 → 株式</h3><p>FOMCの確認済み結果 → 米国債利回り → USD/JPY → NASDAQ・S&amp;P 500の順に反応の整合性を確認する。方向は事前固定しない。</p></article>'
+  '<article class="card"><div class="eyebrow">INFERENCE / TRANSMISSION</div><h3>Fed → 金利 → 株式</h3><p>FOMCの確認済み結果 → 米国債利回り → USD/JPY → Nasdaq-100・S&amp;P 500の順に反応の整合性を確認する。方向は事前固定しない。</p></article>'
   '<article class="card"><div class="eyebrow">INFERENCE / TRANSMISSION</div><h3>BOJ → 為替 → 日本株</h3><p>日銀の確認済み結果 → USD/JPY → TOPIX・日経225を確認する。政策決定の公表時刻は推測で補完しない。</p></article>'
-  '<article class="card"><div class="eyebrow">INFERENCE / CROSS-ASSET</div><h3>日米政策差 → リスク選好</h3><p>金利差、為替、株式の同方向・逆方向を比較し、単一市場だけの初動を政策効果と断定しない。</p></article>'
+  '<article class="card"><div class="eyebrow">INFERENCE / SYSTEMIC CHAIN</div><h3>AI需要 → 半導体 → 日本装置</h3><p>NVIDIA / Broadcom → TSMC / SK hynix → Advantest / Tokyo Electronを発行体IDで追跡し、企業名や上場ラインの重複を波及シグナルとして数えない。</p></article>'
+  '<article class="card"><div class="eyebrow">INFERENCE / CROSS-THEME</div><h3>通信・資本コスト・宇宙</h3><p>NTT、MUFG、Rocket Labを異なる波及経路の観測点として扱う。Registryへの収録自体は投資魅力度を示さない。</p></article>'
   '</div>'
  )
  scenarios=(
@@ -68,20 +105,21 @@ def render(events=policy_events.EVENTS):
  )
  return (
   '<section '+MARKER+' class="card full">'
-  '<div class="eyebrow">EXECUTIVE OVERVIEW / v0.7 PHASE 1</div>'
+  '<div class="eyebrow">EXECUTIVE OVERVIEW / v0.7 PHASE 2</div>'
   '<h3>今日の判断レイヤー</h3>'
   '<div class="grid four">'
   '<article class="card"><div class="eyebrow">Typed policy events</div><div class="metric">'+str(len(events))+'</div><p class="small">FOMC / BOJ</p></article>'
   '<article class="card"><div class="eyebrow">Outcome verified</div><div class="metric">'+str(verified)+'</div><p class="small">時刻経過だけでは増えません</p></article>'
-  '<article class="card"><div class="eyebrow">Claim discipline</div><div class="metric">FACT</div><p class="small">日程・状態は公式出典付き</p></article>'
+  '<article class="card"><div class="eyebrow">Claim discipline</div><div class="metric">FACT</div><p class="small">日程・identityは公式出典付き</p></article>'
   '<article class="card"><div class="eyebrow">Market direction</div><div class="metric">未判定</div><p class="small">外部Widget表示だけで方向を確定しません</p></article>'
   '</div>'
-  '<div class="notice"><strong>What changed:</strong> 重要政策イベントを、予定時刻ではなく結果確認状態で管理します。<br><strong>Why it matters:</strong> 未確認の発表を「通過済み」と誤認して投資判断へ使うリスクを下げます。</div>'
+  '<div class="notice"><strong>What changed:</strong> 政策イベントに加え、主要指数・発行体を共通Registryへ統合しました。<br><strong>Why it matters:</strong> ADR、本国株、複数株式クラスの二重計上を防ぎ、次工程のイベント→指数→企業→テーマ接続を同一IDで構築できます。</div>'
+  +_registry_block()+
   '<h3>最重要イベント</h3><div class="grid two">'+''.join(event_cards)+'</div>'
   '<h3>Systemic Market Map</h3>'+systemic+
   '<h3>Bull / Base / Bear</h3>'+scenarios+
   '<div class="notice"><strong>Invalidation / 反証:</strong> 24時間以内に金利・為替・株式がイベント前レンジへ戻る、または主要市場の反応が相互に矛盾する場合、政策イベント主導という仮説を弱めます。</div>'
-  '<p class="small">Phase 1では新規の自己ホスト株価、コンセンサス、企業スコア、売買推奨を追加していません。次工程で検証済みEntity / Index registryを接続します。</p>'
+  '<p class="small">Phase 2でも新規の自己ホスト株価、コンセンサス、企業スコア、売買推奨は追加していません。次工程ではRegistry IDへ evidence-backed relationship / catalyst recordsを接続します。</p>'
   '</section>'
  )
 
