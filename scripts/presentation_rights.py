@@ -7,6 +7,7 @@ import hashlib
 import re
 
 import publication_rights as rights
+import policy_events
 
 BADGE_OLD="badge('ARCHIVE SNAPSHOT / '+D.as_of,'p-warn')"
 BADGE_NEW="badge('MARKET / PROVIDER-HOSTED','p-good')"
@@ -27,6 +28,7 @@ WORLD_OLD='下段の2026-09-10固定値は監査用スナップショットで�
 MARKET_OLD='下段の2026-09-10以前の値は監査用スナップショットです。'
 LIVE_NEW='旧固定値は監査用に内部保持し、通常画面では非表示です。'
 OPERATIONS='<section class="panel" id="operations" aria-labelledby="tab-operations"><h2>出典・運用</h2>'
+POLICY_RUNTIME_NEW=policy_events.runtime_render_js()
 PRESENTATION_PAIRS=(
  (BADGE_OLD,BADGE_NEW),
  (AGE_OLD,AGE_NEW),
@@ -77,13 +79,15 @@ def _restore_csp(text):
 
 def normalize_index(index_bytes):
     text=index_bytes.decode().replace('\r\n','\n')
-    markers=tuple(new for _,new in PRESENTATION_PAIRS)+('data-dashboard-health="true"','data-market-publication-state="true"',LEGACY_OPEN,NEW_ARCHIVE,LIVE_NEW)
+    markers=tuple(new for _,new in PRESENTATION_PAIRS)+('data-dashboard-health="true"','data-market-publication-state="true"',LEGACY_OPEN,NEW_ARCHIVE,LIVE_NEW,POLICY_RUNTIME_NEW)
     present=[m in text for m in markers]
     if not any(present):
         return index_bytes
     _require(all(present))
     for old,new in PRESENTATION_PAIRS:
         _require(text.count(new)==1 and text.count(old)==0)
+    _require(text.count(policy_events.runtime_time_line())==1)
+    _require(text.count(POLICY_RUNTIME_NEW)==1 and text.count(policy_events.LEGACY_RUNTIME_RENDER)==0)
     _require(text.count(LEGACY_OPEN)==2 and text.count(NEW_ARCHIVE)==2 and text.count(LIVE_NEW)==2)
     _require(text.count(OPERATIONS)==1)
     op=text.index(OPERATIONS)+len(OPERATIONS)
@@ -92,9 +96,11 @@ def normalize_index(index_bytes):
     text=text[:op]+text[match.end():]
     text=_restore_panel(text,'world','market',WORLD_OLD)
     text=_restore_panel(text,'market','events',MARKET_OLD)
+    text=text.replace(POLICY_RUNTIME_NEW,policy_events.LEGACY_RUNTIME_RENDER,1)
     for old,new in PRESENTATION_PAIRS:
         text=text.replace(new,old,1)
     _require(not any(m in text for m in markers))
+    _require(text.count(policy_events.LEGACY_RUNTIME_RENDER)==1)
     return _restore_csp(text).encode()
 
 def normalize_payload(payload):

@@ -40,5 +40,13 @@ class PolicyEventTests(unittest.TestCase):
   self.assertEqual(events.active_event_ids(datetime.fromisoformat('2026-09-22T00:00:00+09:00')),[])
  def test_naive_phase_time_rejected(self):
   with self.assertRaises(events.PolicyEventError):events.phase_at(datetime(2026,9,17,3,5))
+ def test_runtime_schedule_line_is_derived_from_typed_events(self):
+  self.assertEqual(events.runtime_time_line(),"const fomc=Date.parse('2026-09-17T03:00:00+09:00'),fomcPc=Date.parse('2026-09-17T03:30:00+09:00'),bojPc=Date.parse('2026-09-18T15:30:00+09:00');")
+ def test_runtime_defaults_to_unverified_outcomes(self):
+  runtime=events.runtime_render_js();self.assertIn('fomcVerified=false',runtime);self.assertIn('fomcPcVerified=false',runtime);self.assertIn('bojVerified=false',runtime);self.assertIn('bojPcVerified=false',runtime);self.assertIn('結果確認待ち',runtime);self.assertIn('通過扱いにしません',runtime)
+ def test_runtime_does_not_contain_legacy_clock_only_completion(self):
+  runtime=events.runtime_render_js();self.assertNotIn("stage.textContent='FOMC通過 /",runtime);self.assertNotIn("stage.textContent='FOMC・日銀通過後 /",runtime)
+ def test_runtime_flags_change_only_after_verified_outcome(self):
+  values=list(copy.deepcopy(events.EVENTS));values[0]['outcome_state']='outcome_verified';values[0]['outcome_verified_at']='2026-09-17T03:02:00+09:00';runtime=events.runtime_render_js(tuple(values));self.assertIn('fomcVerified=true',runtime);self.assertIn('fomcPcVerified=false',runtime)
 
 if __name__=='__main__':unittest.main()
