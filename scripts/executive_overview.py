@@ -7,6 +7,8 @@ transport or self-hosted quote payloads.
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 from html import escape
 from pathlib import Path
 
@@ -88,12 +90,19 @@ def apply(text:str,events=policy_events.EVENTS)->str:
  if ANCHOR not in text:raise ValueError("overview anchor missing")
  return text.replace(ANCHOR,ANCHOR+render(events),1)
 
+def sync_manifest(site:Path,index_bytes:bytes)->None:
+ path=site/'manifest.json';manifest=json.loads(path.read_text(encoding='utf-8'));files=manifest.get('files')
+ if not isinstance(files,dict) or 'index.html' not in files:raise ValueError('manifest index entry')
+ files['index.html']=hashlib.sha256(index_bytes).hexdigest()
+ path.write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
 def main():
  ap=argparse.ArgumentParser();ap.add_argument('--apply',action='store_true');ap.add_argument('--path',default=str(ROOT/'site/index.html'));args=ap.parse_args()
  path=Path(args.path)
  text=path.read_text(encoding='utf-8')
  out=apply(text)
- if args.apply:path.write_text(out,encoding='utf-8')
+ if args.apply:
+  encoded=out.encode('utf-8');path.write_bytes(encoded);sync_manifest(path.parent,encoded)
  else:print(out)
 
 if __name__=='__main__':main()
