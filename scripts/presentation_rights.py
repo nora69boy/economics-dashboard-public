@@ -8,6 +8,7 @@ import re
 
 import publication_rights as rights
 import policy_events
+import executive_overview
 
 BADGE_OLD="badge('ARCHIVE SNAPSHOT / '+D.as_of,'p-warn')"
 BADGE_NEW="badge('MARKET / PROVIDER-HOSTED','p-good')"
@@ -29,6 +30,7 @@ MARKET_OLD='下段の2026-09-10以前の値は監査用スナップショット�
 LIVE_NEW='旧固定値は監査用に内部保持し、通常画面では非表示です。'
 OPERATIONS='<section class="panel" id="operations" aria-labelledby="tab-operations"><h2>出典・運用</h2>'
 POLICY_RUNTIME_NEW=policy_events.runtime_render_js()
+EXECUTIVE_BLOCK=executive_overview.render()
 PRESENTATION_PAIRS=(
  (BADGE_OLD,BADGE_NEW),
  (AGE_OLD,AGE_NEW),
@@ -77,12 +79,22 @@ def _restore_csp(text):
     _require(len(re.findall(pattern,text))==1)
     return re.sub(pattern,"script-src 'sha256-"+digest+"'",text,count=1)
 
+def _strip_reviewed_executive(text):
+    marker=executive_overview.MARKER
+    if marker not in text:return text
+    _require(text.count(marker)==1)
+    _require(text.count(EXECUTIVE_BLOCK)==1)
+    text=text.replace(EXECUTIVE_BLOCK,'',1)
+    _require(marker not in text)
+    return text
+
 def normalize_index(index_bytes):
     text=index_bytes.decode().replace('\r\n','\n')
+    text=_strip_reviewed_executive(text)
     markers=tuple(new for _,new in PRESENTATION_PAIRS)+('data-dashboard-health="true"','data-market-publication-state="true"',LEGACY_OPEN,NEW_ARCHIVE,LIVE_NEW,POLICY_RUNTIME_NEW)
     present=[m in text for m in markers]
     if not any(present):
-        return index_bytes
+        return text.encode()
     _require(all(present))
     for old,new in PRESENTATION_PAIRS:
         _require(text.count(new)==1 and text.count(old)==0)
