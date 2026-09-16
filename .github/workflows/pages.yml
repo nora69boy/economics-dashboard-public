@@ -86,6 +86,8 @@ jobs:
           python3 -m unittest discover -s tests -p test_company_theme_expansion.py -v
           python3 -m unittest discover -s tests -p test_relevance_scoring.py -v
           python3 -m unittest discover -s tests -p test_executive_overview.py -v
+          python3 scripts/phase2_overview.py --apply
+          python3 -m unittest discover -s tests -p test_phase2_overview.py -v
           node scripts/browser_release.mjs site/index.html
       - name: Validate allowlisted publication
         id: release
