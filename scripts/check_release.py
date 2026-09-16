@@ -1,4 +1,4 @@
-"""Extend the existing fail-closed publication boundary by two precisely typed public datasets."""
+"""Extend the existing fail-closed publication boundary by reviewed typed public datasets."""
 import argparse,hashlib,html,json,os,re,shutil
 from pathlib import Path
 import check_site as gate
@@ -7,13 +7,16 @@ import publication_rights as rights
 import calendar_rights
 import dashboard_finalize as presentation
 ROOT=Path(__file__).resolve().parents[1]
-EXTRA_FILES={'scripts/calendar_snapshot.py','scripts/calendar_publish.py','scripts/run_legacy_tests.py','scripts/macro_core.py','scripts/macro_fetch.py','scripts/build_release.py','scripts/check_release.py','scripts/browser_release.mjs','scripts/release_assertions.js','scripts/dashboard_finalize.py','scripts/presentation_rights.py','scripts/release_state.py','scripts/policy_events.py','templates/macro.js','templates/macro.css','tests/test_release.py','tests/test_browser_retry.py','tests/test_dashboard_finalize.py','tests/test_release_state.py','tests/test_policy_events.py','docs/data-rights.md','docs/release-v060.md','scripts/publication_rights.py','tests/test_rights.py','data-rights/registry.json','data-rights/migration-baseline.json','data-rights/README.md','scripts/market_refresh_guard.py','tests/test_market_refresh_guard.py','docs/market-data-automation.md','docs/market-data-provider-review-2026-09-14.md','scripts/sec_filings.py','tests/test_sec_filings.py','scripts/calendar_probe.py','tests/test_calendar_probe.py','tests/test_calendar_publish.py','docs/calendar-data-rights-review.md','scripts/calendar_rights.py','data-rights/calendar-approvals.json','tests/test_calendar_rights.py'}
-def validate(site:Path, rights_reports=None):
+EXTRA_FILES={'scripts/calendar_snapshot.py','scripts/calendar_publish.py','scripts/run_legacy_tests.py','scripts/macro_core.py','scripts/macro_fetch.py','scripts/build_release.py','scripts/check_release.py','scripts/browser_release.mjs','scripts/release_assertions.js','scripts/dashboard_finalize.py','scripts/presentation_rights.py','scripts/release_state.py','scripts/policy_events.py','scripts/executive_overview.py','templates/macro.js','templates/macro.css','tests/test_release.py','tests/test_browser_retry.py','tests/test_dashboard_finalize.py','tests/test_release_state.py','tests/test_policy_events.py','tests/test_executive_overview.py','docs/data-rights.md','docs/release-v060.md','docs/v07-executive-overview-phase1.md','scripts/publication_rights.py','tests/test_rights.py','data-rights/registry.json','data-rights/migration-baseline.json','data-rights/README.md','scripts/market_refresh_guard.py','tests/test_market_refresh_guard.py','docs/market-data-automation.md','docs/market-data-provider-review-2026-09-14.md','scripts/sec_filings.py','tests/test_sec_filings.py','scripts/calendar_probe.py','tests/test_calendar_probe.py','tests/test_calendar_publish.py','docs/calendar-data-rights-review.md','scripts/calendar_rights.py','data-rights/calendar-approvals.json','tests/test_calendar_rights.py'}
+def validate(site:Path, rights_reports=None, require_overview=False):
  gate.PAYLOAD |= {'data/macro.json','data/macro-calendar.json'};gate.URLS |= macro.URLS;gate.REPO |= EXTRA_FILES
  payload=gate.validate(site);m=gate.loads(payload['data/macro.json']);c=gate.loads(payload['data/macro-calendar.json']);macro.validate(m);macro.validate_calendar(c);s=payload['index.html'].decode()
  for id,name in [('macro-data','data/macro.json'),('macro-calendar-data','data/macro-calendar.json')]:
   match=re.search('<pre id="'+id+'" hidden>(.*?)</pre>',s,re.S);gate.require(match and gate.loads(html.unescape(match[1]))==gate.loads(payload[name]),'Macro embedded mismatch')
  gate.require(s.count("version:'0.6.0'")==2 and 'macro-chart-' in s,'Actual release program')
+ if require_overview:
+  gate.require(s.count('data-v07-executive-overview="true"')==1,'Executive Overview missing or duplicated')
+  gate.require('Systemic Market Map' in s and 'BULL / INFERENCE' in s and 'BASE / INFERENCE' in s and 'BEAR / INFERENCE' in s,'Executive Overview analytical layers missing')
  source_macro=(ROOT/'templates/macro.js').read_text();gate.require(source_macro.count(presentation.AGE_OLD)==1,'Macro presentation transform source');expected_macro=source_macro.replace(presentation.AGE_OLD,presentation.AGE_NEW,1);gate.require(sum((source_macro in s,expected_macro in s))==1,'Macro template state')
  report=calendar_rights.enforce(payload)
  if rights_reports is not None:rights_reports.append(report)
@@ -26,7 +29,7 @@ def history():
 
 def main():
  ap=argparse.ArgumentParser();ap.add_argument('--check-history',action='store_true');ap.add_argument('--build',action='store_true');args=ap.parse_args();reports=[]
- try:out=validate(ROOT/'site',reports)
+ try:out=validate(ROOT/'site',reports,require_overview=True)
  except rights.PublicationBlocked as exc:
   rights.emit(exc.report);raise SystemExit('PUBLICATION RIGHTS BLOCKED') from None
  except rights.RightsError:
