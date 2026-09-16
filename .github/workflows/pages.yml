@@ -67,6 +67,7 @@ jobs:
           python3 -m unittest discover -s tests -p test_systemic_registry.py -v
           python3 -m unittest discover -s tests -p test_relationship_registry.py -v
           python3 -m unittest discover -s tests -p test_company_theme_expansion.py -v
+          python3 -m unittest discover -s tests -p test_relevance_scoring.py -v
           python3 -m unittest discover -s tests -p test_executive_overview.py -v
           python3 -m unittest discover -s tests -p test_calendar_rights.py -v
           python3 -m unittest discover -s tests -p test_calendar_publish.py -v
@@ -83,6 +84,7 @@ jobs:
           python3 -m unittest discover -s tests -p test_systemic_registry.py -v
           python3 -m unittest discover -s tests -p test_relationship_registry.py -v
           python3 -m unittest discover -s tests -p test_company_theme_expansion.py -v
+          python3 -m unittest discover -s tests -p test_relevance_scoring.py -v
           python3 -m unittest discover -s tests -p test_executive_overview.py -v
           node scripts/browser_release.mjs site/index.html
       - name: Validate allowlisted publication
