@@ -2,8 +2,9 @@
 """Inject the v0.7 Executive Overview into the reviewed public HTML.
 
 The panel is derived from typed policy events, the reviewed identity-only systemic
-registry, and the evidence-backed relationship/catalyst registry. It adds no new
-market-data transport or self-hosted quote payloads.
+registry, the evidence-backed relationship/catalyst registry, and the reviewed
+company/theme expansion. It adds no new market-data transport or self-hosted
+quote payloads.
 """
 from __future__ import annotations
 
@@ -13,6 +14,7 @@ import json
 from html import escape
 from pathlib import Path
 
+import company_theme_expansion
 import policy_events
 import relationship_registry
 import systemic_registry
@@ -31,6 +33,13 @@ CATALYST_LABELS={
  "catalyst-fomc-2026-09":"FOMC → 金利・ドル・米国株",
  "catalyst-boj-2026-09":"BOJ → 金利・USD/JPY・日本株",
  "catalyst-ai-semi-demand-2026q3":"AI需要 → 半導体供給網・装置",
+}
+MONITOR_LABELS={
+ "monitor-hyperscaler-ai-capacity-2026h2":"Hyperscaler AI capacity",
+ "monitor-ai-networking-broadcom-2026h2":"AI accelerators / networking",
+ "monitor-jp-rate-mufg-fy26":"Japan rates → MUFG earnings sensitivity",
+ "monitor-photonics-ai-infra-2026-27":"Photonics / AIOWN commercialization",
+ "monitor-space-launch-systems-2026":"Launch / space systems execution",
 }
 
 def _status(event):
@@ -77,7 +86,8 @@ def _ref_name(ref):
  if kind=='company':return systemic_registry.by_id(ident)['name']
  if kind=='factor':
   match=[x for x in relationship_registry.FACTORS if x['id']==ident]
- elif kind=='theme':match=[x for x in relationship_registry.THEMES if x['id']==ident]
+ elif kind=='theme':
+  match=[x for x in relationship_registry.THEMES+company_theme_expansion.THEMES if x['id']==ident]
  else:match=[]
  if len(match)!=1:raise KeyError(ref)
  return match[0]['name']
@@ -90,6 +100,37 @@ def _relationship_row(rel):
   '<span class="tag '+('pending' if rel['publication_state']=='confirm_required' else 'good')+'">'+escape(state)+'</span>'
   '<br><span class="small">'+escape(rel['claim'])+' / Evidence '+escape(rel['evidence_grade'])+' / source published: '+escape(published)+' / verified: '+escape(rel['verified_at'])+' / '
   '<a href="'+escape(rel['source_url'],quote=True)+'" rel="noopener noreferrer" referrerpolicy="no-referrer">一次出典</a><br><strong>Invalidation:</strong> '+escape(rel['invalidation'])+'</span></li>'
+ )
+
+def _expansion_row(rel):
+ return (
+  '<li data-company-theme-relationship="'+escape(rel['id'])+'"><strong>'+escape(_ref_name(rel['source_ref']))+' → '+escape(_ref_name(rel['target_ref']))+'</strong> '
+  '<span class="tag good">FACT</span><br><span class="small">'+escape(rel['claim'])+' / Evidence '+escape(rel['evidence_grade'])+' / source published: '+escape(rel['source_published_at'])+' / verified: '+escape(rel['verified_at'])+' / '
+  '<a href="'+escape(rel['source_url'],quote=True)+'" rel="noopener noreferrer" referrerpolicy="no-referrer">一次出典</a><br><strong>Invalidation:</strong> '+escape(rel['invalidation'])+'</span></li>'
+ )
+
+def _monitor_card(monitor):
+ return (
+  '<article class="card" data-company-theme-monitor="'+escape(monitor['id'])+'"><div class="eyebrow">MONITOR / INFERENCE</div><h3>'+escape(MONITOR_LABELS[monitor['id']])+'</h3>'
+  '<span class="tag good">構造監視中</span><p class="small">Monitor: '+escape(monitor['monitor_window'])+'<br>Activation: '+escape(monitor['activation_rule'])+'<br><strong>Invalidation:</strong> '+escape(monitor['invalidation'])+'</p></article>'
+ )
+
+def _company_theme_block():
+ meta=company_theme_expansion.validate()
+ ai_ids={'rel-ai-cloud-microsoft','rel-ai-cloud-alphabet','rel-ai-cloud-amazon','rel-ai-networking-broadcom'}
+ ai=[r for r in company_theme_expansion.RELATIONSHIPS if r['id'] in ai_ids]
+ strategic=[r for r in company_theme_expansion.RELATIONSHIPS if r['id'] not in ai_ids]
+ return (
+  '<section data-company-theme-expansion="true" class="card full"><div class="eyebrow">FACT + INFERENCE / COMPANY &amp; THEME EXPANSION</div><h3>12/12 seed issuers をEvidence Graphへ接続</h3>'
+  '<div class="grid four">'
+  '<article class="card"><div class="eyebrow">Seed coverage</div><div class="metric">'+str(meta['seed_company_coverage'])+'/12</div><p class="small">全初期発行体に証拠付き接続</p></article>'
+  '<article class="card"><div class="eyebrow">Expansion FACT</div><div class="metric">'+str(meta['relationship_count'])+'</div><p class="small">Grade A一次資料</p></article>'
+  '<article class="card"><div class="eyebrow">Themes</div><div class="metric">'+str(meta['theme_count'])+'</div><p class="small">AI cloud / networking / photonics / space</p></article>'
+  '<article class="card"><div class="eyebrow">Monitors</div><div class="metric">'+str(meta['monitor_count'])+'</div><p class="small">INFERENCE + 反証条件</p></article></div>'
+  '<div class="grid">'+''.join(_monitor_card(m) for m in company_theme_expansion.MONITORS)+'</div>'
+  '<div class="grid two"><article class="card"><div class="eyebrow">AI CLOUD / NETWORKING</div><ul>'+''.join(_expansion_row(r) for r in ai)+'</ul></article>'
+  '<article class="card"><div class="eyebrow">JAPAN RATES / PHOTONICS / SPACE</div><ul>'+''.join(_expansion_row(r) for r in strategic)+'</ul></article></div>'
+  '<div class="notice"><strong>Coverage rule:</strong> 12/12は投資評価ではなく、初期発行体すべてに少なくとも1本のevidence-backed relationshipがあることを示します。MONITORは売買シグナルではなく、次回公式開示で維持・弱化・退役を判断する検証レイヤーです。</div></section>'
  )
 
 def _catalyst_label(state):
@@ -126,7 +167,7 @@ def _chain(ids):
  return ' → '.join(escape(x) for x in names)
 
 def render(events=policy_events.EVENTS):
- policy_events.validate_events(events);systemic_registry.validate();relationship_registry.validate()
+ policy_events.validate_events(events);systemic_registry.validate();relationship_registry.validate();company_theme_expansion.validate()
  verified=sum(e["outcome_state"]=="outcome_verified" for e in events);event_cards=[]
  for event in events:
   label,cls=_status(event)
@@ -136,28 +177,32 @@ def render(events=policy_events.EVENTS):
   '<article class="card"><div class="eyebrow">EVIDENCE CHAIN</div><h3>Fed → 金融条件 → 市場</h3><p>'+_chain(('rel-fomc-policy-rate','rel-us-rate-financial-conditions'))+'。S&amp;P 500 / Nasdaq-100への波及はINFERENCEとして別管理し、方向は事前固定しない。</p></article>'
   '<article class="card"><div class="eyebrow">EVIDENCE CHAIN</div><h3>BOJ → 為替 → 日本株</h3><p>'+_chain(('rel-boj-policy-rate','rel-boj-usdjpy','rel-usdjpy-topix'))+'。政策決定の公表時刻は推測で補完しない。</p></article>'
   '<article class="card"><div class="eyebrow">EVIDENCE CHAIN</div><h3>AI需要 → 半導体・装置</h3><p>AI/HPC/HBM需要 → TSMC / SK hynix / Advantest / Tokyo Electronを一次資料で追跡。NVIDIA → TSMC / SK hynixは2026年10-Kの直接開示をFACTとして保持。</p></article>'
+  '<article class="card"><div class="eyebrow">EVIDENCE CHAIN</div><h3>AI cloud → Hyperscalers / Networking</h3><p>AI cloud / datacenter infrastructure → Microsoft / Alphabet / Amazon、custom AI accelerators / networking → Broadcomを一次資料で追跡。</p></article>'
+  '<article class="card"><div class="eyebrow">EVIDENCE CHAIN</div><h3>Japan rates / Photonics</h3><p>日本政策金利 → MUFGの利息収益感応度、photonics-enabled AI infrastructure → NTTのAIOWN / APN戦略をFACTとして追跡。</p></article>'
+  '<article class="card"><div class="eyebrow">EVIDENCE CHAIN</div><h3>Space infrastructure</h3><p>Launch services / space systems demand → Rocket Lab。契約・backlog・launch executionを分離し、backlogだけで株価方向を推定しない。</p></article>'
   '</div>'
  )
  scenarios=(
   '<div class="grid">'
-  '<article class="card"><div class="eyebrow">BULL / INFERENCE</div><h3>金融条件・AI需要が整合</h3><p>確認済み政策結果と市場反応が緩和方向で整合し、AI半導体の一次資料でも需要継続が確認される場合、成長資産への追い風仮説を強める。</p></article>'
-  '<article class="card"><div class="eyebrow">BASE / INFERENCE</div><h3>クロスアセット不一致</h3><p>政策結果は確認できても市場反応が分かれる場合、24時間のフォロースルーとイベント前レンジへの回帰を優先確認する。AI供給網は次回決算まで構造監視を継続。</p></article>'
-  '<article class="card"><div class="eyebrow">BEAR / INFERENCE</div><h3>金融条件引締め / AI需要鈍化</h3><p>政策結果と金利・為替・株式が引締め方向で整合、または最新一次資料がAI/HBM需要接続を反転させる場合、該当Relationshipを弱化・退役させる。</p></article>'
+  '<article class="card"><div class="eyebrow">BULL / INFERENCE</div><h3>金融条件・AI需要・設備投資が整合</h3><p>確認済み政策結果と市場反応が緩和方向で整合し、AI半導体・cloud capacity・networkingの一次資料でも需要継続が確認される場合、成長資産への追い風仮説を強める。MUFG・NTT・Rocket Labは各社固有の反証条件を別管理する。</p></article>'
+  '<article class="card"><div class="eyebrow">BASE / INFERENCE</div><h3>テーマは継続、企業間の強弱は分岐</h3><p>政策・AI需要の方向は維持しても企業ごとのcapacity、margin、rate sensitivity、commercialization、executionに差が出る場合、テーマ全体ではなくRelationship単位で維持・弱化を判定する。</p></article>'
+  '<article class="card"><div class="eyebrow">BEAR / INFERENCE</div><h3>金融条件引締め / AI投資鈍化 / 実行遅延</h3><p>政策結果と金利・為替・株式が引締め方向で整合、AI/cloud投資計画が縮小、またはNTT/Rocket Labなどの固有マイルストーンが後退する場合、該当RelationshipとMonitorを弱化・退役させる。</p></article>'
   '</div>'
  )
+ total_relationships=len(relationship_registry.RELATIONSHIPS)+len(company_theme_expansion.RELATIONSHIPS)
  return (
-  '<section '+MARKER+' class="card full"><div class="eyebrow">EXECUTIVE OVERVIEW / v0.7 PHASE 3</div><h3>今日の判断レイヤー</h3>'
+  '<section '+MARKER+' class="card full"><div class="eyebrow">EXECUTIVE OVERVIEW / v0.7 PHASE 4</div><h3>今日の判断レイヤー</h3>'
   '<div class="grid four">'
   '<article class="card"><div class="eyebrow">Typed policy events</div><div class="metric">'+str(len(events))+'</div><p class="small">FOMC / BOJ</p></article>'
   '<article class="card"><div class="eyebrow">Outcome verified</div><div class="metric">'+str(verified)+'</div><p class="small">時刻経過だけでは増えません</p></article>'
-  '<article class="card"><div class="eyebrow">Relationships</div><div class="metric">'+str(len(relationship_registry.RELATIONSHIPS))+'</div><p class="small">FACT / INFERENCEを分離</p></article>'
-  '<article class="card"><div class="eyebrow">Market direction</div><div class="metric">未判定</div><p class="small">観測前に方向を固定しません</p></article></div>'
-  '<div class="notice"><strong>What changed:</strong> Identity Registryへ、FOMC/BOJとAI半導体のevidence-backed Relationship / Catalyst Registryを接続しました。<br><strong>Why it matters:</strong> イベント→マクロ→指数→企業の各矢印について、FACT / INFERENCE・一次出典・検証日・反証条件を追跡できます。</div>'
-  +_registry_block()+_relationship_block(events)+
+  '<article class="card"><div class="eyebrow">Evidence relationships</div><div class="metric">'+str(total_relationships)+'</div><p class="small">14 base + 7 company/theme</p></article>'
+  '<article class="card"><div class="eyebrow">Issuer coverage</div><div class="metric">12/12</div><p class="small">coverage ≠ ranking</p></article></div>'
+  '<div class="notice"><strong>What changed:</strong> Company / Theme ExpansionをExecutive Overviewへ接続し、初期12発行体すべてをEvidence Graph上で可視化しました。<br><strong>Why it matters:</strong> AI cloud・networking・日本金利・photonics・spaceを、一次資料FACTと反証可能なMonitorに分けて追跡できます。</div>'
+  +_registry_block()+_relationship_block(events)+_company_theme_block()+
   '<h3>最重要イベント</h3><div class="grid two">'+''.join(event_cards)+'</div><h3>Systemic Market Map</h3>'+systemic+
   '<h3>Bull / Base / Bear</h3>'+scenarios+
-  '<div class="notice"><strong>Invalidation / 反証:</strong> 政策波及は24時間以内のフォロースルーがなくイベント前レンジへ回帰した場合に弱化。AI半導体は後続の公式決算・filingが需要接続または供給関係を反転させた場合に該当Relationshipを弱化・退役します。</div>'
-  '<p class="small">Phase 3でも新規の自己ホスト株価、コンセンサス、企業スコア、確率、売買推奨は追加していません。Relationship Registryは投資ランキングではありません。</p></section>'
+  '<div class="notice"><strong>Invalidation / 反証:</strong> 政策波及は24時間以内のフォロースルーがなくイベント前レンジへ回帰した場合に弱化。企業・テーマは後続の公式決算・filing・事業進捗が現在の需要接続、金利感応度、commercialization、execution前提を反転させた場合に該当Relationship / Monitorを弱化・退役します。</div>'
+  '<p class="small">Phase 4でも新規の自己ホスト株価、コンセンサス、企業スコア、確率、売買推奨は追加していません。12/12 coverageは投資ランキングではありません。</p></section>'
  )
 
 def apply(text:str,events=policy_events.EVENTS)->str:
