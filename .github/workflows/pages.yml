@@ -40,10 +40,15 @@ jobs:
         run: python3 -m unittest discover -s tests -p test_calendar_publish.py -v
       - name: Test EIA WTI fallback parser
         run: python3 -m unittest discover -s tests -p test_wti_fallback.py -v
+      - name: Test bounded EIA WTI diagnostics
+        run: python3 -m unittest discover -s tests -p test_wti_probe.py -v
       - name: Probe official SEC filings for tracked US companies
         id: sec
         if: github.event_name != 'pull_request'
         run: python3 scripts/sec_filings.py --probe
+      - name: Probe official EIA WTI source paths
+        if: github.event_name != 'pull_request'
+        run: python3 scripts/wti_probe.py
       - name: Read published public fixture for pull requests
         if: github.event_name == 'pull_request'
         run: python3 scripts/macro_fetch.py --snapshot-only
@@ -78,6 +83,7 @@ jobs:
           python3 -m unittest discover -s tests -p test_calendar_probe.py -v
           python3 -m unittest discover -s tests -p test_browser_retry.py -v
           python3 -m unittest discover -s tests -p test_wti_fallback.py -v
+          python3 -m unittest discover -s tests -p test_wti_probe.py -v
           node --check templates/macro.js
       - name: Finalize Dashboard Health and live market presentation
         run: |
