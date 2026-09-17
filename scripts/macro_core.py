@@ -12,12 +12,13 @@ BLS = 'https://api.bls.gov/publicAPI/v1/timeseries/data/'
 BEA = 'https://apps.bea.gov/national/Release/TXT/NipaDataM.txt'
 FX = 'https://www.federalreserve.gov/releases/h10/hist/dat00_ja.htm'
 WTI = 'https://www.eia.gov/dnav/pet/hist/RWTCD.htm'
+WTI_RECENT = 'https://www.eia.gov/dnav/pet/PET_PRI_SPT_S1_D.htm'
 VIX = 'https://www.cboe.com/tradable-products/vix/vix-historical-data/'
 CAL_SOURCES = {'cpi':'https://www.bls.gov/schedule/news_release/cpi.htm','jobs':'https://www.bls.gov/schedule/news_release/empsit.htm','pce':'https://www.bea.gov/news/schedule','fomc':'https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm'}
 META = {'ust10':('daily','percent',TREASURY+'TextView',-5,30),'cpi':('monthly','index_1982_84_100','https://data.bls.gov/timeseries/CUUR0000SA0',1,10000),'pce':('monthly','index_2017_100','https://www.bea.gov/data/personal-consumption-expenditures-price-index',1,10000),'unemployment':('monthly','percent','https://data.bls.gov/timeseries/LNS14000000',0,40),'vix':('daily','points',VIX,0,500),'usdjpy':('daily','JPY_per_USD',FX,1,1000),'wti':('daily','USD_per_barrel',WTI,-100,1000)}
 AUX = {'ust10':{'ust2':(-5,30)},'cpi':{'core':(1,10000),'headline_sa':(1,10000),'core_sa':(1,10000)},'pce':{'core':(1,10000)},'unemployment':{'payrolls_thousands':(1,1000000)},'vix':{},'usdjpy':{},'wti':{}}
 BLS_IDS = {'CUUR0000SA0':('cpi',None),'CUSR0000SA0':('cpi','headline_sa'),'CUUR0000SA0L1E':('cpi','core'),'CUSR0000SA0L1E':('cpi','core_sa'),'LNS14000000':('unemployment',None),'CES0000000001':('unemployment','payrolls_thousands')}
-URLS = {x[2] for x in META.values()} | set(CAL_SOURCES.values()) | {'https://www.cboe.com/terms'}
+URLS = {x[2] for x in META.values()} | set(CAL_SOURCES.values()) | {WTI_RECENT,'https://www.cboe.com/terms'}
 def require(ok: bool, reason: str) -> None:
  if not ok:raise ValueError(reason)
 def keys(obj: dict, expected: str) -> None:require(isinstance(obj,dict) and set(obj)==set(expected.split()),'Unexpected fields')
@@ -104,6 +105,20 @@ def parse_wti(raw: bytes) -> dict:
   for i,v in enumerate(r[1:]):
    if re.fullmatch(r'-?\d+(?:\.\d+)?',v):out[(d+timedelta(days=i)).isoformat()]=float(v)
  require(len(out)>1500,'EIA parser empty');return out
+def parse_wti_recent(raw: bytes) -> dict:
+ p=Rows();p.feed(raw.decode('utf-8'));dates=[]
+ for r in p.rows:
+  candidate=[]
+  for cell in r:
+   if re.fullmatch(r'\d{2}/\d{2}/\d{2}',cell):candidate.append(datetime.strptime(cell,'%m/%d/%y').date())
+  if len(candidate)>=2:dates=candidate;break
+ require(len(dates)>=2,'EIA recent date header')
+ for r in p.rows:
+  if not r or not r[0].startswith('WTI - Cushing'):continue
+  values=[float(cell) for cell in r[1:] if re.fullmatch(r'-?\d+(?:\.\d+)?',cell)]
+  require(len(values)==len(dates),'EIA recent WTI alignment')
+  return {d.isoformat():v for d,v in zip(dates,values)}
+ raise ValueError('EIA recent WTI row absent')
 def parse_bea(lines) -> tuple[dict,dict]:
  out={'DPCERG':{},'DPCCRG':{}}
  for r in csv.reader(lines):

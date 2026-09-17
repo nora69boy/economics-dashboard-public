@@ -6,7 +6,7 @@ from pathlib import Path
 from macro_core import *
 ROOT=Path(__file__).resolve().parents[1]
 PUBLIC='https://nora69boy.github.io/economics-dashboard-public/data/macro.json'
-ENDPOINTS={BLS,BEA,FX,WTI,PUBLIC,TREASURY+'daily-treasury-rate-archives/par-yield-curve-rates-2010-2019.csv',TREASURY+'daily-treasury-rate-archives/par-yield-curve-rates-2020-2023.csv'} | {TREASURY+'daily-treasury-rates.csv/'+str(y)+'/all?_format=csv&field_tdr_date_value='+str(y)+'&page=&type=daily_treasury_yield_curve' for y in range(2024,date.today().year+1)}
+ENDPOINTS={BLS,BEA,FX,WTI,WTI_RECENT,PUBLIC,TREASURY+'daily-treasury-rate-archives/par-yield-curve-rates-2010-2019.csv',TREASURY+'daily-treasury-rate-archives/par-yield-curve-rates-2020-2023.csv'} | {TREASURY+'daily-treasury-rates.csv/'+str(y)+'/all?_format=csv&field_tdr_date_value='+str(y)+'&page=&type=daily_treasury_yield_curve' for y in range(2024,date.today().year+1)}
 HOSTS={'home.treasury.gov','api.bls.gov','apps.bea.gov','www.federalreserve.gov','www.eia.gov','nora69boy.github.io'}
 class Redirect(urllib.request.HTTPRedirectHandler):
  def redirect_request(self,req,fp,code,msg,headers,newurl):
@@ -31,7 +31,6 @@ def download(url: str, body: dict | None = None) -> bytes:
                 require(len(value) <= cap, 'Size limit')
                 return value
         except urllib.error.HTTPError as exc:
-            # A rate limit or denial must not be amplified by automatic retries.
             if exc.code not in {500, 502, 503, 504} or attempt + 1 == attempts:
                 raise
         except (urllib.error.URLError, TimeoutError):
@@ -96,7 +95,6 @@ def emit_status(data: dict, mode: str = 'refresh') -> None:
         lines += ['', 'Stocks, indices, news, calendar review and VIX are not refreshed by this job.', '']
         with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as handle:
             handle.write('\n'.join(lines))
-
 def main():
  ap=argparse.ArgumentParser();ap.add_argument('--raw-dir',type=Path);ap.add_argument('--previous',type=Path);ap.add_argument('--snapshot-only',action='store_true');a=ap.parse_args()
  require(not (a.snapshot_only and a.raw_dir),'Fixture mode cannot read provider captures')
@@ -136,10 +134,18 @@ def main():
  try:
   raw=get('bea_pce',BEA);x,y=parse_bea(io.StringIO(raw.decode('utf-8-sig')));collected['pce']=entry('pce',x,{'core':y},[raw])
  except Exception:collected['pce']=failed('pce')
- for ident,name,url,parser in [('usdjpy','fx',FX,parse_fx),('wti','wti',WTI,parse_wti)]:
+ try:
+  raw=get('fx',FX);collected['usdjpy']=entry('usdjpy',parse_fx(raw),{},[raw])
+ except Exception:collected['usdjpy']=failed('usdjpy')
+ try:
+  raw=get('wti',WTI);collected['wti']=entry('wti',parse_wti(raw),{},[raw])
+ except Exception:
   try:
-   raw=get(name,url);collected[ident]=entry(ident,parser(raw),{},[raw])
-  except Exception:collected[ident]=failed(ident)
+   prior=old.get('wti');require(prior is not None and prior['observations'],'WTI fallback requires validated history')
+   raw=get('wti_recent',WTI_RECENT);merged=dict(prior['observations']);merged.update(parse_wti_recent(raw))
+   provenance=(prior['source_sha256'] or '').encode()+raw
+   collected['wti']=entry('wti',merged,{},[provenance])
+  except Exception:collected['wti']=failed('wti')
  collected['vix']={'id':'vix','status':'rights_pending','fetched_at':None,'source_sha256':None,'observations':[],'auxiliary':{}}
  for ident in META:
   s=collected[ident]
